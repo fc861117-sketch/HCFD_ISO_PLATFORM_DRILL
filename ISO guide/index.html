@@ -1,0 +1,536 @@
+---
+---
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>【演練專用】消防事故安全官 (ISO) 現場作業指南 - 深度危害辨識版</title>
+    <style>
+        :root {
+            --primary-color: #0f172a;
+            --secondary-color: #334155;
+            --accent-red: #dc2626;
+            --accent-blue: #2563eb;
+            --accent-green: #059669;
+            --accent-orange: #ea580c;
+            --accent-cyan: #0891b2;
+            --accent-purple: #7c3aed;
+            --bg-light: #f8fafc;
+            --text-main: #1e293b;
+            --white: #ffffff;
+            --yellow-warn: #fef08a;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-print-color-adjust: exact;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-main);
+            background-color: var(--bg-light);
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: var(--white);
+            padding: 1.5rem 1rem;
+            text-align: center;
+            border-bottom: 4px solid var(--accent-red);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.4rem;
+            letter-spacing: 1px;
+        }
+
+        .badge {
+            display: inline-block;
+            background: var(--accent-blue);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        .tab-nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 1.5rem;
+            justify-content: center;
+        }
+
+        .tab-btn {
+            background-color: #e2e8f0;
+            color: var(--secondary-color);
+            border: none;
+            padding: 10px 8px;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex-grow: 1;
+            text-align: center;
+        }
+
+        .tab-btn:hover {
+            background-color: #cbd5e1;
+        }
+
+        .tab-btn.active {
+            background-color: var(--primary-color);
+            color: var(--white);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .tab-content {
+            display: none;
+            background: var(--white);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            color: var(--primary-color);
+            border-left: 4px solid var(--accent-blue);
+            padding-left: 10px;
+            font-size: 1.3rem;
+            margin-top: 0;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .medic-tag {
+            font-size: 0.8rem;
+            background: #e2e8f0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: var(--secondary-color);
+        }
+
+        .category-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1rem 1.2rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .category-box h3 {
+            margin-top: 0;
+            margin-bottom: 0.8rem;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #cbd5e1;
+            font-size: 1.15rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .cat-fire h3 { color: var(--accent-red); border-color: #fca5a5; }
+        .cat-build h3 { color: var(--accent-orange); border-color: #fdba74; }
+        .cat-energy h3 { color: var(--accent-purple); border-color: #c4b5fd; }
+        .cat-hazmat h3 { color: var(--accent-green); border-color: #86efac; }
+        .cat-ff h3 { color: var(--accent-cyan); border-color: #67e8f9; }
+        .cat-universal h3 { color: var(--primary-color); border-color: #cbd5e1; }
+
+        h4 {
+            color: var(--secondary-color);
+            font-size: 1.05rem;
+            margin-top: 1rem;
+            margin-bottom: 0.4rem;
+            font-weight: 700;
+        }
+
+        .checklist {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .checklist li {
+            padding: 0.6rem 0;
+            border-bottom: 1px dashed #e2e8f0;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .checklist li:last-child {
+            border-bottom: none;
+        }
+
+        .checklist input[type="checkbox"] {
+            margin-right: 10px;
+            margin-top: 4px;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--accent-blue);
+        }
+
+        .checklist span {
+            flex: 1;
+            font-size: 0.95rem;
+        }
+
+        ul.bullet-list {
+            padding-left: 1.5rem;
+            margin-top: 0.5rem;
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+
+        ul.bullet-list li {
+            margin-bottom: 0.4rem;
+        }
+
+        .info-box {
+            background-color: #eff6ff;
+            border-left: 4px solid var(--accent-blue);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95rem;
+        }
+
+        .warning-box {
+            background-color: #fee2e2;
+            border: 2px solid var(--accent-red);
+            border-radius: 8px;
+            padding: 1.2rem;
+            color: #991b1b;
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .warning-box strong {
+            display: block;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .tool-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            background: white;
+        }
+        .tool-table th, .tool-table td {
+            border: 1px solid #cbd5e1;
+            padding: 8px;
+            text-align: left;
+        }
+        .tool-table th {
+            background-color: #e2e8f0;
+            color: var(--primary-color);
+        }
+
+        /* 免責聲明區塊樣式 */
+        .disclaimer-box {
+            background-color: #e2e8f0;
+            border-left: 4px solid #64748b;
+            padding: 1.2rem 1.5rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            color: #475569;
+            line-height: 1.6;
+            text-align: justify;
+        }
+        .disclaimer-box strong {
+            color: #1e293b;
+            font-size: 0.95rem;
+            display: block;
+            margin-bottom: 0.4rem;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem 0;
+            font-size: 0.85rem;
+            color: #94a3b8;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        @media (max-width: 600px) {
+            .tab-nav { flex-direction: row; }
+            .tab-btn { width: 31%; padding: 8px 4px; font-size: 0.85rem;}
+            .category-box { padding: 0.8rem; }
+            .disclaimer-box { padding: 1rem; font-size: 0.8rem; }
+        }
+    </style>
+</head>
+<body>
+    {% include nav.html %}
+<header>
+    <div class="badge">Incident Safety Officer</div>
+    <h1>【演練專用】消防事故安全官 (ISO) 現場作業指引</h1>
+    <!-- [AI FIX] 加入返回主平台按鈕 -->
+    <div style="margin-top: 0.5rem;">
+        <a href="../index.html" style="display:inline-block; background:rgba(255,255,255,0.15); color:white; text-decoration:none; padding:6px 14px; border-radius:6px; font-size:0.9rem; border:1px solid rgba(255,255,255,0.3); transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.25)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">&#8592; 返回主平台</a>
+    </div>
+</header>
+
+<div class="container">
+    
+    <div class="tab-nav">
+        <button class="tab-btn active" onclick="openTab(event, 'tab-m')">監視(M)</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab-e')">評估(E)</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab-d')">管制(D)</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab-i')">介入(I)</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab-c')">溝通(C)</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab-post')">復原</button>
+    </div>
+
+    <div id="tab-m" class="tab-content active">
+        <h2>監視與觀察 (Monitor) <span class="medic-tag">MEDIC - M</span></h2>
+
+        <ul class="checklist">
+            <li><input type="checkbox" id="chk-m-1"> <span><strong>向指揮官(IC)報到：</strong>確認目前戰術目標 (IAP)、人員編組與安全官專屬頻道。</span></li>
+            <li><input type="checkbox" id="chk-m-2"> <span><strong>執行 360 度勘查 (Recon)：</strong>親自繞行現場，尋找潛在死角、建築物特徵或危害能量。</span></li>
+        </ul>
+        
+        <div class="category-box cat-fire">
+            <h3>💨 火煙深度判讀 (VVDC & Flow Path)</h3>
+            <ul class="bullet-list">
+                <li><strong>體積(Volume)與流速(Velocity)：</strong>噴射狀的高速煙霧代表內部蓄熱極高。注意空氣從何處被吸入，若新鮮空氣快速流入，代表處於「通風控制」，極易極端成長。</li>
+                <li><strong>密度(Density)：</strong>濃稠不見光的煙含有大量未燃燒氣體（CO、HCN、苯等），極具爆炸與閃燃危險。</li>
+                <li><strong>顏色(Color)：</strong>白色通常為水蒸氣或初期熱分解；黃褐色為木材深度燃燒；深黑色為碳氫化合物燃燒。顏色越淺有時代表火點越遠（碳微粒已被過濾）。</li>
+                <li><strong>黑火 (Black Fire)：</strong>具備大體積、極快流速、極高密度與暗黑煙色。這是自燃及閃燃的明確象徵，溫度可達 538°C 以上，人員必須撤出，改採防禦式攻擊。</li>
+            </ul>
+        </div>
+
+        <div class="category-box cat-build">
+            <h3>🏗️ 建築物判讀與倒塌潛勢</h3>
+            <ul class="bullet-list">
+                <li><strong>輕量化結構法則：</strong>鐵皮屋、木造或輕鋼架結構，在受熱 <strong>5-10 分鐘</strong>後即有極高坍塌風險。</li>
+                <li><strong>倒塌前兆：</strong>牆面裂縫變形、屋頂下陷、門窗框扭曲、結構發出異常撕裂聲響。</li>
+                <li><strong>高科技廠房/無塵室風險：</strong>發生火災時，一旦通風排氣設備停止，煙熱將迅速蓄積。須注意上游的火災影響會直接在下游出現。</li>
+            </ul>
+        </div>
+
+        <div class="category-box cat-energy">
+            <h3>⚡ 危險能量與特殊危害 (Hazardous Energy)</h3>
+            <ul class="bullet-list">
+                <li><strong>太陽能光電 (Solar Panels)：</strong>台電斷電後，僅切斷台電至變流器間的交流電。<strong>光電板至變流器間的直流電(DC)依然帶電！</strong></li>
+                <li><strong>觸電風險：</strong>夜間照明燈照射到高壓設備（如 1000V 太陽能陣列）時，可能產生漏電流引發人體肌肉痙攣無法放開（Lock-On）。</li>
+                <li><strong>化學品 (HazMat)：</strong>抵達工廠火警應立即要求廠方提供 H-Card（危害辨識卡）。透過 GHS 及 UN 編號查閱 ERG。</li>
+            </ul>
+        </div>
+    </div>
+
+    <div id="tab-e" class="tab-content">
+        <h2>危害辨識與風險評估 (Evaluate) <span class="medic-tag">MEDIC - E</span></h2>
+
+        <div class="category-box cat-ff">
+            <h3>👨‍🚒 消防員生理與疲勞評估</h3>
+            <ul class="bullet-list">
+                <li><strong>過勞與壓力 (Overexertion/Stress)：</strong>根據統計，超過 50% 消防員殉職原因為心血管壓力與過勞。安全官須隨時評估現場作業同仁的體力透支狀況。</li>
+                <li><strong>生理指標阻擋：</strong>在 REHAB 區休息 20 分鐘後，若心跳仍 <strong>> 100 次/分</strong> 或體溫 <strong>> 38°C</strong>，嚴禁該員再次投入熱區作業。</li>
+            </ul>
+        </div>
+
+        <div class="category-box" style="border-color: #94a3b8; background-color: #f1f5f9;">
+            <h3 style="color: var(--primary-color);">📊 風險量化與決策工具</h3>
+            
+            <h4>生存機率評估 (Survivability Profile)</h4>
+            <ul class="bullet-list">
+                <li>若空間充滿紊流黑火或地面溫度超過人體極限 (約149°C)，研判無生存可能，應建議轉為防禦性作戰。</li>
+            </ul>
+
+            <h4>VTS 戰術決策模式</h4>
+            <ul class="bullet-list">
+                <li><strong>Value (價值)：</strong>現場有值得冒險的人命或財產嗎？(若無生還可能 = 不可接受風險，NO-GO)</li>
+                <li><strong>Time (時間)：</strong>建築還能撐多久？氣瓶夠嗎？極端危害發生前剩多少時間？</li>
+                <li><strong>Size (規模)：</strong>目前人力、水源、裝備足以壓制災害規模嗎？</li>
+            </ul>
+
+            <h4>SPE 危害評估矩陣 (S×P×E)</h4>
+            <table class="tool-table">
+                <tr><th>S 嚴重性(1-5)</th><th>P 機率(1-5)</th><th>E 暴露(1-4)</th></tr>
+                <tr><td>1:輕傷 ~ 5:死亡威脅</td><td>1:極低 ~ 5:必然發生</td><td>1:受控 ~ 4:完全失控</td></tr>
+            </table>
+            <p style="font-size:0.9rem; margin:5px 0 0 0;"><em>* 大於 80 分為不可接受風險 (NO-GO)，應建議指揮官撤出人員。</em></p>
+        </div>
+    </div>
+
+    <div id="tab-d" class="tab-content">
+        <h2>發展預防與管制 (Develop) <span class="medic-tag">MEDIC - D</span></h2>
+
+        <div class="category-box">
+            <h3>🚧 區域劃設與 1.5倍倒塌防護圈</h3>
+            <ul class="checklist">
+                <li><input type="checkbox"> <span><strong>禁止進入區 (No-Entry Zone)：</strong>有倒塌風險時，管制範圍 <strong>至少為建築物高度的 1.5 倍以上</strong>，全員嚴禁進入。</span></li>
+                <li><input type="checkbox"> <span><strong>熱區 (Hot Zone)：</strong>必須穿戴完整個人防護裝備 (PPE) 與 SCBA 才能進入。</span></li>
+                <li><input type="checkbox"> <span><strong>暖區與冷區：</strong>暖區設立除汙站 (Decon) 與 RIC 集結區；冷區設置指揮站與 REHAB 休息區。</span></li>
+            </ul>
+        </div>
+
+        <div class="category-box">
+            <h3>🚑 消防員後勤照護 (REHAB)</h3>
+            <ul class="checklist">
+                <li><input type="checkbox"> <span>確保 REHAB 區位於冷區、上風處且環境安靜，備有救護人員監測生理徵象。</span></li>
+                <li><input type="checkbox"> <span><strong>20法則：</strong>消耗 1 支氣瓶或連續高強度作業 20-40 分鐘，強制脫裝休息至少 10-20 分鐘，主動補充水分。</span></li>
+            </ul>
+        </div>
+    </div>
+
+    <div id="tab-i" class="tab-content">
+        <h2>介入與求救程序 (Intervene) <span class="medic-tag">MEDIC - I</span></h2>
+        
+        <div class="category-box">
+            <h3>⚠️ 安全官的介入權限</h3>
+            <ul class="bullet-list">
+                <li><strong>軟性介入 (Soft Intervention)：</strong>針對非立即威脅，透過對話引導情境意識 (例：「你有注意到煙色變黑了嗎？」)。</li>
+                <li><strong>硬性介入 (Hard Intervention)：</strong>遇 <strong>立即危及生命健康 (IDLH)</strong> 時，擁有絕對停止權 (Stop Work Authority)，可直接下令停止或撤退，事後再向 IC 回報。</li>
+            </ul>
+        </div>
+
+        <div class="warning-box">
+            <strong>🚨 火場 MAYDAY (消防員自救 GRAB LIVES)</strong>
+            當人員迷失 (Lost)、失去方向 (Disoriented) 或受困 (Trapped)，安全官應透過無線電引導執行：
+            <ul class="bullet-list" style="margin-bottom: 0; margin-top: 5px;">
+                <li><strong>Gauge:</strong> 看壓力錶 (確認殘壓)</li>
+                <li><strong>Radio:</strong> 喊 MAYDAY 通報 (Who, Where, What)</li>
+                <li><strong>Activate Pass:</strong> 啟動救命器</li>
+                <li><strong>Breathing:</strong> 控制呼吸 (節省空氣)</li>
+                <li><strong>Low:</strong> 保持低姿勢</li>
+                <li><strong>Illuminate:</strong> 打開照明燈 (45度角向上)</li>
+                <li><strong>Volume:</strong> 製造聲響</li>
+                <li><strong>Exit:</strong> 尋找出口</li>
+                <li><strong>Shield airway:</strong> 保護呼吸道</li>
+            </ul>
+        </div>
+    </div>
+
+    <div id="tab-c" class="tab-content">
+        <h2>進行風險溝通 (Communicate) <span class="medic-tag">MEDIC - C</span></h2>
+
+        <div class="category-box cat-universal">
+            <h3>📻 無線電通訊與 3C 原則</h3>
+            <ul class="bullet-list">
+                <li><strong>面對面優先：</strong>將無線電留給真正需要的人(求救、內部回報)，能面對面溝通最清楚。</li>
+                <li><strong>Connect (連結)：</strong>先呼叫並吸引對方注意。</li>
+                <li><strong>Convey (傳達)：</strong>內容精簡、清楚傳達，遵守 <strong>CAN 原則</strong> (Condition 狀態、Action 行動、Need 需求)。</li>
+                <li><strong>Confirm (確認)：</strong>簡要重複訊息，確認雙方理解無誤。</li>
+            </ul>
+        </div>
+
+        <div class="category-box cat-ff">
+            <h3>⚠️ 溝通障礙的指標判讀</h3>
+            <ul class="bullet-list">
+                <li><strong>溝通太多：</strong>可能代表現場混亂、各編組缺乏紀律，需重新律定回報優先順序。</li>
+                <li><strong>溝通不足：</strong>可能代表同仁遭遇困難（如隧道視野）或通訊故障，可透過 IC 要求 <strong>PAR回報</strong> 來矯正與確認。</li>
+                <li><strong>語氣判讀 (How it's said)：</strong>除了聽內容，更要注意同仁回報時是否出現情緒化、喘氣、虛弱或痛苦的聲音。</li>
+                <li><strong>通訊干擾：</strong>注意面罩擴音器、救命器警報或重機具噪音是否影響指揮下達。</li>
+            </ul>
+        </div>
+
+        <div class="category-box cat-fire">
+            <h3>🚨 緊急通訊與 PAR (人員清點)</h3>
+            <ul class="checklist">
+                <li><input type="checkbox"> <span><strong>MAYDAY 頻道淨空：</strong>確認 MAYDAY 事件發生時，指揮官或安全官應通報所有人員將該頻道淨空，維持其他無危害作業。</span></li>
+                <li><input type="checkbox"> <span><strong>時機執行 PAR：</strong>當戰術由攻擊轉防禦、發生 MAYDAY、局部坍塌，或 MAYDAY 狀況解除時，必須立即實施 PAR (Personnel Accountability Report) 確認所有人命安全。</span></li>
+            </ul>
+        </div>
+    </div>
+
+    <div id="tab-post" class="tab-content">
+        <h2>任務結束與災後作業 <span class="medic-tag">Post-Incident</span></h2>
+        <ul class="checklist">
+            <li><input type="checkbox"> <span><strong>全員清點 (PAR)：</strong>所有作業結束後，確保現場各單位完成人員清點 (Personnel Accountability Report)。</span></li>
+            <li><input type="checkbox"> <span><strong>現場初步除汙 (On-scene Decon)：</strong>卸下面罩前，完成消防衣初步沖洗，降低致癌物（多環芳香烴）附著。</span></li>
+            <li><input type="checkbox"> <span><strong>裝備隔離：</strong>受汙染的防護裝備應放入專用防漏袋，與一般衣物及駕駛座隔離。</span></li>
+            <li><input type="checkbox"> <span><strong>災後檢討 (AAR)：</strong>記錄本次救災的優良處置與安全缺失，防範未來危害。</span></li>
+        </ul>
+    </div>
+
+    <div class="disclaimer-box">
+        <strong>⚠️ 免責聲明 (Disclaimer)</strong>
+        本網頁內容彙整自內政部消防署事故安全官 (ISO) 訓練準則及相關救災文獻，僅供消防人員作為教育訓練與現場輔助參考。<span><br>災害現場環境瞬息萬變，各項量化指標與處置原則僅為原則性建議。<span><br>實際救災行動與安全管制仍須完全仰賴現場指揮官與安全官的動態決斷，並嚴格遵守各機關之標準作業程序（SOP）與最新法規。<br><br>
+        本系統開發者與內容提供者，對於因使用或依賴本網頁資訊所衍生之任何人員傷亡、財物損失或戰術誤判，概不承擔任何法律與行政責任。
+    </div>
+
+</div>
+
+<script>
+    // [AI FIX] 核取方塊狀態持久化 - localStorage 自動儲存/還原
+    function openTab(evt, tabId) {
+        var tabContents = document.getElementsByClassName("tab-content");
+        for (var i = 0; i < tabContents.length; i++) {
+            tabContents[i].classList.remove("active");
+        }
+
+        var tabBtns = document.getElementsByClassName("tab-btn");
+        for (var i = 0; i < tabBtns.length; i++) {
+            tabBtns[i].classList.remove("active");
+        }
+
+        document.getElementById(tabId).classList.add("active");
+        evt.currentTarget.classList.add("active");
+        // 儲存目前 Tab
+        localStorage.setItem('isoGuideActiveTab', tabId);
+    }
+
+    // 頁面載入時還原核取方塊與 Tab 狀態
+    window.addEventListener('DOMContentLoaded', function() {
+        // 還原 checkbox
+        document.querySelectorAll('.checklist input[type="checkbox"]').forEach(function(cb) {
+            if (cb.id) {
+                const saved = localStorage.getItem('isoGuide_' + cb.id);
+                if (saved === 'true') cb.checked = true;
+                cb.addEventListener('change', function() {
+                    localStorage.setItem('isoGuide_' + cb.id, cb.checked);
+                });
+            }
+        });
+
+        // 還原 Tab
+        const lastTab = localStorage.getItem('isoGuideActiveTab');
+        if (lastTab && document.getElementById(lastTab)) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(lastTab).classList.add('active');
+            // 找對應的按鈕並高亮
+            const tabs = ['tab-m','tab-e','tab-d','tab-i','tab-c','tab-post'];
+            const idx = tabs.indexOf(lastTab);
+            if (idx >= 0) {
+                document.querySelectorAll('.tab-btn')[idx].classList.add('active');
+            }
+        }
+    });
+</script>
+
+</body>
+</html>

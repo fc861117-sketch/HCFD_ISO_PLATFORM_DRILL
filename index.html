@@ -1,0 +1,1271 @@
+---
+---
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>【演練專用】新竹縣政府消防局ISO作業平台</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root { --primary: #d32f2f; --bg: #121212; --card: #1e1e1e; --text: #e0e0e0; --accent: #ffb74d; --medic: #4caf50; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; padding-bottom: 100px; }
+        
+       /* 網頁專屬背景浮水印 (滿版排列小字體) */
+        .page-watermark { 
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: 9999; pointer-events: none; user-select: none;
+            /* 利用 SVG 繪製浮水印並設定為重複背景 */
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='150'%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' transform='rotate(-30, 110, 75)' fill='rgba(255, 255, 255, 0.04)' font-size='18' font-weight='900' font-family='sans-serif'%3Epowered by 單柏洋%3C/text%3E%3C/svg%3E");
+            background-repeat: repeat;
+        }
+
+        h1, h2, h3 { color: var(--accent); margin-top: 0; }
+        h1 { font-size: 1.4rem; text-align: center; border-bottom: 2px solid #333; padding-bottom: 10px; }
+        h2 { font-size: 1.2rem; border-bottom: 1px solid #444; padding-bottom: 5px; }
+        
+        .page { display: none; animation: fadeIn 0.3s; }
+        .page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        .card { background: var(--card); border-radius: 8px; padding: 15px; margin-bottom: 15px; border-left: 4px solid var(--primary); }
+        .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; align-items: start; }
+        .grid-2 > div { display: flex; flex-direction: column; width: 100%; min-width: 0; }
+        .row-full { display: flex; flex-direction: column; width: 100%; margin-bottom: 12px; }
+        
+        label { display: block; font-size: 0.85rem; color: #aaa; margin-top: 10px; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+        
+        input[type="text"], input[type="time"], input[type="number"], select { 
+            width: 100%; max-width: 100%; min-width: 0; padding: 0 10px; border-radius: 6px; border: 1px solid #444; 
+            background: #2a2a2a; color: white; box-sizing: border-box; font-size: 16px; 
+            height: 48px; min-height: 48px; max-height: 48px; line-height: 48px; transition: 0.3s; 
+        }
+        input[type="time"]::-webkit-date-and-time-value { text-align: left; }
+        input[type="number"] { font-family: monospace; }
+        textarea { 
+            width: 100%; max-width: 100%; min-width: 0; padding: 10px; border-radius: 6px; border: 1px solid #444; 
+            background: #2a2a2a; color: white; box-sizing: border-box; font-size: 16px; min-height: 80px; line-height: 1.4; 
+        }
+        
+        optgroup { font-weight: bold; color: #ffb74d; background: #333; }
+        option { color: white; background: #2a2a2a; }
+
+        .btn-main { width: 100%; padding: 0; background: #444; color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin-top: 10px; height: 55px; min-height: 55px; max-height: 55px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;}
+        .btn-main:disabled { background: #555 !important; color: #999 !important; cursor: not-allowed; }
+        input:disabled, select:disabled, textarea:disabled { background: #1a1a1a !important; color: #777 !important; cursor: not-allowed; border-color: #333; }
+        .btn-delete { background: #b71c1c; color: white; border-radius: 4px; padding: 0 12px; font-size: 13px; font-weight: bold; width: auto; height: 36px; display: inline-flex; align-items: center; justify-content: center; border: none;}
+        
+        .list-item { background: #2a2a2a; padding: 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #444; }
+        .list-title { font-size: 1.1rem; font-weight: bold; color: white; margin-bottom: 5px; text-align:center;}
+        
+        .medic-entry { background: #252525; padding: 15px; border-radius: 6px; margin-top: 10px; border-left: 4px solid #4caf50; }
+        .medic-body div { margin-bottom: 5px; font-size: 0.95rem; }
+
+        /* 即時視覺羅盤 CSS */
+        .compass-container { position: relative; width: 140px; height: 140px; margin: 15px auto; border-radius: 50%; background: #1a1a1a; border: 4px solid #444; box-shadow: inset 0 0 15px rgba(0,0,0,0.8), 0 4px 15px rgba(0,0,0,0.5); }
+        .compass-rose { position: absolute; width: 100%; height: 100%; border-radius: 50%; transition: transform 0.1s linear; }
+        .compass-mark { position: absolute; font-weight: 900; font-size: 16px; }
+        .mark-n { top: 4px; left: 50%; transform: translateX(-50%); color: #ff5252; }
+        .mark-s { bottom: 4px; left: 50%; transform: translateX(-50%); color: #fff; }
+        .mark-e { right: 6px; top: 50%; transform: translateY(-50%); color: #fff; }
+        .mark-w { left: 6px; top: 50%; transform: translateY(-50%); color: #fff; }
+        .compass-needle-n { position: absolute; bottom: 50%; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-bottom: 45px solid #ff5252; }
+        .compass-needle-s { position: absolute; top: 50%; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 45px solid #fff; }
+        .compass-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 12px; height: 12px; background: #ffb74d; border-radius: 50%; z-index: 10; border: 2px solid #111; }
+        .compass-target { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 14px solid #ffb74d; z-index: 20; }
+
+        .wind-compass { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; max-width: 280px; margin: 10px auto; }
+        .wind-btn { aspect-ratio: 1/1; height: auto; padding: 0; font-size: 16px; font-weight: bold; display: flex; align-items: center; justify-content: center; background: #333; border: 1px solid #555; border-radius: 8px; color: #ddd; cursor: pointer; transition: 0.2s; }
+        .wind-btn.active { background: var(--accent); color: #000; border-color: #fff; box-shadow: 0 0 10px rgba(255, 183, 77, 0.8); }
+
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(20, 20, 20, 0.95); backdrop-filter: blur(10px); display: flex; border-top: 1px solid #333; z-index: 100000; padding-bottom: env(safe-area-inset-bottom); }
+        .bottom-nav button { flex: 1; padding: 16px 0; background: transparent; border: none; color: #777; font-size: 0.95rem; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .bottom-nav button.active { color: var(--primary); border-top: 3px solid var(--primary); }
+
+        .back-to-top { position: fixed; bottom: 90px; right: 20px; background-color: #555; color: white; border: none; border-radius: 50%; width: 50px; height: 50px; font-size: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.6); cursor: pointer; z-index: 90000; display: none; align-items: center; justify-content: center; opacity: 0.85; }
+
+        #sysToast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 12px 24px; border-radius: 30px; font-size: 15px; font-weight: bold; z-index: 999999; display: none; box-shadow: 0 4px 15px rgba(0,0,0,0.5); text-align: center; white-space: nowrap; }
+
+        /* 導出圖檔模板：加深字體、高對比度 (無浮水印) */
+        #exportTemplate { position: absolute; left: -9999px; top: -9999px; width: 1000px; background: #ffffff; color: #000000; padding: 40px; box-sizing: border-box; font-family: "微軟正黑體", sans-serif; overflow: hidden; }
+        .export-content { position: relative; z-index: 1; }
+        .export-header { text-align: center; font-size: 34px; font-weight: 900; margin-bottom: 25px; border-bottom: 5px solid #d32f2f; padding-bottom: 10px; color:#d32f2f;}
+        .export-section { margin-bottom: 20px; border: 2px solid #000; border-radius: 10px; overflow: hidden; background: #fff; }
+        .export-section-title { background: #111; color: #fff; padding: 10px 15px; font-size: 22px; font-weight: 900; }
+        .export-grid { display: grid; grid-template-columns: 1fr 1fr; }
+        .export-row { display: flex; border-bottom: 1px solid #222; }
+        .export-label { background: #f0f0f0; padding: 12px 15px; font-weight: 900; font-size: 18px; width: 160px; flex-shrink: 0; border-right: 1px solid #222; color: #000; display: flex; align-items: center; }
+        .export-val { padding: 12px 15px; flex-grow: 1; font-weight: 900; font-size: 18px; color: #000; display: flex; align-items: center; }
+        
+        .export-table { width: 100%; border-collapse: collapse; text-align: center; table-layout: fixed; border: 2px solid #000; }
+        .export-table th { background: #e0e0e0; padding: 14px 5px; border: 2px solid #000; font-weight: 900; font-size: 18px; color: #000 !important; }
+        .export-table td { padding: 14px 5px; border: 2px solid #000; font-weight: 900; font-size: 18px; vertical-align: middle; color: #000 !important; }
+        
+        .photo-upload-btn { background: #2196F3; color: white; padding: 0 12px; border-radius: 4px; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; height: 32px; border: none; line-height: 1;}
+    </style>
+</head>
+<body>
+   {% include nav.html %}
+    
+<div class="page-watermark"></div>
+
+<div id="sysToast">✅ 系統提示</div>
+<div id="autoSyncIndicator" style="position:fixed; top:20px; right:20px; background:#4caf50; color:white; padding:8px 15px; border-radius:20px; font-size:14px; font-weight:bold; display:none; z-index:99999; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">🔄 雲端同步完成</div>
+<button id="backToTopBtn" class="back-to-top" onclick="window.scrollTo({top:0, behavior:'smooth'})">⬆️</button>
+
+<div id="page-home" class="page active">
+    <h1>【演練專用】新竹縣政府消防局ISO作業平台</h1>
+    <div class="card">
+        <h2>建立新專案</h2>
+        <div class="grid-2">
+            <div><label>案名 <span style="color:#ff5252;">*必填</span></label><input type="text" id="newProjectName" placeholder="例如: 1150101湖口住宅火警"></div>
+            <div><label>ISO姓名 <span style="color:#ff5252;">*必填</span></label><input type="text" id="newProjectCreator" placeholder="單位+姓名"></div>
+        </div>
+        <button id="btnCreateProject" class="btn-main" style="background:var(--primary);" onclick="confirmAction(this, createNewProject)">建立新專案</button>
+    </div>
+    <div class="card">
+        <h2 style="color:var(--accent);">雲端救災專案列表</h2>
+        <label style="color:#ff5252; font-weight:bold; overflow:visible;">⚠️ 載入專案前必填</label>
+        <input type="text" id="modifierName" placeholder="請輸入您的姓名 (操作人員)..." style="margin-bottom:10px; border: 2px solid #ff5252;">
+        <button class="btn-main" style="background:#555; height: 48px; min-height: 48px; font-size: 1rem; border-radius:6px; padding:0;" onclick="renderHome()">↻ 重新整理雲端列表</button>
+        <div id="projectListContainer" style="text-align: center; padding: 10px; color:#aaa;">正在讀取雲端資料庫...</div>
+    </div>
+</div>
+
+<div id="page-briefing" class="page">
+    <div id="lockedBadge" style="display:none; background:#ff5252; color:white; text-align:center; padding:5px; font-weight:bold; border-radius:4px; margin-bottom:10px;">🔒 此救災專案已結案，禁止編輯</div>
+    <div id="viewOnlyBadge" style="display:none; background:#2196F3; color:white; text-align:center; padding:5px; font-weight:bold; border-radius:4px; margin-bottom:10px;">👁️ 僅供檢視模式</div>
+    <div class="card">
+        <h2>簡報表 (Briefing List)</h2>
+        <div class="row-full">
+            <label>災害名稱</label><input type="text" id="b_caseName" readonly style="color:#ffb74d; font-weight:bold;">
+        </div>
+        <div class="grid-2">
+            <div><label>事故安全官(ISO)</label><input type="text" id="b_iso"></div>
+            <div><label>現場初期指揮官</label><input type="text" id="b_ic"></div>
+        </div>
+        <div class="grid-2">
+            <div>
+                <label>建築用途</label>
+                <div style="display:flex; gap:5px; flex-direction:column;">
+                    <select id="b_usage" onchange="toggleUsageOther()">
+                        <option value="" disabled selected>請選擇...</option>
+                        <optgroup label="1. 住宅用途"><option value="獨立住宅">獨立住宅</option><option value="透天厝">透天厝</option><option value="公寓">公寓</option><option value="集合住宅">集合住宅</option><option value="宿舍">宿舍</option></optgroup>
+                        <optgroup label="2. 商業用途"><option value="辦公大樓">辦公大樓</option><option value="零售與餐飲空間">零售與餐飲空間</option><option value="住宿服務">住宿服務</option></optgroup>
+                        <optgroup label="3. 工業用途"><option value="工廠 / 廠房">工廠 / 廠房</option><option value="倉庫 / 物流中心">倉庫 / 物流中心</option><option value="科技廠房 / 無塵室">科技廠房 / 無塵室</option></optgroup>
+                        <optgroup label="4. 公共與機構用途"><option value="教育設施">教育設施</option><option value="醫療保健">醫療保健</option><option value="政府與公務機關">政府與公務機關</option><option value="能源設施">能源設施</option></optgroup>
+                        <optgroup label="5. 文化與娛樂用途"><option value="藝文與教育展覽">藝文與教育展覽</option><option value="表演與娛樂">表演與娛樂</option><option value="體育設施">體育設施</option></optgroup>
+                        <optgroup label="6. 交通與基礎設施"><option value="交通設施">交通設施</option></optgroup>
+                        <optgroup label="7. 宗教用途"><option value="信仰中心">信仰中心</option></optgroup>
+                        <optgroup label="8. 農業用途"><option value="農業設施">農業設施</option></optgroup>
+                        <optgroup label="其他"><option value="其他">其他 (自行輸入)</option></optgroup>
+                    </select>
+                    <input type="text" id="b_usage_other" style="display:none; margin-top:5px;" placeholder="請輸入...">
+                </div>
+            </div>
+            <div>
+                <label>構造</label>
+                <div style="display:flex; gap:5px; flex-direction:column;">
+                    <select id="b_structure" onchange="toggleStructureOther()">
+                        <option value="" disabled selected>請選擇...</option>
+                        <option value="RC">RC</option><option value="鐵皮">鐵皮</option><option value="磚造">磚造</option><option value="木造">木造</option><option value="其他">其他</option>
+                    </select>
+                    <input type="text" id="b_structure_other" style="display:none; margin-top:5px;" placeholder="請輸入...">
+                </div>
+            </div>
+        </div>
+        
+        <div class="row-full">
+            <label>單一樓層面積 (自動換算)</label>
+            <div style="display:flex; gap:10px; align-items:center;">
+                <input type="number" id="b_area_input" placeholder="數字..." style="flex:2;" onblur="convertArea()">
+                <select id="b_area_unit" style="flex:1;" onchange="convertArea()">
+                    <option value="m2">平方公尺(㎡)</option>
+                    <option value="ping">坪</option>
+                </select>
+                <input type="hidden" id="b_area"> 
+            </div>
+        </div>
+
+        <div class="row-full"><label>抵達現場時間</label><input type="time" id="b_arriveTime"></div>
+        <div class="row-full"><label>指揮官確認時間</label><input type="time" id="c_time"></div>
+        
+        <div class="grid-2">
+            <div><label>地上層</label><select id="b_floorUp" class="floor-select"></select></div>
+            <div><label>地下層</label><select id="b_floorDown" class="floor-select"></select></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>與指揮官確認事項</h2>
+        <div class="grid-2">
+            <div><label>民眾受困情形</label><select id="c_trappedState"><option value="無">無</option><option value="有">有</option></select></div>
+            <div><label>現場作業組數</label><select id="c_deployCount" class="num-select"></select></div>
+        </div>
+        <div class="grid-2">
+            <div><label>已救出人數</label><select id="c_rescued" class="num-select"></select></div>
+            <div><label>待救人員數</label><select id="c_toRescue" class="num-select"></select></div>
+        </div>
+        <div class="row-full">
+            <label>待救位置</label>
+            <input type="text" id="c_trapLocation" placeholder="無受困則免填">
+        </div>
+        <div class="row-full">
+            <label>備註欄</label>
+            <textarea id="c_notes" rows="2"></textarea>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>初期 360° RECON</h2>
+        <div id="reconContainer"></div>
+    </div>
+
+    <div class="card">
+        <h2>環境與安全簡報</h2>
+        
+        <div class="row-full"><label>初次安全簡報時間</label><input type="time" id="s_time"></div>
+        
+        <div class="row-full">
+            <label>天氣狀況</label>
+            <select id="e_weather">
+                <option value="" disabled selected>請選擇...</option>
+                <option value="☀️ 晴天">☀️ 晴天</option><option value="⛅ 多雲">⛅ 多雲</option><option value="☁️ 陰天">☁️ 陰天</option>
+                <option value="🌦️ 小雨">🌦️ 小雨</option><option value="🌧️ 大雨">🌧️ 大雨</option><option value="⛈️ 雷雨">⛈️ 雷雨</option>
+                <option value="💨 強風">💨 強風</option><option value="🌫️ 濃霧">🌫️ 濃霧</option>
+            </select>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:15px; margin-bottom:10px;">
+            <label style="margin:0; font-weight:bold; color:#fff;">現場風向</label>
+            <button class="btn-main" style="width:auto; height:32px; min-height:32px; padding:0 12px; margin:0; background:#ff9800; font-size:13px; color:#000;" onclick="toggleLiveCompass()">🧭 開啟即時電子羅盤</button>
+        </div>
+
+        <div id="liveCompassArea" style="display:none; background:#222; padding:15px; border-radius:8px; margin-bottom:15px; text-align:center; border: 1px solid #444;">
+            <div style="color:var(--accent); font-weight:bold; margin-bottom:15px; font-size:0.9rem;">請將手機頂部對準風吹來的方向</div>
+            <div class="compass-container">
+                <div class="compass-target"></div>
+                <div class="compass-rose" id="compassRose">
+                    <div class="compass-mark mark-n">N</div>
+                    <div class="compass-mark mark-e">E</div>
+                    <div class="compass-mark mark-s">S</div>
+                    <div class="compass-mark mark-w">W</div>
+                    <div class="compass-needle-n"></div>
+                    <div class="compass-needle-s"></div>
+                    <div class="compass-center"></div>
+                </div>
+            </div>
+            <div style="font-size:1.2rem; font-weight:bold; margin: 15px 0;">目前指向: <span id="liveWindDir" style="color:#ffb74d; font-size:1.4rem;">--</span> <span id="liveWindDeg" style="font-size:0.9rem; color:#888;"></span></div>
+            <div style="display:flex; gap:10px;">
+                <button class="btn-main" style="background:#555; height:45px; min-height:45px; flex:1;" onclick="stopCompass()">取消</button>
+                <button class="btn-main" style="background:var(--primary); height:45px; min-height:45px; flex:2;" onclick="lockCompass()">🎯 鎖定此風向</button>
+            </div>
+        </div>
+
+        <div class="wind-compass" id="windCompass">
+            <button class="wind-btn" onclick="setWind('西北風', this)">NW</button><button class="wind-btn" onclick="setWind('北風', this)">N</button><button class="wind-btn" onclick="setWind('東北風', this)">NE</button>
+            <button class="wind-btn" onclick="setWind('西風', this)">W</button><button class="wind-btn" onclick="setWind('無風', this)">無</button><button class="wind-btn" onclick="setWind('東風', this)">E</button>
+            <button class="wind-btn" onclick="setWind('西南風', this)">SW</button><button class="wind-btn" onclick="setWind('南風', this)">S</button><button class="wind-btn" onclick="setWind('東南風', this)">SE</button>
+        </div>
+        <input type="hidden" id="e_wind" value="無風">
+
+        <div class="row-full" style="margin-top: 15px;">
+            <label>初步分析及建議事項</label>
+            <textarea id="s_advice" rows="3" placeholder="請輸入建議..."></textarea>
+        </div>
+    </div>
+
+    <button class="btn-main btn-sync-brief" onclick="syncBriefingToCloud()" style="background:#4caf50; margin-top:20px;">☁️ 儲存並同步【簡報表】至雲端</button>
+    <button id="btnExportImage" class="btn-main btn-export" onclick="exportToImage()" style="background:#2196F3; margin-top:10px;">📸 匯出最佳格式圖檔</button>
+        <div id="finishCaseArea" style="margin-top: 40px; padding-top: 20px; border-top: 2px dashed #444; display: flex; flex-direction: column; align-items: center; width: 100%;">
+    
+    <button id="btnFinishCase" class="btn-main" style="background:#b71c1c; height:65px; min-height:65px; border:3px solid #ff5252; width: 100%;" onclick="finishCaseConfirm(this)">🔒 確定結案並鎖定專案 (禁止後續編輯)</button>
+    
+    <div style="color: #888; font-size: 0.85rem; margin-top: 12px; text-align: center; width: 100%; display: block;">
+        ※ 結案後本專案將無法再進行任何存檔或修改
+    </div>
+
+ </div>
+</div>
+       
+    <div id="page-medic" class="page">
+    <div class="card" style="border-left-color: var(--medic);">
+        <h2 style="color:var(--medic);">新增 MEDIC 資料</h2>
+        <div class="row-full">
+            <label>時間 <span style="color:#ff5252; font-weight:bold;">*必填</span></label>
+            <input type="time" id="m_time">
+        </div>
+        <div class="row-full">
+            <label>監控環境與行動 (M) <span style="color:#ff5252; font-weight:bold;">*必填 (加入後無法修改)</span></label>
+            <textarea id="m_m" placeholder="偵測的地點或區域..."></textarea>
+        </div>
+        <label>評估潛在危險 (E)</label><textarea id="m_e"></textarea>
+        <label>預防措施 (D)</label><textarea id="m_d"></textarea>
+        <label>介入 (I)</label><textarea id="m_i"></textarea>
+        <label>資訊彙整及溝通對象 (C)</label><textarea id="m_c"></textarea>
+        <button class="btn-main" onclick="confirmAction(this, addMedicEntry)" style="background:#2196F3;">➕ 加入至本地列表</button>
+    </div>
+
+    <div class="card" style="border-left-color: var(--medic);">
+        <h2 style="color:var(--medic);">MEDIC 事件列表 (本地暫存)</h2>
+        <div id="medicListContainer"></div>
+    </div>
+
+    <button class="btn-main btn-sync-medic" onclick="syncMedicToCloud()" style="background:#4caf50; margin-top:20px;">☁️ 儲存並同步全部【MEDIC表】至雲端</button>
+</div>
+
+<nav class="bottom-nav" id="bottomNav">
+    <button id="nav-home" onclick="goHome()">🏠 換專案</button>
+    <button id="nav-briefing" onclick="switchTab('page-briefing')">📋 簡報表</button>
+    <button id="nav-medic" onclick="switchTab('page-medic')">✚ MEDIC</button>
+</nav>
+
+<div id="exportTemplate">
+    <div class="export-content">
+        <div class="export-header">【演練專用】新竹縣政府消防局 ISO現場簡報表</div>
+        
+        <div class="export-section">
+            <div class="export-section-title">一、 基本資訊與指揮確認</div>
+            <div class="export-grid">
+                <div class="export-row"><div class="export-label">災害案名</div><div class="export-val" id="exp_caseName"></div></div>
+                <div class="export-row"><div class="export-label">抵達時間</div><div class="export-val" id="exp_arriveTime"></div></div>
+                <div class="export-row"><div class="export-label">ISO / IC</div><div class="export-val" id="exp_iso_ic"></div></div>
+                <div class="export-row"><div class="export-label">用途構造</div><div class="export-val" id="exp_usage_structure"></div></div>
+                <div class="export-row"><div class="export-label">單層面積(㎡)</div><div class="export-val" id="exp_area"></div></div>
+                <div class="export-row"><div class="export-label">樓層分佈</div><div class="export-val" id="exp_floor"></div></div>
+                <div class="export-row"><div class="export-label">確認時間</div><div class="export-val" id="exp_c_time"></div></div>
+                <div class="export-row"><div class="export-label">作業組數</div><div class="export-val" id="exp_c_deployCount"></div></div>
+                <div class="export-row"><div class="export-label">受困 / 待救</div><div class="export-val" id="exp_trapped"></div></div>
+                <div class="export-row"><div class="export-label">待救位置</div><div class="export-val" id="exp_trapLoc"></div></div>
+            </div>
+            <div class="export-row" style="border-top:1px solid #222;"><div class="export-label">備註</div><div class="export-val" id="exp_c_notes"></div></div>
+        </div>
+
+        <div class="export-section">
+            <div class="export-section-title">二、 360° RECON 面向回報</div>
+            <table class="export-table" id="exp_reconTable"></table>
+        </div>
+
+        <div class="export-section">
+            <div class="export-section-title">三、 環境安全與建議</div>
+            <div class="export-grid">
+                <div class="export-row"><div class="export-label">簡報時間</div><div class="export-val" id="exp_s_time"></div></div>
+                <div class="export-row"><div class="export-label">天氣與風向</div><div class="export-val" id="exp_e_weather_wind"></div></div>
+            </div>
+            <div style="display:flex; width:100%; border-top:1px solid #222;">
+                <div class="export-label" style="border-right:1px solid #222;">分析與建議</div>
+                <div class="export-val" id="exp_s_advice" style="white-space: pre-wrap;"></div>
+            </div>
+        </div>
+        <div style="text-align: right; color: #000; font-size: 16px; font-weight:bold; margin-top:10px;" id="exp_printInfo"></div>
+    </div>
+</div>
+
+<script>
+    // ==========================================
+    // ⚠️ 記得替換下方網址 ⚠️
+    // ==========================================
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbz4Lf6I0Na-mC940MtkDmD5CfA9WAoCYjy67sY3bQWSKycY45ki67NpHEMenDIr_ic/exec"; 
+    // ==========================================
+    
+    const fetchHeaders = { 'Content-Type': 'text/plain;charset=utf-8' };
+    
+    function getSyncMode() {
+        return localStorage.getItem('iso_sync_mode') || 'github';
+    }
+    function getGasUrl() {
+        return localStorage.getItem('iso_gas_url') || '';
+    }
+
+    async function callGitHubAPI(method, path, body = null) {
+        const pat = localStorage.getItem('iso_github_pat');
+        const repo = localStorage.getItem('iso_github_repo') || 'fc861117-sketch/HCFD_ISO_PLATFORM_DRILL';
+        if (!pat) {
+            throw new Error("⚠️ 未設定 GitHub PAT，請點擊選單中的「⚙️ 系統同步設定」輸入。");
+        }
+        const headers = {
+            'Accept': 'application/vnd.github.v3+json',
+            'Authorization': `token ${pat}`
+        };
+        const url = `https://api.github.com/repos/${repo}/contents/${path}`;
+        const options = {
+            method: method,
+            headers: headers
+        };
+        if (body) {
+            options.body = JSON.stringify(body);
+        }
+        const resp = await fetch(url, options);
+        if (!resp.ok) {
+            if (resp.status === 404 && method === 'GET') {
+                return null;
+            }
+            const errData = await resp.json().catch(() => ({}));
+            throw new Error(errData.message || `GitHub 錯誤 (${resp.status})`);
+        }
+        return await resp.json();
+    }
+
+    async function apiCall(payload) {
+        const mode = getSyncMode();
+        if (mode === 'gas') {
+            const url = getGasUrl() || GAS_URL;
+            const req = await fetch(url + "?t=" + new Date().getTime(), {
+                method: 'POST',
+                headers: fetchHeaders,
+                body: JSON.stringify(payload),
+                redirect: 'follow'
+            });
+            const text = await req.text();
+            return JSON.parse(text);
+        } else {
+            const branch = localStorage.getItem('iso_github_branch') || 'main';
+            if (payload.action === 'getList') {
+                try {
+                    const files = await callGitHubAPI('GET', 'drills');
+                    if (!files || !Array.isArray(files)) return [];
+                    return files.filter(f => f.type === 'file' && f.name.endsWith('.json'))
+                                 .map(f => f.name.substring(0, f.name.length - 5));
+                } catch (e) {
+                    if (e.message.includes("404")) return [];
+                    throw e;
+                }
+            } else if (payload.action === 'createProject') {
+                const projectName = payload.projectName;
+                const existing = await callGitHubAPI('GET', `drills/${encodeURIComponent(projectName)}.json`);
+                if (existing) {
+                    throw new Error("專案名稱已存在，請使用其他名稱");
+                }
+                const initialData = { creator: payload.creator, briefing: {}, medic: [] };
+                const base64Content = btoa(unescape(encodeURIComponent(JSON.stringify(initialData, null, 2))));
+                const body = {
+                    message: `Create project ${projectName}`,
+                    content: base64Content,
+                    branch: branch
+                };
+                const res = await callGitHubAPI('PUT', `drills/${encodeURIComponent(projectName)}.json`, body);
+                if (!db[projectName]) db[projectName] = initialData;
+                db[projectName].sha = res.content.sha;
+                saveDB();
+                return { success: true };
+            } else if (payload.action === 'getProjectData') {
+                const projectName = payload.projectName;
+                const fileData = await callGitHubAPI('GET', `drills/${encodeURIComponent(projectName)}.json`);
+                if (!fileData) throw new Error("找不到該專案資料");
+                const decodedContent = decodeURIComponent(escape(atob(fileData.content)));
+                const data = JSON.parse(decodedContent);
+                if (!db[projectName]) db[projectName] = {};
+                db[projectName].sha = fileData.sha;
+                saveDB();
+                return data;
+            } else if (payload.action === 'saveBriefing') {
+                const projectName = payload.projectName;
+                let sha = db[projectName] ? db[projectName].sha : null;
+                if (!sha) {
+                    const fileData = await callGitHubAPI('GET', `drills/${encodeURIComponent(projectName)}.json`);
+                    if (fileData) sha = fileData.sha;
+                }
+                if (!db[projectName]) db[projectName] = { briefing: {} };
+                db[projectName].briefing = payload.briefing;
+                if (payload.creator) db[projectName].creator = payload.creator;
+                const updatedData = {
+                    creator: db[projectName].creator || payload.creator,
+                    briefing: db[projectName].briefing || {},
+                    medic: db[projectName].medic || []
+                };
+                const base64Content = btoa(unescape(encodeURIComponent(JSON.stringify(updatedData, null, 2))));
+                const body = {
+                    message: `Sync project ${projectName} briefing (${payload.modifier})`,
+                    content: base64Content,
+                    sha: sha,
+                    branch: branch
+                };
+                const res = await callGitHubAPI('PUT', `drills/${encodeURIComponent(projectName)}.json`, body);
+                db[projectName].sha = res.content.sha;
+                saveDB();
+                return { success: true };
+            } else if (payload.action === 'saveMedic') {
+                const projectName = payload.projectName;
+                let sha = db[projectName] ? db[projectName].sha : null;
+                if (!sha) {
+                    const fileData = await callGitHubAPI('GET', `drills/${encodeURIComponent(projectName)}.json`);
+                    if (fileData) sha = fileData.sha;
+                }
+                if (!db[projectName]) db[projectName] = { medic: [] };
+                
+                // Keep file fully in sync by writing current complete array
+                const updatedData = {
+                    creator: db[projectName].creator || payload.creator,
+                    briefing: db[projectName].briefing || {},
+                    medic: db[projectName].medic || []
+                };
+                const base64Content = btoa(unescape(encodeURIComponent(JSON.stringify(updatedData, null, 2))));
+                const body = {
+                    message: `Sync project ${projectName} medic (${payload.modifier})`,
+                    content: base64Content,
+                    sha: sha,
+                    branch: branch
+                };
+                const res = await callGitHubAPI('PUT', `drills/${encodeURIComponent(projectName)}.json`, body);
+                db[projectName].sha = res.content.sha;
+                saveDB();
+                return { success: true };
+            } else if (payload.action === 'uploadPhoto') {
+                const filename = payload.filename;
+                const body = {
+                    message: `Upload photo ${filename}`,
+                    content: payload.base64,
+                    branch: branch
+                };
+                const res = await callGitHubAPI('PUT', `drills/photos/${encodeURIComponent(filename)}`, body);
+                const url = res.content.download_url;
+                const fileId = res.content.sha;
+                const formula = `=IMAGE("${url}")`;
+                return { url: url, fileId: fileId, formula: formula };
+            }
+        }
+        throw new Error("不支援的操作");
+    }
+
+    let currentProject = null; let currentModifier = ""; let db = JSON.parse(localStorage.getItem('isoDB')) || {};
+    window.lastBHash = ""; window.lastMHash = ""; window.autoSyncInterval = null;
+    let isSyncLocked = false; let isReadOnly = false;
+
+    // --- 視覺化電子羅盤專用變數 ---
+    let liveOrientationHandler = null;
+    let isCompassRunning = false;
+    let currentLiveHeading = null;
+
+    function showToast(msg, type = "success") {
+        const t = document.getElementById('sysToast'); t.style.background = type === "error" ? "#d32f2f" : (type === "warning" ? "#ff9800" : "#4caf50");
+        t.innerHTML = msg; t.style.display = "block"; setTimeout(() => { t.style.display = "none"; }, 3000);
+    }
+
+    // ─── 結案三階段防誤觸與鎖定邏輯 ───
+    function finishCaseConfirm(btn) {
+        if (isReadOnly) return;
+        const stage = parseInt(btn.dataset.stage || "0");
+        if (stage === 0) {
+            btn.dataset.originalText = btn.innerText; btn.dataset.stage = "1";
+            btn.style.background = "#ff9800"; btn.innerText = "⚠️ 您確定要結案？(點此第二次確認)";
+            setTimeout(() => { if(btn.dataset.stage==="1") resetFinishBtn(btn); }, 4000);
+        } else if (stage === 1) {
+            btn.dataset.stage = "2"; btn.style.background = "#d32f2f"; btn.innerText = "🚨 最後確認：結案後將永遠無法編輯！";
+            setTimeout(() => { if(btn.dataset.stage==="2") resetFinishBtn(btn); }, 4000);
+        } else if (stage === 2) {
+            executeFinishCase();
+        }
+    }
+    function resetFinishBtn(btn) { btn.dataset.stage = "0"; btn.innerText = btn.dataset.originalText; btn.style.background = "#b71c1c"; }
+
+async function executeFinishCase() {
+        showToast("⏳ 正在執行結案並同步雲端...", "warning");
+        isReadOnly = true; 
+        
+        // 1. 將所有未結案的 MEDIC 事件強制結案
+        if(db[currentProject].medic) {
+            db[currentProject].medic.forEach(m => m.completed = true);
+        }
+        
+        saveBriefingToLocal(); 
+        db[currentProject].briefing.isLocked = true;
+        saveDB(); // 確保 MEDIC 變更寫入本地
+        
+        const payloadB = JSON.parse(JSON.stringify(db[currentProject].briefing));
+        const payloadM = db[currentProject].medic || [];
+        
+        try {
+            // 2. 同時將簡報表與 MEDIC 同步至雲端
+            let p1 = apiCall({ action: 'saveBriefing', projectName: currentProject, creator: db[currentProject].creator, modifier: currentModifier + "(結案)", briefing: payloadB, overwrite: false });
+            let p2 = apiCall({ action: 'saveMedic', projectName: currentProject, creator: db[currentProject].creator, modifier: currentModifier + "(結案)", medic: payloadM, overwrite: false });
+            
+            await Promise.all([p1, p2]);
+            
+            applyReadOnly(true); 
+            renderMedicList(); // 更新 MEDIC 列表畫面，按鈕會變成綠色的「🔒 已結案」
+            showToast("🔒 專案與 MEDIC 已正式結案鎖定", "success");
+        } catch (e) { 
+            showToast("❌ 結案同步失敗: " + e.message, "error"); 
+            isReadOnly = false; 
+            applyReadOnly(false); 
+        }
+    }
+
+    function applyReadOnly(status) {
+        isReadOnly = status;
+        document.querySelectorAll('input, select, textarea').forEach(el => { if (el.id !== 'modifierName') el.disabled = status; });
+        // 隱藏儲存與新增按鈕，保留匯出圖片
+        const hideSelectors = ['.btn-sync-brief', '.btn-sync-medic', 'button[onclick="confirmAction(this, addMedicEntry)"]', '#finishCaseArea', 'button[onclick="toggleLiveCompass()"]'];
+        hideSelectors.forEach(sel => { const el = document.querySelector(sel); if(el) el.style.display = status ? 'none' : 'flex'; });
+        
+        document.getElementById('viewOnlyBadge').style.display = (status && !db[currentProject]?.briefing?.isLocked) ? 'block' : 'none';
+        document.getElementById('lockedBadge').style.display = (status && db[currentProject]?.briefing?.isLocked) ? 'block' : 'none';
+    }
+    function confirmAction(btn, callback, arg1) {
+        if (btn.dataset.confirm === "yes") {
+            btn.dataset.confirm = ""; btn.innerText = btn.dataset.originalText; btn.style.background = btn.dataset.originalBg; callback(arg1); return;
+        } 
+        btn.dataset.originalText = btn.innerText; btn.dataset.originalBg = btn.style.background; btn.dataset.confirm = "yes";
+        btn.style.background = "#d32f2f"; btn.innerText = "⚠️ 確定操作？";
+        setTimeout(() => {
+            if (btn.dataset.confirm === "yes") {
+                btn.dataset.confirm = ""; btn.innerText = btn.dataset.originalText; btn.style.background = btn.dataset.originalBg;
+            }
+        }, 3000);
+    }
+
+    function setWind(val, el) {
+        document.getElementById('e_wind').value = val;
+        document.querySelectorAll('.wind-btn').forEach(b => b.classList.remove('active'));
+        if(el) el.classList.add('active');
+        showToast(`已選定風向: ${val}`);
+    }
+
+    function toggleLiveCompass() {
+        if (window.self !== window.top) { showToast("❌ 錯誤：請直接開啟 GitHub 網址", "error"); return; }
+        if (location.protocol !== 'https:' && location.hostname !== 'localhost') { showToast("❌ 錯誤：羅盤需要 HTTPS 連線", "error"); return; }
+
+        document.getElementById('liveCompassArea').style.display = 'block';
+
+        if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+            DeviceOrientationEvent.requestPermission()
+                .then(permissionState => {
+                    if (permissionState === 'granted') { startLiveCompass(); } 
+                    else { showToast("❌ 權限被拒絕", "error"); stopCompass(); }
+                }).catch((err) => { showToast("❌ 羅盤呼叫失敗", "error"); stopCompass(); });
+        } else {
+            startLiveCompass();
+        }
+    }
+
+    function startLiveCompass() {
+        if(isCompassRunning) return;
+        isCompassRunning = true;
+        showToast("📍 羅盤感測器已啟動", "warning");
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(()=>{}, ()=>{}, { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 });
+        }
+
+        // [AI FIX] Android 超時提示：5 秒後若仍未收到絕對角度，顯示說明
+        let hasReceivedAbsHeading = false;
+        const compassTimeoutId = setTimeout(() => {
+            if (!hasReceivedAbsHeading && isCompassRunning) {
+                document.getElementById('liveWindDir').innerText = '無法獲取';
+                document.getElementById('liveWindDeg').innerText = '';
+                showToast("⚠️ 裝置磁力計未回應，請校準後重試或手動選擇風向", "warning");
+            }
+        }, 5000);
+
+        liveOrientationHandler = function(event) {
+            let heading = null;
+            let isAbs = false;
+
+            if (event.webkitCompassHeading !== undefined && event.webkitCompassHeading !== null) {
+                heading = event.webkitCompassHeading;
+                isAbs = true;
+            } else if (event.type === 'deviceorientationabsolute' || event.absolute === true) {
+                if (event.alpha !== null) {
+                    heading = 360 - event.alpha;
+                    isAbs = true;
+                }
+            }
+
+            if (isAbs && heading !== null) {
+                if (!hasReceivedAbsHeading) {
+                    hasReceivedAbsHeading = true;
+                    clearTimeout(compassTimeoutId); // 收到訊號，取消超時提示
+                }
+                if (heading < 0) heading += 360;
+                currentLiveHeading = heading;
+
+                document.getElementById('compassRose').style.transform = `rotate(${-heading}deg)`;
+                
+                let val = "無風";
+                if (heading >= 337.5 || heading < 22.5) val = "北風";
+                else if (heading >= 22.5 && heading < 67.5) val = "東北風";
+                else if (heading >= 67.5 && heading < 112.5) val = "東風";
+                else if (heading >= 112.5 && heading < 157.5) val = "東南風";
+                else if (heading >= 157.5 && heading < 202.5) val = "南風";
+                else if (heading >= 202.5 && heading < 247.5) val = "西南風";
+                else if (heading >= 247.5 && heading < 292.5) val = "西風";
+                else if (heading >= 292.5 && heading < 337.5) val = "西北風";
+
+                document.getElementById('liveWindDir').innerText = val;
+                document.getElementById('liveWindDeg').innerText = `(${Math.round(heading)}°)`;
+            }
+        };
+
+        window.addEventListener('deviceorientationabsolute', liveOrientationHandler);
+        window.addEventListener('deviceorientation', liveOrientationHandler);
+    }
+
+    function lockCompass() {
+        if (currentLiveHeading !== null) {
+            let val = document.getElementById('liveWindDir').innerText;
+            document.getElementById('e_wind').value = val;
+            
+            document.querySelectorAll('.wind-btn').forEach(b => {
+                b.classList.remove('active');
+                let t = b.innerText;
+                if ((val==="西北風"&&t==="NW")||(val==="北風"&&t==="N")||(val==="東北風"&&t==="NE")||(val==="西風"&&t==="W")||(val==="東風"&&t==="E")||(val==="西南風"&&t==="SW")||(val==="南風"&&t==="S")||(val==="東南風"&&t==="SE")) { b.classList.add('active'); }
+            });
+            showToast(`✅ 風向已鎖定為: ${val}`, "success");
+        } else {
+            showToast("⚠️ 尚未獲取到有效地理方位", "warning");
+        }
+        stopCompass();
+    }
+
+    function stopCompass() {
+        if(liveOrientationHandler) {
+            window.removeEventListener('deviceorientationabsolute', liveOrientationHandler);
+            window.removeEventListener('deviceorientation', liveOrientationHandler);
+        }
+        isCompassRunning = false;
+        document.getElementById('liveCompassArea').style.display = 'none';
+        document.getElementById('liveWindDir').innerText = '--';
+        document.getElementById('liveWindDeg').innerText = '';
+        currentLiveHeading = null;
+    }
+
+    function convertArea() {
+        let inputEl = document.getElementById('b_area_input'); let unitEl = document.getElementById('b_area_unit'); let hiddenEl = document.getElementById('b_area');
+        let val = parseFloat(inputEl.value);
+        if (isNaN(val)) { hiddenEl.value = ""; return; }
+        if (unitEl.value === 'ping') {
+            let m2Val = (val * 3.305785).toFixed(2); inputEl.value = m2Val; unitEl.value = 'm2'; hiddenEl.value = m2Val; showToast("✅ 已自動單位換算 (坪 → ㎡)", "success");
+        } else {
+            hiddenEl.value = val;
+        }
+    }
+
+    window.onscroll = function() { document.getElementById("backToTopBtn").style.display = (document.documentElement.scrollTop > 200) ? "flex" : "none"; };
+    function scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+    function toggleStructureOther() { const s = document.getElementById('b_structure'); const o = document.getElementById('b_structure_other'); o.style.display = (s.value === '其他') ? 'block' : 'none'; if(s.value !== '其他') o.value = ''; }
+    function toggleUsageOther() { const s = document.getElementById('b_usage'); const o = document.getElementById('b_usage_other'); o.style.display = (s.value === '其他') ? 'block' : 'none'; if(s.value !== '其他') o.value = ''; }
+
+    function initSelects() {
+        let fOpts = ''; for(let i=0; i<=50; i++) fOpts += `<option value="${i}">${i}</option>`;
+        document.querySelectorAll('.floor-select, .num-select').forEach(el => el.innerHTML = fOpts);
+        
+        const faces = ["第一面", "第二面", "第三面", "第四面"]; let rHtml = '';
+        faces.forEach((face, idx) => {
+            rHtml += `
+            <div style="background:#252525; padding:15px; border-radius:8px; margin-bottom:15px; border:1px solid #444;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <h3 style="margin:0; color:#ff5252;">${face}</h3>
+                    <label class="photo-upload-btn">📸 拍照 / 選照片<input type="file" accept="image/*" style="display:none;" onchange="uploadReconPhoto(${idx}, this)"></label>
+                </div>
+                <input type="hidden" id="r_${idx}_photo_url"><input type="hidden" id="r_${idx}_photo_id"><input type="hidden" id="r_${idx}_photo_formula">
+                <div id="r_${idx}_photo_status" style="font-size:13px; text-align:center; margin-bottom:10px;"></div>
+                <div class="grid-2">
+                    <div><label>樓層數</label><select id="r_${idx}_floor" class="floor-select"></select></div>
+                    <div><label>消防組數</label><select id="r_${idx}_teams" class="num-select"></select></div>
+                </div>
+                <div class="grid-2">
+                    <div><label>火勢</label><select id="r_${idx}_fire"><option value="0無">0無</option><option value="1火光">1火光</option><option value="2火舌">2火舌</option><option value="3延燒">3延燒</option></select></div>
+                    <div><label>煙霧</label><select id="r_${idx}_smoke"><option value="0無">0無</option><option value="1小">1小</option><option value="2大">2大</option></select></div>
+                </div>
+                <div class="grid-2">
+                    <div><label>門</label><select id="r_${idx}_door"><option value="無">無</option><option value="有">有</option></select></div>
+                    <div><label>窗</label><select id="r_${idx}_window"><option value="無">無</option><option value="有">有</option></select></div>
+                </div>
+                <div class="row-full"><label>風險</label><input type="text" id="r_${idx}_risk" placeholder="無風險則免填"></div>
+                <div class="row-full"><label>完成時間</label><input type="time" id="r_${idx}_time"></div>
+            </div>`;
+        });
+        document.getElementById('reconContainer').innerHTML = rHtml;
+        document.querySelectorAll('.floor-select, .num-select').forEach(el => { if(el.options.length === 0) el.innerHTML = fOpts; });
+    }
+
+    function uploadReconPhoto(idx, inputElement) {
+        if (isReadOnly) return;
+        const file = inputElement.files[0]; if (!file) return;
+        const statusEl = document.getElementById(`r_${idx}_photo_status`);
+        statusEl.innerHTML = "<span style='color:#ffb74d;'>⏳ 影像處理與上傳中...</span>";
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas'); const MAX_W = 600; let w = img.width, h = img.height;
+                if (w > MAX_W) { h = h * (MAX_W / w); w = MAX_W; }
+                canvas.width = w; canvas.height = h;
+                const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, w, h);
+                const fullBase64 = canvas.toDataURL('image/jpeg', 0.6);
+                const base64Data = fullBase64.split(',')[1];
+
+                apiCall({ action: 'uploadPhoto', projectName: currentProject, filename: `R_${idx}_${Date.now()}.jpg`, mimeType: 'image/jpeg', base64: base64Data }).then(res => {
+                    if (res.error) { showToast("❌ 系統錯誤", "error"); return statusEl.innerHTML = `<span style='color:#d32f2f;'>❌ 系統錯誤</span>`; }
+                    document.getElementById(`r_${idx}_photo_url`).value = res.url; document.getElementById(`r_${idx}_photo_id`).value = res.fileId; document.getElementById(`r_${idx}_photo_formula`).value = res.formula;
+                    
+                    let rawImgUrl = res.url;
+                    if (getSyncMode() === 'gas') {
+                        rawImgUrl = `https://drive.google.com/thumbnail?id=${res.fileId}&sz=w800`;
+                    }
+                    
+                    statusEl.innerHTML = `
+                        <img src="${rawImgUrl}" style="max-width:100%; max-height:180px; border-radius:6px; margin-top:5px; border:1px solid #555; object-fit:cover;">
+                        <div style="margin-top:5px;"><a href="${res.url}" target="_blank" style="color:#4caf50; text-decoration:underline; font-weight:bold; font-size:13px;">🔗 開啟原始大圖</a></div>
+                    `;
+                    saveBriefingToLocal(); showToast(`✅ 第${idx+1}面照片上傳成功！`, "success");
+                }).catch(err => { statusEl.innerHTML = `<span style='color:#d32f2f;'>❌ 上傳失敗，請確認網路</span>`; showToast("❌ 照片上傳異常", "error"); });
+            }; img.src = e.target.result;
+        }; reader.readAsDataURL(file);
+    }
+
+    function clearAllForms() {
+        const b_ids = ['b_iso', 'b_ic', 'b_usage', 'b_usage_other', 'b_structure', 'b_structure_other', 'b_arriveTime', 'b_floorUp', 'b_floorDown', 'c_time', 'c_trappedState', 'c_deployCount', 'c_rescued', 'c_toRescue', 'c_trapLocation', 'c_notes', 's_time', 's_advice', 'e_weather', 'e_wind'];
+        b_ids.forEach(id => { const el = document.getElementById(id); if(el) { if(el.tagName==='SELECT') el.selectedIndex=0; else el.value=''; } });
+        document.getElementById('b_structure_other').style.display = 'none'; document.getElementById('b_usage_other').style.display = 'none';
+        
+        document.getElementById('b_area_input').value = ''; document.getElementById('b_area_unit').selectedIndex = 0; document.getElementById('b_area').value = '';
+
+        for(let i=0; i<4; i++) {
+            ['floor', 'teams', 'fire', 'smoke', 'door', 'window', 'risk', 'time', 'photo_url', 'photo_id', 'photo_formula'].forEach(f => {
+                const el = document.getElementById(`r_${i}_${f}`); if(el) { if(el.tagName==='SELECT') el.selectedIndex=0; else el.value=''; }
+            });
+            document.getElementById(`r_${i}_photo_status`).innerHTML = '';
+        }
+        ['m_time', 'm_m', 'm_e', 'm_d', 'm_i', 'm_c'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+
+        document.querySelectorAll('.wind-btn').forEach(b => b.classList.remove('active'));
+        const centerBtn = document.querySelector('.wind-btn:nth-child(5)');
+        if (centerBtn) centerBtn.classList.add('active'); 
+        document.getElementById('e_wind').value = "無風";
+    }
+
+    function saveDB() { localStorage.setItem('isoDB', JSON.stringify(db)); }
+
+    async function createNewProject() {
+        const name = document.getElementById('newProjectName').value.trim(); const creator = document.getElementById('newProjectCreator').value.trim(); const btn = document.getElementById('btnCreateProject');
+        if(!name || !creator) return showToast("⚠️ 請輸入完整專案名稱與創建者姓名", "error");
+        currentModifier = creator; btn.innerText = "⏳ 專案建立中..."; btn.disabled = true; btn.style.background = "#555";
+
+        db[name] = { creator: creator, briefing: {}, medic: [] }; saveDB();
+        try {
+            const res = await apiCall({ action: 'createProject', projectName: name, creator: creator, modifier: currentModifier });
+            if(res.error) showToast("❌ 建立專案失敗：" + res.error, "error"); else showToast("✅ 專案建立成功！", "success");
+        } catch (e) { showToast("❌ 建立專案連線異常: " + e.message, "error"); }
+        btn.innerText = "建立新專案"; btn.disabled = false; btn.style.background = "var(--primary)"; document.getElementById('newProjectName').value = ''; document.getElementById('newProjectCreator').value = '';
+        openProject(name, 'edit', null, true);
+    }
+
+    async function openProject(name, mode = 'edit', btnElement = null, isNew = false) {
+        try {
+            if (!isNew) {
+                const modInput = document.getElementById('modifierName'); const modName = modInput.value.trim();
+                if (!modName) {
+                    modInput.style.border = "3px solid #ff5252"; modInput.style.backgroundColor = "#4a0000"; modInput.value = "";
+                    modInput.placeholder = "⚠️ 點擊前，請務必先輸入您的姓名！"; modInput.focus(); showToast("⚠️ 請先輸入操作人員姓名", "error");
+                    setTimeout(() => { modInput.style.border = "1px solid #444"; modInput.style.backgroundColor = "#2a2a2a"; modInput.placeholder = "請輸入您的姓名 (操作人員)..."; }, 3000);
+                    return; 
+                }
+                currentModifier = modName;
+                localStorage.setItem('isoUserName', modName); // 把名字存起來
+            }
+
+            // 按下按鈕後顯示讀取中，並鎖定同群組的按鈕
+            let originalText = "";
+            if (btnElement && btnElement.tagName === 'BUTTON') {
+                originalText = btnElement.innerText;
+                btnElement.innerText = "⏳ 載入中...";
+                if (btnElement.parentElement) {
+                    btnElement.parentElement.querySelectorAll('button').forEach(b => b.disabled = true);
+                }
+            }
+
+            isSyncLocked = true; currentProject = name; document.getElementById('b_caseName').value = name;
+            if (btnElement) { btnElement.innerText = "⏳ 雲端下載中..."; btnElement.disabled = true; btnElement.style.background = "#555"; }
+
+            clearAllForms(); if (!db[name]) db[name] = { briefing: {}, medic: [] };
+
+            try {
+                const cloudData = await apiCall({ action: 'getProjectData', projectName: name });
+                if (cloudData) {
+                    if(cloudData.error) { showToast("❌ 下載資料失敗：" + cloudData.error, "error"); } 
+                    else {
+                        if (cloudData.creator) db[name].creator = cloudData.creator;
+                        if (cloudData.briefing && Object.keys(cloudData.briefing).length > 0) db[name].briefing = cloudData.briefing;
+                        if (cloudData.medic && cloudData.medic.length > 0) db[name].medic = cloudData.medic;
+                        saveDB(); if(!isNew) showToast("✅ 雲端資料下載成功", "success");
+                    }
+                }
+            } catch (netErr) { 
+                showToast("⚠️ 下載失敗，已載入本地暫存: " + netErr.message, "warning"); 
+            }
+
+            if(db[name] && db[name].briefing) {
+                Object.keys(db[name].briefing).forEach(key => { const el = document.getElementById(key); if(el) el.value = db[name].briefing[key]; });
+                toggleStructureOther(); toggleUsageOther(); 
+                if (document.getElementById('b_area_input') && db[name].briefing['b_area_input']) {
+                    document.getElementById('b_area_input').value = db[name].briefing['b_area_input']; if (db[name].briefing['b_area_unit']) document.getElementById('b_area_unit').value = db[name].briefing['b_area_unit'];
+                }
+
+                let weatherVal = db[name].briefing['e_weather'] || ""; document.getElementById('e_weather').value = weatherVal;
+                let windVal = db[name].briefing['e_wind'] || "無風"; document.getElementById('e_wind').value = windVal;
+                document.querySelectorAll('.wind-btn').forEach(b => { 
+                    b.classList.remove('active'); let t = b.innerText;
+                    if (windVal===t || (windVal==="西北風"&&t==="NW")||(windVal==="北風"&&t==="N")||(windVal==="東北風"&&t==="NE")||(windVal==="西風"&&t==="W")||(windVal==="東風"&&t==="E")||(windVal==="西南風"&&t==="SW")||(windVal==="南風"&&t==="S")||(windVal==="東南風"&&t==="SE")||(windVal==="無風"&&t==="無")) { b.classList.add('active'); }
+                });
+
+                for(let i=0; i<4; i++) {
+                    const pUrl = db[name].briefing[`r_${i}_photo_url`];
+                    const pId = db[name].briefing[`r_${i}_photo_id`];
+                    if (pUrl && pUrl !== "") {
+                        let extractedId = pId;
+                        if (!extractedId && pUrl.includes('/d/')) { extractedId = pUrl.split('/d/')[1].split('/')[0]; }
+                        else if (!extractedId && pUrl.includes('id=')) { extractedId = pUrl.split('id=')[1].split('&')[0]; }
+                        
+                        let rawImgUrl = pUrl;
+                        if (getSyncMode() === 'gas' && extractedId) {
+                            rawImgUrl = `https://drive.google.com/thumbnail?id=${extractedId}&sz=w800`;
+                        }
+                        
+                        document.getElementById(`r_${i}_photo_status`).innerHTML = `
+                            <img src="${rawImgUrl}" style="max-width:100%; max-height:180px; border-radius:6px; margin-top:5px; border:1px solid #555; object-fit:cover;">
+                            <div style="margin-top:5px;"><a href="${pUrl}" target="_blank" style="color:#4caf50; text-decoration:underline; font-weight:bold; font-size:13px;">🔗 開啟原始大圖</a></div>
+                        `;
+                    }
+                }
+            }
+            if(!document.getElementById('b_iso').value && db[name] && db[name].creator) document.getElementById('b_iso').value = db[name].creator;
+            
+            window.lastBHash = JSON.stringify(db[name].briefing || {}); window.lastMHash = JSON.stringify(db[name].medic || []);
+            const forceLock = db[name]?.briefing?.isLocked === true;
+            applyReadOnly(forceLock || mode === 'view');
+
+            isSyncLocked = false; startAutoSync(); switchTab('page-briefing');
+            if (btnElement && btnElement.tagName === 'BUTTON') {
+                btnElement.innerText = originalText;
+                if (btnElement.parentElement) {
+                    btnElement.parentElement.querySelectorAll('button').forEach(b => b.disabled = false);
+                }
+            }
+            isSyncLocked = true;
+            currentProject = name;
+            localStorage.setItem('isoCurrentProject', name);
+            document.getElementById('b_caseName').value = name;
+            
+            if (btnElement) { btnElement.innerText = "📂 下載並開啟專案"; btnElement.disabled = false; btnElement.style.background = "#1565c0"; }
+        } catch(fatalErr) {
+            isSyncLocked = false; showToast("❌ 系統嚴重錯誤：" + fatalErr.message, "error");
+            if (btnElement) { btnElement.innerText = "⚠️ 開啟失敗"; btnElement.disabled = false; btnElement.style.background = "#d32f2f"; }
+        }
+    }
+
+    function startAutoSync() {
+        if(window.autoSyncInterval) clearInterval(window.autoSyncInterval);
+        window.autoSyncInterval = setInterval(() => {
+            if (isReadOnly || !currentProject || !currentModifier || isSyncLocked) return;
+            saveBriefingToLocal();
+            
+            const curB = JSON.stringify(db[currentProject].briefing); let changedB = (curB !== window.lastBHash);
+            const curM = JSON.stringify(db[currentProject].medic || []); let changedM = (curM !== window.lastMHash);
+            if (!changedB && !changedM) return; 
+            
+            if (changedB) window.lastBHash = curB; if (changedM) window.lastMHash = curM;
+            let promises = [];
+            
+            if (changedB) {
+                let payload = JSON.parse(JSON.stringify(db[currentProject].briefing));
+                promises.push(apiCall({ action: 'saveBriefing', projectName: currentProject, creator: db[currentProject].creator, modifier: currentModifier + "(自)", briefing: payload, overwrite: false }).catch(()=>{}));
+            }
+            if (changedM) {
+                promises.push(apiCall({ action: 'saveMedic', projectName: currentProject, creator: db[currentProject].creator, modifier: currentModifier + "(自)", medic: db[currentProject].medic || [], overwrite: false }).catch(()=>{}));
+            }
+
+            Promise.all(promises).then(() => { const ind = document.getElementById('autoSyncIndicator'); if (ind) { ind.style.display = 'block'; setTimeout(()=>ind.style.display='none', 3000); } });
+        }, 15000);
+    }
+
+    async function syncBriefingToCloud() {
+        if (isReadOnly) return;
+        if (!currentProject) return showToast("⚠️ 請先開啟專案", "error"); 
+        saveBriefingToLocal(); window.lastBHash = JSON.stringify(db[currentProject].briefing); 
+        let payload = JSON.parse(JSON.stringify(db[currentProject].briefing));
+        const btn = document.querySelector('.btn-sync-brief'); btn.innerText = "☁️ 簡報表同步中...";
+        try {
+            const res = await apiCall({ action: 'saveBriefing', projectName: currentProject, creator: db[currentProject].creator, modifier: currentModifier, briefing: payload, overwrite: false });
+            if(res.error) throw new Error(res.error); showToast("✅ 簡報表手動同步完成！", "success");
+        } catch (e) { showToast("❌ 同步錯誤: " + e.message, "error"); }
+        btn.innerText = "☁️ 儲存並同步【簡報表】至雲端";
+    }
+
+    async function syncMedicToCloud() {
+        if (isReadOnly) return;
+        if (!currentProject) return showToast("⚠️ 請先開啟專案", "error"); 
+        window.lastMHash = JSON.stringify(db[currentProject].medic || []); 
+        const btn = document.querySelector('.btn-sync-medic'); btn.innerText = "☁️ MEDIC 同步中...";
+        try {
+            const res = await apiCall({ action: 'saveMedic', projectName: currentProject, creator: db[currentProject].creator, modifier: currentModifier, medic: db[currentProject].medic, overwrite: false });
+            if(res.error) throw new Error(res.error); showToast("✅ MEDIC 事件手動同步完成！", "success");
+        } catch (e) { showToast("❌ 同步錯誤: " + e.message, "error"); }
+        btn.innerText = "☁️ 儲存並同步全部【MEDIC表】至雲端";
+    }
+
+    async function syncSingleMedicToCloud(index) {
+        if (!currentProject) return;
+        try {
+            const res = await apiCall({ action: 'saveMedic', projectName: currentProject, creator: db[currentProject].creator, modifier: currentModifier, medic: [db[currentProject].medic[index]], overwrite: false });
+            if(res.error) throw new Error(res.error); showToast("✅ 單筆 MEDIC 紀錄同步成功！", "success");
+        } catch (e) { showToast("❌ 單筆同步失敗: " + e.message, "error"); }
+    }
+
+    // ─── 匯出最佳格式圖檔 (高對比度, 無背景浮水印) ───
+    function exportToImage() {
+        if (!currentProject) return showToast("⚠️ 請先開啟專案！", "error"); 
+        saveBriefingToLocal(); 
+        const btn = document.getElementById('btnExportImage'); btn.innerText = "⏳ 正在處理圖檔排版...";
+
+        const v = (id) => document.getElementById(id).value || '未填寫';
+        
+        document.getElementById('exp_caseName').innerText = v('b_caseName');
+        document.getElementById('exp_arriveTime').innerText = v('b_arriveTime');
+        document.getElementById('exp_iso_ic').innerText = `ISO: ${v('b_iso')} / IC: ${v('b_ic')}`;
+        document.getElementById('exp_usage_structure').innerText = `${v('b_usage') === '其他' ? v('b_usage_other') : v('b_usage')} / ${v('b_structure') === '其他' ? v('b_structure_other') : v('b_structure')}`;
+        let areaVal = v('b_area'); document.getElementById('exp_area').innerText = (areaVal && areaVal !== '未填寫') ? areaVal : '未填寫';
+        document.getElementById('exp_floor').innerText = `地上 ${v('b_floorUp')} 層 / 地下 ${v('b_floorDown')} 層`;
+        document.getElementById('exp_c_time').innerText = v('c_time'); document.getElementById('exp_c_deployCount').innerText = v('c_deployCount');
+        
+        let trappedState = v('c_trappedState');
+        if(trappedState === '有') { document.getElementById('exp_trapped').innerHTML = `<span style="color:#d32f2f; font-weight:900;">⚠️ 有 (${v('c_toRescue')} 人待救)</span>`; } 
+        else { document.getElementById('exp_trapped').innerText = "無受困"; }
+
+        let trapLoc = v('c_trapLocation');
+        if(trapLoc !== '未填寫' && trapLoc !== '') { document.getElementById('exp_trapLoc').innerHTML = `<span style="color:#d32f2f; font-weight:900;">${trapLoc}</span>`; } 
+        else { document.getElementById('exp_trapLoc').innerHTML = `無`; }
+        
+        document.getElementById('exp_c_notes').innerText = v('c_notes');
+
+        // 表格重繪：加深字體與框線
+        let reconTableHtml = `
+            <tr>
+                <th width="8%">面向</th><th width="8%">樓層</th><th width="8%">組數</th>
+                <th width="10%">火勢</th><th width="10%">煙</th><th width="8%">門</th><th width="8%">窗</th>
+                <th width="20%">風險</th><th width="10%">時間</th><th width="10%">照片</th>
+            </tr>
+        `;
+        const faces = ["第一面", "第二面", "第三面", "第四面"];
+        for(let i=0; i<4; i++) {
+            let fire = v(`r_${i}_fire`); let smoke = v(`r_${i}_smoke`); let risk = v(`r_${i}_risk`);
+            let fireFmt = (parseInt(fire.charAt(0)) >= 2) ? `<span style="color:#d32f2f; font-weight:900;">${fire}</span>` : fire;
+            let smokeFmt = (parseInt(smoke.charAt(0)) >= 2) ? `<span style="color:#d32f2f; font-weight:900;">${smoke}</span>` : smoke;
+            let riskFmt = (risk !== '未填寫' && risk !== '') ? `<span style="background-color:#fff9c4; color:#d32f2f; padding:2px 6px; border:2px solid #ffb74d; border-radius:4px;">${risk}</span>` : '無';
+            let photoUrl = v(`r_${i}_photo_url`); let imgHtml = (photoUrl && photoUrl !== '未填寫' && photoUrl !== '') ? '<div style="color:#2196F3; font-weight:900; font-size:16px;">[雲端有照]</div>' : '<div style="color:#444; font-weight:900; font-size:16px;">無</div>';
+            reconTableHtml += `<tr><td style="font-weight:900;">${faces[i]}</td><td>${v(`r_${i}_floor`)}</td><td>${v(`r_${i}_teams`)}</td><td>${fireFmt}</td><td>${smokeFmt}</td><td>${v(`r_${i}_door`)}</td><td>${v(`r_${i}_window`)}</td><td>${riskFmt}</td><td>${v(`r_${i}_time`)}</td><td>${imgHtml}</td></tr>`;
+        }
+        document.getElementById('exp_reconTable').innerHTML = reconTableHtml;
+
+        document.getElementById('exp_s_time').innerText = v('s_time'); document.getElementById('exp_e_weather_wind').innerText = `${v('e_weather')} / 風向: ${v('e_wind')}`;
+        document.getElementById('exp_s_advice').innerText = v('s_advice'); document.getElementById('exp_printInfo').innerText = `產出時間：${new Date().toLocaleString()} ｜ 匯出人員：${currentModifier}`;
+
+        setTimeout(() => {
+            const element = document.getElementById('exportTemplate');
+            html2canvas(element, { scale: 2, backgroundColor: "#ffffff" }).then(canvas => {
+                const link = document.createElement('a'); link.download = `[ISO簡報表] ${currentProject}.png`; link.href = canvas.toDataURL("image/png"); link.click();
+                btn.innerText = "📸 匯出最佳格式圖檔"; showToast("✅ 圖檔生成完畢，準備下載！", "success");
+            }).catch(err => { showToast("❌ 圖檔產出失敗", "error"); btn.innerText = "📸 匯出最佳格式圖檔"; });
+        }, 500); 
+    }
+
+    function switchTab(pageId) {
+        if (!currentProject && pageId !== 'page-home') return showToast("⚠️ 請先建立或開啟專案", "error");
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.getElementById(pageId).classList.add('active');
+        const bottomNav = document.getElementById('bottomNav');
+        if (pageId === 'page-home') { bottomNav.style.display = 'none'; } else {
+            bottomNav.style.display = 'flex'; document.querySelectorAll('.bottom-nav button').forEach(b => b.classList.remove('active'));
+            if (pageId === 'page-briefing') document.getElementById('nav-briefing').classList.add('active');
+            if (pageId === 'page-medic') document.getElementById('nav-medic').classList.add('active');
+        }
+        if(pageId === 'page-medic') {
+            renderMedicList();
+            // [AI FIX] MEDIC 切換時自動填入當前時間，節省現場操作時間
+            const timeEl = document.getElementById('m_time');
+            if (timeEl && !timeEl.value) {
+                const now = new Date();
+                timeEl.value = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+            }
+        }
+        // 記住最後停留的子畫面加在這裡
+        localStorage.setItem('isoLastTab', pageId);
+        scrollToTop(); 
+    }
+    
+    function goHome() {
+        currentProject = null;
+        localStorage.removeItem('isoCurrentProject'); // ✅ 新增這行：主動回首頁時，清除專案記憶
+        clearInterval(window.autoSyncInterval);
+        applyReadOnly(false);
+        /* 加入這行：回首頁時全面解除輸入框鎖定 */
+        renderHome();
+        switchTab('page-home');
+    }
+
+    async function renderHome() {
+        const container = document.getElementById('projectListContainer'); container.innerHTML = '<div style="text-align:center; padding:20px; color:#aaa;">🔄 讀取雲端資料庫中...</div>';
+        
+        const mode = getSyncMode();
+        if (mode === 'gas') {
+            const url = getGasUrl();
+            if (!url || url.trim() === "" || url.includes("請在這裡貼上")) {
+                container.innerHTML = `<div style="color:#ffb74d; padding:15px; border:2px solid #ffb74d; border-radius:8px; margin-bottom:10px; background:#2a2a2a;"><b>⚠️ 系統設定提示</b><br>您尚未設定 GAS 網址，已強制切換為本地模式。<br>請點選側邊欄的「⚙️ 系統同步設定」進行設定。</div>`;
+                return renderLocalHomeFallback();
+            }
+        } else {
+            const pat = localStorage.getItem('iso_github_pat');
+            if (!pat || pat.trim() === "") {
+                container.innerHTML = `<div style="color:#ffb74d; padding:15px; border:2px solid #ffb74d; border-radius:8px; margin-bottom:10px; background:#2a2a2a;"><b>⚠️ 系統設定提示</b><br>您尚未設定 GitHub 存取權杖 (PAT)，已切換為本地模式。<br>請點選側邊欄的「⚙️ 系統同步設定」進行設定以開啟線上同步。</div>`;
+                return renderLocalHomeFallback();
+            }
+        }
+        
+        try {
+            const data = await apiCall({ action: 'getList' });
+            if (data && data.error) { container.innerHTML = `<div style="color:#ff5252; padding:15px; border:2px solid #ff5252; border-radius:8px; margin-bottom:10px; background:#2a2a2a; word-break:break-all;"><b>🚨 同步端報錯：</b><br>${data.error}</div>`; return renderLocalHomeFallback(); }
+            if (!data || !Array.isArray(data)) throw new Error("回傳的不是專案陣列");
+            if(data.length === 0) { container.innerHTML = '<p style="text-align:center; color:#888;">同步端尚無專案，請建立新專案</p>'; return; }
+            container.innerHTML = '';
+            data.forEach(key => {
+                const safeKey = key.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+                const displayKey = key.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;');
+                container.innerHTML += `
+                <div class="list-item" style="display:flex; flex-direction:column; align-items:center;">
+                    <div class="list-title" style="font-size:1.2rem; width:100%; text-align:center; margin-bottom:10px;">${displayKey}</div>
+                    <div style="display:flex; flex-direction:column; width:100%; gap:8px;">
+                        <button class="btn-main" style="background:#1565c0; width:100%; margin:0; height:45px;" onclick="openProject('${safeKey}', 'view', this)">👁️ 僅供檢視</button>
+                        <button class="btn-main" style="background:#2e7d32; width:100%; margin:0; height:45px;" onclick="openProject('${safeKey}', 'edit', this)">✏️ 進入編輯</button>
+                    </div>
+                </div>`;
+            });
+        } catch(e) { 
+            container.innerHTML = `<div style="color:#ff5252; padding:15px; border:2px solid #ff5252; border-radius:8px; margin-bottom:10px; background:#2a2a2a;"><b>🚨 同步連線失敗</b><br>${e.message}</div>`; 
+            renderLocalHomeFallback(); 
+        }
+    }
+
+function renderLocalHomeFallback() {
+        const container = document.getElementById('projectListContainer'); const keys = Object.keys(db).reverse();
+        if(keys.length === 0) container.innerHTML += '<p style="text-align:center;">本地也無暫存專案</p>';
+        keys.forEach(key => { 
+            const safeKey = key.replace(/'/g, "\\'").replace(/"/g, "&quot;"); 
+            container.innerHTML += `
+            <div class="list-item" style="display:flex; flex-direction:column; align-items:center;">
+                <div class="list-title" style="font-size:1.2rem; width:100%; text-align:center; margin-bottom:10px;">${key} (本地)</div>
+                <div style="display:flex; flex-direction:column; width:100%; gap:8px;">
+                    <button class="btn-main" style="background:#1565c0; width:100%; margin:0; height:45px; min-height:45px;" onclick="openProject('${safeKey}', 'view', this)">👁️ 僅供檢視</button>
+                    <button class="btn-main" style="background:#2e7d32; width:100%; margin:0; height:45px; min-height:45px;" onclick="openProject('${safeKey}', 'edit', this)">✏️ 進入編輯</button>
+                </div>
+            </div>`; 
+        });
+    }
+
+    function saveBriefingToLocal() {
+        const data = {};
+        const ids = ['b_iso', 'b_ic', 'b_usage', 'b_usage_other', 'b_structure', 'b_structure_other', 'b_arriveTime', 'b_floorUp', 'b_floorDown', 'c_time', 'c_trappedState', 'c_deployCount', 'c_rescued', 'c_toRescue', 'c_trapLocation', 'c_notes', 's_time', 's_advice', 'e_weather', 'e_wind'];
+        ids.forEach(id => data[id] = document.getElementById(id).value);
+        data['b_area_input'] = document.getElementById('b_area_input').value; data['b_area_unit'] = document.getElementById('b_area_unit').value; data['b_area'] = document.getElementById('b_area').value; 
+        data['b_usage_final'] = (!data['b_usage']) ? '' : ((data['b_usage'] === '其他') ? data['b_usage_other'] : data['b_usage']); data['b_structure_final'] = (!data['b_structure']) ? '' : ((data['b_structure'] === '其他') ? data['b_structure_other'] : data['b_structure']);
+        for(let i=0; i<4; i++) { ['floor', 'teams', 'fire', 'smoke', 'door', 'window', 'risk', 'time', 'photo_url', 'photo_id', 'photo_formula'].forEach(f => { data[`r_${i}_${f}`] = document.getElementById(`r_${i}_${f}`).value; }); }
+        if(!db[currentProject]) db[currentProject] = { briefing: {}, medic: [] }; db[currentProject].briefing = data; saveDB();
+    }
+
+    function addMedicEntry() {
+        if(!currentProject) return showToast("⚠️ 請先開啟專案", "error");
+        let tInput = document.getElementById('m_time').value; let mInput = document.getElementById('m_m').value.trim();
+        if (!tInput) return showToast("⚠️ 「時間」為必填欄位！", "error"); if (!mInput) return showToast("⚠️ 「監控環境與行動 (M)」為必填欄位！", "error");
+        db[currentProject].medic.push({ id: Date.now(), time: tInput, m: mInput, e: document.getElementById('m_e').value, d: document.getElementById('m_d').value, i: document.getElementById('m_i').value, c: document.getElementById('m_c').value, completed: false, deleted: false });
+        saveDB(); ['m_time', 'm_m', 'm_e', 'm_d', 'm_i', 'm_c'].forEach(id => document.getElementById(id).value = ''); renderMedicList(); showToast("✅ MEDIC 事件已加入清單", "success");
+    }
+
+    function deleteMedicEntry(index) { db[currentProject].medic[index].deleted = true; saveDB(); renderMedicList(); showToast("🗑️ 紀錄已隱藏，下次同步將寫入雲端", "warning"); }
+    function closeMedicEntry(index) { db[currentProject].medic[index].completed = true; saveDB(); renderMedicList(); }
+
+    function renderMedicList() {
+        if(!currentProject || !db[currentProject]) return;
+        const container = document.getElementById('medicListContainer'); container.innerHTML = '';
+        const list = db[currentProject].medic || []; let visibleCount = 0;
+        let sortedList = list.map((item, index) => { return { data: item, originalIndex: index }; }).sort((a, b) => { if (a.data.completed === b.data.completed) return a.originalIndex - b.originalIndex; return a.data.completed ? 1 : -1; });
+
+        sortedList.forEach((mappedItem) => {
+            const item = mappedItem.data; const index = mappedItem.originalIndex; if (item.deleted) return; visibleCount++;
+            const isLocked = item.completed; const disabledAttr = isLocked ? 'disabled' : ''; const displayBg = isLocked ? '#1a3b1a' : '#252525';
+            const delBtn = isLocked ? '' : `<button class="btn-delete" style="display:inline-flex; align-items:center; justify-content:center; height:36px; padding:0 12px; border-radius:4px; font-size:14px; margin:0; line-height:1;" onclick="confirmAction(this, deleteMedicEntry, ${index})">🗑️ 刪除</button>`;
+            const closeBtn = isLocked ? `<span style="color:#4caf50; font-weight:bold; display:inline-flex; align-items:center; height:36px;">🔒 已結案</span>` : `<button class="btn-delete" style="background:#ff9800; display:inline-flex; align-items:center; justify-content:center; height:36px; padding:0 12px; border-radius:4px; font-size:14px; margin:0; line-height:1;" onclick="confirmAction(this, closeMedicEntry, ${index})">✅ 結案</button>`;
+            const syncBtn = isLocked ? '' : `<button class="nav-btn" style="display:inline-flex; align-items:center; justify-content:center; width:auto; padding:0 16px; height:36px; min-height:36px; max-height:36px; margin:0; background:#2196F3; font-size:14px; font-weight:bold; border:none; border-radius:4px; color:white; line-height:1;" onclick="confirmAction(this, syncSingleMedicToCloud, ${index})">☁️ 同步</button>`;
+
+            container.innerHTML += `
+            <div class="medic-entry" style="background:${displayBg};">
+                <div class="row-full" style="border-bottom: 1px solid #444; padding-bottom: 12px; margin-bottom: 12px;">
+                    <label style="margin-top:0; color:#fff;">評估時間:</label>
+                    <input type="time" id="med_t_${index}" value="${item.time}" ${disabledAttr} style="background:#333; margin-bottom: 10px;">
+                    <div style="display:flex; gap:8px; justify-content:flex-end; width:100%;">${syncBtn} ${delBtn} ${closeBtn}</div>
+                </div>
+                <div class="medic-body">
+                    <div><span style="color:#aaa;">[M]</span> <input type="text" value="${item.m}" disabled style="background:#1a1a1a; color:#888;"></div>
+                    <div><span style="color:#aaa;">[E]</span> <textarea id="med_e_${index}" ${disabledAttr} onchange="updateMedic(${index})">${item.e || ''}</textarea></div>
+                    <div><span style="color:#aaa;">[D]</span> <textarea id="med_d_${index}" ${disabledAttr} onchange="updateMedic(${index})">${item.d || ''}</textarea></div>
+                    <div><span style="color:#aaa;">[I]</span> <textarea id="med_i_${index}" ${disabledAttr} onchange="updateMedic(${index})">${item.i || ''}</textarea></div>
+                    <div><span style="color:#aaa;">[C]</span> <textarea id="med_c_${index}" ${disabledAttr} onchange="updateMedic(${index})">${item.c || ''}</textarea></div>
+                </div>
+            </div>`;
+        });
+        if(visibleCount === 0) container.innerHTML = '<p style="color:#888;">尚無 MEDIC 紀錄</p>';
+    }
+
+    function updateMedic(index) {
+        if(db[currentProject].medic[index].completed) return;
+        ['time','e','d','i','c'].forEach(f => { const el = document.getElementById(`med_${f.charAt(0)}_${index}`); if(el) db[currentProject].medic[index][f] = el.value; }); saveDB();
+    }
+
+   initSelects();
+
+// === 🚀 網頁重整 / 休眠喚醒的自動還原機制 ===
+const savedUserName = localStorage.getItem('isoUserName');
+const savedProject = localStorage.getItem('isoCurrentProject');
+const savedTab = localStorage.getItem('isoLastTab') || 'page-briefing';
+
+// 1. 自動填入操作人員姓名
+if (savedUserName) {
+    const modInput = document.getElementById('modifierName');
+    if (modInput) modInput.value = savedUserName;
+    currentModifier = savedUserName;
+}
+
+// 2. 判斷是否有尚未離開的專案
+if (savedProject && savedUserName && db[savedProject]) {
+    // 🌟 步驟 A：鎖定整個網頁的點擊功能，並跳出「載入中」提示
+    document.body.style.pointerEvents = 'none';
+    showToast(`🔄 正在為您恢復專案：${savedProject}...`, "info");
+
+    // 🌟 步驟 B：設定 500 毫秒的延遲，讓瀏覽器有時間把提示框畫出來
+    setTimeout(() => {
+        try {
+            // 執行背景載入專案
+            openProject(savedProject, 'edit', null, true);
+            
+            // 載入完成後，切換回休眠前所在的子分頁
+            if (savedTab !== 'page-briefing') {
+                switchTab(savedTab);
+            }
+            
+            // 🌟 步驟 C：載入完畢，解鎖網頁點擊功能，並跳出「成功」提示
+            document.body.style.pointerEvents = 'auto';
+            showToast("✅ 已成功接續先前的作業！", "success");
+
+        } catch (error) {
+            // 防呆機制：萬一載入過程發生意外錯誤，強制解鎖畫面並回到首頁
+            document.body.style.pointerEvents = 'auto';
+            renderHome();
+        }
+    }, 500); 
+
+} else {
+    // 沒有記憶，才正常顯示首頁列表
+    renderHome();
+}
+// ===========================================
+</script>
+</body>
+</html>

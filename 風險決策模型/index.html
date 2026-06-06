@@ -1,0 +1,402 @@
+---
+---
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>【演練專用】HCFD // 現場決策工具 (ISO)</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #e0e0e0;
+            --accent-color: #ff9800;
+            --safe: #4caf50;
+            --warning: #ffeb3b;
+            --danger: #f44336;
+            --extreme: #b71c1c;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0 15px 50px 15px;
+        }
+
+        /* 置頂懸浮標題列 */
+        .top-bar {
+            position: sticky;
+            top: 0;
+            background-color: rgba(18, 18, 18, 0.95);
+            backdrop-filter: blur(8px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin: 0 -15px 20px -15px;
+            border-bottom: 1px solid #333;
+            z-index: 1000;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        .top-bar h1 { 
+            margin: 0; 
+            color: var(--accent-color); 
+            font-size: 1.2rem; 
+            text-align: left;
+        }
+
+        .reset-btn-top {
+            background: #444;
+            color: white;
+            border: 1px solid #666;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .reset-btn-top:active { background: #666; }
+
+        h2 { font-size: 1.2rem; border-left: 5px solid var(--accent-color); padding-left: 10px; margin-top: 10px; margin-bottom: 15px; }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        /* 滑桿樣式 */
+        .input-group { margin-bottom: 20px; }
+        .input-group label { display: block; margin-bottom: 8px; font-weight: bold; }
+        input[type="range"] {
+            width: 100%;
+            height: 15px;
+            border-radius: 5px;
+            accent-color: var(--accent-color);
+        }
+        .value-display { float: right; color: var(--accent-color); font-size: 1.2rem; font-weight: bold; }
+
+        /* 結果顯示框 */
+        .result-box {
+            text-align: center;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+        }
+
+        /* VTS 按鈕樣式 */
+        .vts-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .btn-radio {
+            background: #333;
+            border: 2px solid #444;
+            color: white;
+            padding: 12px 5px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+        .btn-radio.active {
+            border-color: var(--accent-color);
+            background: rgba(255, 152, 0, 0.2);
+        }
+
+        /* 矩陣樣式 */
+        .matrix-container { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; table-layout: fixed; }
+        td {
+            border: 1px solid #333;
+            height: 40px;
+            text-align: center;
+            font-size: 0.7rem;
+            color: rgba(0,0,0,0.6);
+            transition: all 0.2s ease;
+        }
+        .active-cell {
+            border: 4px solid white !important;
+            box-shadow: inset 0 0 10px rgba(255,255,255,0.8);
+            color: black !important;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        /* 免責聲明與警語區塊 */
+.disclaimer-box {
+    background-color: rgba(244, 67, 54, 0.1); 
+    border-left: 4px solid var(--danger);
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 0 8px 8px 0;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: #ccc;
+}
+
+.disclaimer-box strong {
+    color: var(--danger);
+    display: block;
+    margin-bottom: 8px;
+    font-size: 1rem;
+}
+    </style>
+</head>
+<body>
+    {% include nav.html %}
+    
+    <!-- 置頂標題與重置鈕 -->
+    <div class="top-bar">
+        <h1>【演練專用】HCFD // ISO 現場決策系統</h1>
+        <button class="reset-btn-top" onclick="resetAll()">一鍵重置</button>
+    </div>
+
+    <!-- SPE 模組 -->
+    <div class="card">
+        <h2>SPE 風險量化評估</h2>
+        <div class="input-group">
+            <label>嚴重度 Severity (1-10) <span id="s-val" class="value-display">5</span></label>
+            <input type="range" id="s-range" min="1" max="10" value="5" oninput="calculateSPE()">
+        </div>
+        <div class="input-group">
+            <label>發生機率 Probability (1-10) <span id="p-val" class="value-display">5</span></label>
+            <input type="range" id="p-range" min="1" max="10" value="5" oninput="calculateSPE()">
+        </div>
+        <div class="input-group">
+            <label>暴露度 Exposure (1-10) <span id="e-val" class="value-display">5</span></label>
+            <input type="range" id="e-range" min="1" max="10" value="5" oninput="calculateSPE()">
+        </div>
+        <div id="spe-result" class="result-box">
+            <!-- 由 JS 動態生成 -->
+        </div>
+    </div>
+
+    <!-- VTS 模組 -->
+    <div class="card">
+        <h2>VTS 戰術決策模式</h2>
+        <label>人命搶救價值 (Value)</label>
+        <div class="vts-grid" id="v-group">
+            <div class="btn-radio active" onclick="setVTS('v', 'high', this)">高 (人命)</div>
+            <div class="btn-radio" onclick="setVTS('v', 'mid', this)">中 (財產)</div>
+            <div class="btn-radio" onclick="setVTS('v', 'low', this)">低 (無價值)</div>
+        </div>
+
+        <label>可用時間 (Time)</label>
+        <div class="vts-grid" id="t-group">
+            <div class="btn-radio active" onclick="setVTS('t', 'suff', this)">充足</div>
+            <div class="btn-radio" onclick="setVTS('t', 'press', this)">緊迫</div>
+            <div class="btn-radio" onclick="setVTS('t', 'limit', this)">已逾極限</div>
+        </div>
+
+        <label>災害規模 (Size)</label>
+        <div class="vts-grid" id="s-group">
+            <div class="btn-radio active" onclick="setVTS('s', 'small', this)">侷限</div>
+            <div class="btn-radio" onclick="setVTS('s', 'grow', this)">擴大中</div>
+            <div class="btn-radio" onclick="setVTS('s', 'total', this)">全面失控</div>
+        </div>
+
+        <div id="vts-result" class="result-box">
+            <!-- 由 JS 動態生成 -->
+        </div>
+    </div>
+
+    <!-- 危害排序矩陣 -->
+    <div class="card">
+        <h2>危害排序矩陣 (5x5)</h2>
+        <div class="input-group">
+            <label>機率 (1-5) <span id="m-p-val" class="value-display">3</span></label>
+            <input type="range" id="m-p-range" min="1" max="5" value="3" oninput="updateMatrix()">
+        </div>
+        <div class="input-group">
+            <label>嚴重度 (1-5) <span id="m-s-val" class="value-display">3</span></label>
+            <input type="range" id="m-s-range" min="1" max="5" value="3" oninput="updateMatrix()">
+        </div>
+        <div class="matrix-container">
+            <table id="risk-table">
+                <!-- 由 JS 生成 -->
+            </table>
+        </div>
+    </div>
+
+    <div class="disclaimer-box">
+        <strong>⚠️ 決策模型使用警語與免責聲明</strong>
+        本平台提供之 SPE、VTS 及風險矩陣模型，均為基於理論架構之「輔助性運算工具」。<br><br>
+        實際災害現場瞬息萬變，系統給出之「風險等級」與「戰術建議（攻擊/防禦/撤退）」僅供指揮官 (IC) 及事故安全官 (ISO) 參考，絕不可完全取代現場專業人員之視覺判斷、經驗評估與現行之標準作業程序 (SOP)。依賴本模型所作之任何戰術決策，風險由使用者自行承擔。
+    </div>
+
+<script>
+        // --- SPE Logic ---
+        function calculateSPE() {
+            const s = document.getElementById('s-range').value;
+            const p = document.getElementById('p-range').value;
+            const e = document.getElementById('e-range').value;
+            
+            document.getElementById('s-val').innerText = s;
+            document.getElementById('p-val').innerText = p;
+            document.getElementById('e-val').innerText = e;
+
+            const score = s * p * e;
+            const res = document.getElementById('spe-result');
+            
+            let level = "";
+            let tagStyle = "";
+
+            if (score < 70) {
+                level = "低風險 - 可接受";
+                res.style.backgroundColor = "var(--safe)";
+                res.style.color = "white";
+                tagStyle = "background-color: #1b5e20; color: #ffffff;"; 
+            } else if (score < 200) {
+                level = "中度風險 - 警戒";
+                res.style.backgroundColor = "var(--warning)";
+                res.style.color = "black";
+                tagStyle = "background-color: #000000; color: #ffeb3b;"; 
+            } else if (score < 400) {
+                level = "高度風險 - 危險";
+                res.style.backgroundColor = "var(--accent-color)";
+                res.style.color = "white";
+                tagStyle = "background-color: #bf360c; color: #ffffff;"; 
+            } else {
+                level = "極高風險 - 不可接受";
+                res.style.backgroundColor = "var(--extreme)";
+                res.style.color = "white";
+                tagStyle = "background-color: #ffeb3b; color: #b71c1c;"; 
+            }
+            
+            res.innerHTML = `風險得分: ${score} <br> <span style="font-size: 1.25rem; font-weight: 900; letter-spacing: 1px; padding: 6px 18px; border-radius: 8px; display: inline-block; margin-top: 10px; box-shadow: 0 3px 6px rgba(0,0,0,0.4); ${tagStyle}">${level}</span>`;
+        }
+
+        // --- VTS Logic ---
+        let vtsData = { v: 'high', t: 'suff', s: 'small' };
+        
+function setVTS(type, val, el) {
+            vtsData[type] = val;
+            
+            const parent = el.parentElement;
+            Array.from(parent.children).forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            
+            const res = document.getElementById('vts-result');
+            
+            let tactic = "";
+            let color = "";
+            let tagStyle = "";
+            let textColor = ""; // 🌟 1. 新增這個變數來控制標題顏色
+
+            if (vtsData.t === 'limit' || (vtsData.v === 'low' && (vtsData.s === 'grow' || vtsData.s === 'total'))) {
+                tactic = "撤退 / 非干預 (Non-intervention)";
+                color = "var(--extreme)"; 
+                tagStyle = "background-color: #ffeb3b; color: #b71c1c;"; 
+                textColor = "white"; // 🌟 紅底配白字
+            } else if (vtsData.s === 'total' || vtsData.s === 'grow' || vtsData.t === 'press' || vtsData.v === 'mid' || vtsData.v === 'low') {
+                tactic = "防禦式戰術 (Defensive)";
+                color = "var(--warning)"; 
+                tagStyle = "background-color: #000000; color: #ffeb3b;"; 
+                textColor = "black"; // 🌟 黃底配黑字
+            } else {
+                tactic = "攻擊式戰術 (Offensive)";
+                color = "var(--safe)"; 
+                tagStyle = "background-color: #1b5e20; color: #ffffff;"; 
+                textColor = "black"; // 🌟 綠底配黑字
+            }
+
+            res.style.backgroundColor = color;
+            res.style.color = textColor; // 🌟 2. 讓整個結果框的文字顏色跟著變動
+            
+            // 🌟 3. 在「建議戰術」加上 span 確保顏色生效，並稍微加粗
+            res.innerHTML = `<span style="font-weight: 900; color: ${textColor};">建議戰術</span><br><span style="font-size: 1.25rem; font-weight: 900; letter-spacing: 1px; padding: 6px 18px; border-radius: 8px; display: inline-block; margin-top: 10px; box-shadow: 0 3px 6px rgba(0,0,0,0.4); ${tagStyle}">${tactic}</span>`;
+        }
+
+        // --- Matrix Logic ---
+        const matrixData = [
+            [1, 1, 2, 2, 3],
+            [1, 2, 2, 3, 3],
+            [2, 2, 3, 3, 4],
+            [2, 3, 3, 4, 4],
+            [3, 3, 4, 4, 5]
+        ];
+
+        function initMatrix() {
+            const table = document.getElementById('risk-table');
+            // [AI FIX] 加入橫縱軸標籤，讓使用者能直接讀應矩陣座標
+            let html = "<tr><td style='border:none;background:transparent;font-size:0.65rem;color:#888;' title='機率軸'></td>";
+            for (let j = 1; j <= 5; j++) {
+                html += `<td style="border:none; background:transparent; text-align:center; font-size:0.65rem; color:#aaa; font-weight:bold; height:20px;">P${j}</td>`;
+            }
+            html += "</tr>";
+
+            for (let i = 5; i >= 1; i--) { 
+                // 左側寫入嚴重度標籤
+                html += `<tr><td style="border:none; background:transparent; text-align:center; font-size:0.65rem; color:#aaa; font-weight:bold; width:20px;">S${i}</td>`;
+                for (let j = 1; j <= 5; j++) { 
+                    const level = matrixData[i-1][j-1];
+                    let color = "";
+                    let label = "";
+                    if(level == 1) { color = "#4caf50"; label="低"; }
+                    else if(level == 2) { color = "#ffeb3b"; label="中"; }
+                    else if(level == 3) { color = "#ff9800"; label="高"; }
+                    else if(level == 4) { color = "#f44336"; label="極高"; }
+                    else { color = "#b71c1c"; label="立即危險"; }
+                    
+                    html += `<td id="cell-${j}-${i}" style="background-color: ${color}">${label}</td>`;
+                }
+                html += "</tr>";
+            }
+            // 底部說明
+            html += `<tr><td colspan="6" style="border:none; background:transparent; font-size:0.65rem; color:#666; text-align:center; padding-top:4px;">P=機率(1-5) │ S=嚴重度(1-5)</td></tr>`;
+            table.innerHTML = html;
+            updateMatrix();
+        }
+
+        function updateMatrix() {
+            const p = document.getElementById('m-p-range').value;
+            const s = document.getElementById('m-s-range').value;
+            document.getElementById('m-p-val').innerText = p;
+            document.getElementById('m-s-val').innerText = s;
+
+            document.querySelectorAll('td').forEach(td => td.classList.remove('active-cell'));
+            
+            const active = document.getElementById(`cell-${p}-${s}`);
+            if (active) active.classList.add('active-cell');
+        }
+
+        // --- Reset Logic ---
+        function resetAll() {
+            // SPE 重置
+            document.getElementById('s-range').value = 5;
+            document.getElementById('p-range').value = 5;
+            document.getElementById('e-range').value = 5;
+            calculateSPE();
+
+            // VTS 重置
+            setVTS('v', 'high', document.getElementById('v-group').children[0]);
+            setVTS('t', 'suff', document.getElementById('t-group').children[0]);
+            setVTS('s', 'small', document.getElementById('s-group').children[0]);
+
+            // Matrix 重置
+            document.getElementById('m-p-range').value = 3;
+            document.getElementById('m-s-range').value = 3;
+            updateMatrix();
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // --- Initialize ---
+        window.onload = () => {
+            initMatrix();
+            calculateSPE();
+            // 觸發 VTS 預設運算顯示
+            setVTS('v', 'high', document.getElementById('v-group').children[0]);
+        };
+    </script>
+</body>
+</html>
