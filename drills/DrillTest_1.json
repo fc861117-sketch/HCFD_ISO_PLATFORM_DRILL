@@ -2,7 +2,10 @@
   "creator": "TestCreator_1",
   "briefing": {
     "b_iso": "TestISO_1",
-    "b_ic": "TestIC_1"
+    "b_ic": "TestIC_1",
+    "b_usage": "\u96c6\u5408\u4f4f\u5b85",
+    "b_structure": "RC",
+    "b_area": "500"
   },
   "medic": []
 }
