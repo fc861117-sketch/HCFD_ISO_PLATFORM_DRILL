@@ -4,7 +4,7 @@
     "b_caseName": "Test Case 1",
     "b_iso": "Auto ISO",
     "b_ic": "Auto IC",
-    "isLocked": false
+    "isLocked": true
   },
   "medic": [
     {
@@ -12,7 +12,7 @@
       "time": "12:00",
       "m": "Test M",
       "e": "Test E",
-      "completed": false
+      "completed": true
     }
   ]
 }
