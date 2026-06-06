@@ -7,5 +7,17 @@
     "b_structure": "RC",
     "b_area": "500"
   },
-  "medic": []
+  "medic": [
+    {
+      "id": 11111,
+      "time": "12:00",
+      "m": "Test M",
+      "e": "Test E",
+      "d": "Test D",
+      "i": "Test I",
+      "c": "Test C",
+      "completed": false,
+      "deleted": false
+    }
+  ]
 }
