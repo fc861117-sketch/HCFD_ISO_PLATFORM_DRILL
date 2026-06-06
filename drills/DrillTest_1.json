@@ -16,7 +16,7 @@
       "d": "Test D",
       "i": "Test I",
       "c": "Test C",
-      "completed": false,
+      "completed": true,
       "deleted": false
     }
   ]
