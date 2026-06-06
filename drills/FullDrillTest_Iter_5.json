@@ -1,0 +1,18 @@
+{
+  "creator": "Tester 5",
+  "briefing": {
+    "b_caseName": "Test Case 5",
+    "b_iso": "Auto ISO",
+    "b_ic": "Auto IC",
+    "isLocked": false
+  },
+  "medic": [
+    {
+      "id": 1,
+      "time": "12:00",
+      "m": "Test M",
+      "e": "Test E",
+      "completed": false
+    }
+  ]
+}
