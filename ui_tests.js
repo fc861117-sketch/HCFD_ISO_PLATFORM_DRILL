@@ -434,8 +434,8 @@
         updateStepStatus('step_create_guard', 'running');
         
         const btn = document.getElementById('btnCreateProject');
-        const opName = document.getElementById('home_operatorName');
-        const projName = document.getElementById('home_projectName');
+        const opName = document.getElementById('newProjectCreator');
+        const projName = document.getElementById('newProjectName');
         
         if (!btn || !opName || !projName) {
             updateStepStatus('step_create_guard', 'failed', '找不到建立專案之輸入項或按鈕');
