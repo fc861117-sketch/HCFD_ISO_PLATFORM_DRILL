@@ -299,8 +299,12 @@
             <input type="text" id="settingGithubBranch" placeholder="main" value="main">
         </div>
     </div>
+    <div style="margin-top: 18px; padding-top: 15px; border-top: 1px dashed #444; display: flex; flex-direction: column; gap: 8px;">
+        <span style="font-size: 0.85rem; color: #aaa; font-weight: bold;">🛠️ 開發與演練測試工具</span>
+        <button type="button" class="settings-btn-save" onclick="startUIAutomatedTest()" style="background-color: #e65100; color: white; margin-top: 0; padding: 10px; font-size: 0.95rem;">執行 UI 自動功能測試</button>
+    </div>
     
-    <button class="settings-btn-save" onclick="saveSettings()">儲存並套用設定</button>
+    <button class="settings-btn-save" onclick="saveSettings()" style="margin-top: 15px;">儲存並套用設定</button>
 </div>
 
 <script>
@@ -367,3 +371,5 @@
         window.location.reload();
     }
 </script>
+
+<script src="{{ site.baseurl }}/ui_tests.js"></script>
