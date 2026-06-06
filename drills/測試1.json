@@ -1,5 +1,17 @@
 {
   "creator": "1",
   "briefing": {},
-  "medic": []
+  "medic": [
+    {
+      "id": 1780739814288,
+      "time": "17:55",
+      "m": "123",
+      "e": "1",
+      "d": "1",
+      "i": "2",
+      "c": "2",
+      "completed": false,
+      "deleted": false
+    }
+  ]
 }
