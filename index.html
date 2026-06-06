@@ -548,10 +548,17 @@
         if (stage === 0) {
             btn.dataset.originalText = btn.innerText; btn.dataset.stage = "1";
             btn.style.background = "#ff9800"; btn.innerText = "⚠️ 您確定要結案？(點此第二次確認)";
-            setTimeout(() => { if(btn.dataset.stage==="1") resetFinishBtn(btn); }, 4000);
+            setTimeout(() => { if(btn.dataset.stage==="1") resetFinishBtn(btn); }, 6000);
         } else if (stage === 1) {
             btn.dataset.stage = "2"; btn.style.background = "#d32f2f"; btn.innerText = "🚨 最後確認：結案後將永遠無法編輯！";
-            setTimeout(() => { if(btn.dataset.stage==="2") resetFinishBtn(btn); }, 4000);
+            setTimeout(() => { 
+                if(btn.dataset.stage==="2") {
+                    btn.dataset.stage = "1";
+                    btn.style.background = "#ff9800";
+                    btn.innerText = "⚠️ 您確定要結案？(點此第二次確認)";
+                    setTimeout(() => { if(btn.dataset.stage==="1") resetFinishBtn(btn); }, 6000);
+                }
+            }, 6000);
         } else if (stage === 2) {
             executeFinishCase();
         }
@@ -611,8 +618,17 @@ async function executeFinishCase() {
             if (btn.dataset.confirm === "yes") {
                 btn.dataset.confirm = ""; btn.innerText = btn.dataset.originalText; btn.style.background = btn.dataset.originalBg;
             }
-        }, 3000);
+        }, 6000);
     }
+
+    // 網路恢復後自動重試同步
+    window.addEventListener('online', () => {
+        if (currentProject && !isReadOnly) {
+            showToast("🌐 網路連線已恢復，正在自動重新同步資料...", "warning");
+            if (typeof syncBriefingToCloud === 'function') syncBriefingToCloud();
+            if (typeof syncMedicToCloud === 'function') syncMedicToCloud();
+        }
+    });
 
     function setWind(val, el) {
         document.getElementById('e_wind').value = val;
