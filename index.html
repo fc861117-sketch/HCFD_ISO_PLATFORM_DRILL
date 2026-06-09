@@ -542,10 +542,12 @@
         resetTestProject: (name) => {
             if (name && db[name]) delete db[name];
             currentProject = null;
+            currentModifier = "";
             isReadOnly = false;
             isSyncLocked = false;
             localStorage.removeItem('isoCurrentProject');
             localStorage.removeItem('isoLastTab');
+            localStorage.removeItem('isoUserName');
             if (window.autoSyncInterval) {
                 clearInterval(window.autoSyncInterval);
                 window.autoSyncInterval = null;

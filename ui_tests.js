@@ -102,11 +102,34 @@
     let mockMode = true; // Default to Mock mode to prevent spamming commits
     const TEST_PROJECT_NAME = '1150606_UI_DrillTest';
     const CONFIRM_RESET_WAIT_MS = 6500; // App confirm timeout is 6000ms.
-    const CREATE_PROJECT_WAIT_MS = 1200;
-    const FINISH_EXEC_WAIT_MS = 1800;
+    const WAIT_TIMEOUT_MS = 8000;
 
     // Helper to Wait/Delay
     const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+    async function waitFor(predicate, timeoutMs = WAIT_TIMEOUT_MS, intervalMs = 100) {
+        const startedAt = Date.now();
+        let lastError = null;
+        while (Date.now() - startedAt < timeoutMs) {
+            try {
+                if (predicate()) return true;
+            } catch (error) {
+                lastError = error;
+            }
+            await delay(intervalMs);
+        }
+        if (lastError) throw lastError;
+        return false;
+    }
+
+    function resetButtonState(btn, text, background = '') {
+        if (!btn) return;
+        btn.dataset.confirm = "";
+        btn.dataset.stage = "0";
+        if (text) btn.innerText = text;
+        if (background !== undefined) btn.style.background = background;
+        btn.disabled = false;
+    }
 
     function getTestHooks() {
         if (!window.__isoTestHooks) {
@@ -207,10 +230,10 @@
                 <div class="ui-test-footer">
                     <div class="ui-test-mode-toggle">
                         <label style="display:inline-flex; align-items:center; cursor:pointer; font-weight:bold; color: #eee; margin:0;">
-                            <input type="checkbox" id="uiTestModeCheckbox" ${hasPat ? '' : 'disabled checked'} style="margin-right: 6px;"> 
+                            <input type="checkbox" id="uiTestModeCheckbox" checked style="margin-right: 6px;">
                             模擬單機模式 (不實際寫入 GitHub)
                         </label>
-                        ${!hasPat ? '<span style="font-size: 0.75rem; color:#ff9800; margin-left: 5px;">(未偵測到 GitHub PAT)</span>' : ''}
+                        <span style="font-size: 0.75rem; color:#ff9800; margin-left: 5px;">${hasPat ? '(建議保持勾選，避免測試寫入 GitHub)' : '(未偵測到 GitHub PAT，請保持模擬模式)'}</span>
                     </div>
                     <div>
                         <button id="uiTestControlBtn" class="ui-test-btn" onclick="runAllUITests()">開始測試</button>
@@ -311,15 +334,28 @@
 
             // Mock window.apiCall
             window.apiCall = async function(payload) {
-                logToConsole(`[MOCK API CALL] ${payload.action} on project ${payload.projectName}`);
-                await delay(300);
+                const action = payload?.action || 'unknown';
+                logToConsole(`[MOCK API CALL] ${action} on project ${payload?.projectName || '-'}`);
+                await delay(80);
+                if (action === 'getList') return [];
+                if (action === 'getProjectData') return null;
+                if (action === 'createProject') return { success: true, mocked: true };
+                if (action === 'saveBriefing') return { success: true, mocked: true };
+                if (action === 'saveMedic') return { success: true, mocked: true };
+                if (action === 'uploadPhoto') {
+                    return {
+                        url: "https://example.invalid/mock-photo.jpg",
+                        fileId: "mock_photo_id",
+                        formula: '=IMAGE("https://example.invalid/mock-photo.jpg")'
+                    };
+                }
                 return { success: true, mocked: true };
             };
 
             // Mock window.callGitHubAPI
             window.callGitHubAPI = async function(method, path, body = null) {
                 logToConsole(`[MOCK GITHUB API] ${method} ${path}`);
-                await delay(300);
+                await delay(80);
                 return { 
                     content: {
                         download_url: "https://raw.githubusercontent.com/mock-photo.jpg",
@@ -430,9 +466,16 @@
             });
             const home = document.getElementById('page-home');
             if (home) home.classList.add('active');
+            resetButtonState(document.getElementById('btnCreateProject'), '建立新專案', 'var(--primary)');
+            resetButtonState(document.getElementById('btnFinishCase'), '🔒 確定結案並鎖定專案 (禁止後續編輯)', '#b71c1c');
+            document.querySelectorAll('[data-confirm="yes"]').forEach(btn => {
+                btn.dataset.confirm = "";
+                if (btn.dataset.originalText) btn.innerText = btn.dataset.originalText;
+                if (btn.dataset.originalBg) btn.style.background = btn.dataset.originalBg;
+            });
             
             await window.renderHome();
-            await delay(500);
+            await waitFor(() => document.getElementById('projectListContainer')?.textContent?.length > 0, 3000);
             updateStepStatus('step_route', 'passed', '系統狀態已初始化');
         } else {
             updateStepStatus('step_route', 'failed', '找不到 renderHome 函數，請確認是否在首頁。');
@@ -503,7 +546,10 @@
         await delay(150); // fast second click
         btn.click();
 
-        await delay(CREATE_PROJECT_WAIT_MS); // Wait for project creation and redirection
+        await waitFor(() => {
+            const briefingTab = document.getElementById('page-briefing');
+            return getAppState().currentProject === TEST_PROJECT_NAME && briefingTab && briefingTab.classList.contains('active');
+        });
 
         // Verify redirection and project loaded
         const briefingTab = document.getElementById('page-briefing');
@@ -662,7 +708,7 @@
         await delay(150);
         btnAdd.click();
 
-        await delay(500); // Wait for rendering
+        await waitFor(() => (getTestProject()?.medic || []).length > 0);
 
         // Verify entry added
         const medicList = getTestProject()?.medic || [];
@@ -700,10 +746,11 @@
         closeBtn.click();
         await delay(150);
         closeBtn.click();
-        await delay(500);
+        await waitFor(() => (getTestProject()?.medic || [])[0]?.completed === true);
 
         // Verify closed status
-        const isClosed = medicList[0].completed === true;
+        const updatedMedicList = getTestProject()?.medic || [];
+        const isClosed = updatedMedicList[0]?.completed === true;
         const statusSpan = document.querySelector('span[style*="color:#4caf50"]'); // should show "🔒 已結案"
         if (!isClosed || !statusSpan || !statusSpan.textContent.includes("已結案")) {
             updateStepStatus('step_medic_exec', 'failed', '雙擊行內結案後，該事件狀態未正確變更為「🔒 已結案」');
@@ -784,7 +831,10 @@
         await delay(200);
         finishBtn.click(); // Execute
         
-        await delay(FINISH_EXEC_WAIT_MS); // Wait for async execution of executeFinishCase
+        await waitFor(() => {
+            const badge = document.getElementById('lockedBadge');
+            return getAppState().isReadOnly && badge && badge.style.display !== 'none';
+        });
 
         // Verify read only
         const badge = document.getElementById('lockedBadge');
