@@ -100,6 +100,7 @@
     let originalApiCall = null;
     let originalCallGitHubAPI = null;
     let mockMode = true; // Default to Mock mode to prevent spamming commits
+    let mockApiCalls = [];
     const TEST_PROJECT_NAME = '1150606_UI_DrillTest';
     const CONFIRM_RESET_WAIT_MS = 6500; // App confirm timeout is 6000ms.
     const WAIT_TIMEOUT_MS = 8000;
@@ -163,6 +164,10 @@
 
     function getTestProject() {
         return getTestHooks().getProject(TEST_PROJECT_NAME);
+    }
+
+    function getMockCalls(action) {
+        return mockApiCalls.filter(call => call.payload?.action === action);
     }
 
     // Logs output to UI Console
@@ -349,6 +354,7 @@
 
     // Mocks or Restores API calls
     function setupApiMocks() {
+        mockApiCalls = [];
         if (mockMode) {
             logToConsole("[MOCK] 已啟用 API 模擬模式，所有網路同步請求將直接返回成功。");
             
@@ -360,6 +366,10 @@
             window.apiCall = async function(payload) {
                 const action = payload?.action || 'unknown';
                 logToConsole(`[MOCK API CALL] ${action} on project ${payload?.projectName || '-'}`);
+                mockApiCalls.push({
+                    at: Date.now(),
+                    payload: JSON.parse(JSON.stringify(payload || {}))
+                });
                 await delay(80);
                 if (action === 'getList') return [];
                 if (action === 'getProjectData') return null;
@@ -661,12 +671,55 @@
         // Trigger Sync Briefing
         logToConsole("觸發「儲存並同步【簡報表】至雲端」...");
         const syncBriefBtn = document.querySelector('.btn-sync-brief');
-        if (syncBriefBtn) {
-            syncBriefBtn.click();
-            await delay(1000); // wait for sync
-        } else {
+        if (!syncBriefBtn) {
             updateStepStatus('step_briefing_edit', 'failed', '找不到簡報同步按鈕 .btn-sync-brief');
             throw new Error('Sync button missing');
+        }
+
+        const saveCallsBefore = getMockCalls('saveBriefing').length;
+        const originalSyncBriefing = window.syncBriefingToCloud;
+        let syncCompleted = false;
+        if (typeof originalSyncBriefing === 'function') {
+            window.syncBriefingToCloud = async function(...args) {
+                try {
+                    return await originalSyncBriefing.apply(this, args);
+                } finally {
+                    syncCompleted = true;
+                }
+            };
+        }
+
+        try {
+            syncBriefBtn.click();
+            const completed = await waitFor(() => {
+                if (syncCompleted) return true;
+                return mockMode && getMockCalls('saveBriefing').length > saveCallsBefore;
+            }, WAIT_TIMEOUT_MS, 100);
+            if (!completed) {
+                updateStepStatus('step_briefing_edit', 'failed', '簡報同步逾時，未確認 syncBriefingToCloud 完成');
+                throw new Error('Briefing sync timeout');
+            }
+        } finally {
+            if (typeof originalSyncBriefing === 'function') {
+                window.syncBriefingToCloud = originalSyncBriefing;
+            }
+        }
+
+        const savedProject = getTestProject();
+        const savedArea = parseFloat(savedProject?.briefing?.b_area);
+        if (!savedProject?.briefing || Math.abs(savedArea - 330.58) > 1.0 || savedProject.briefing.b_area_unit !== 'm2') {
+            updateStepStatus('step_briefing_edit', 'failed', `本機簡報資料未保存換算後面積，b_area=${savedProject?.briefing?.b_area}，unit=${savedProject?.briefing?.b_area_unit}`);
+            throw new Error('Briefing local save mismatch');
+        }
+
+        if (mockMode) {
+            const manualSaveCalls = getMockCalls('saveBriefing').slice(saveCallsBefore);
+            const latestSave = manualSaveCalls[manualSaveCalls.length - 1]?.payload;
+            const uploadedArea = parseFloat(latestSave?.briefing?.b_area);
+            if (!latestSave || latestSave.projectName !== TEST_PROJECT_NAME || Math.abs(uploadedArea - 330.58) > 1.0 || latestSave.briefing?.b_area_unit !== 'm2') {
+                updateStepStatus('step_briefing_edit', 'failed', `mock 雲端未收到正確簡報同步資料，project=${latestSave?.projectName}，b_area=${latestSave?.briefing?.b_area}，unit=${latestSave?.briefing?.b_area_unit}`);
+                throw new Error('Briefing cloud sync payload mismatch');
+            }
         }
 
         updateStepStatus('step_briefing_edit', 'passed', '簡報表資料輸入、單位換算與雲端同步成功');
