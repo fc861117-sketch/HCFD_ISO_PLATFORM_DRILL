@@ -100,9 +100,28 @@
     let originalApiCall = null;
     let originalCallGitHubAPI = null;
     let mockMode = true; // Default to Mock mode to prevent spamming commits
+    const TEST_PROJECT_NAME = '1150606_UI_DrillTest';
+    const CONFIRM_RESET_WAIT_MS = 6500; // App confirm timeout is 6000ms.
+    const CREATE_PROJECT_WAIT_MS = 1200;
+    const FINISH_EXEC_WAIT_MS = 1800;
 
     // Helper to Wait/Delay
     const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+    function getTestHooks() {
+        if (!window.__isoTestHooks) {
+            throw new Error('找不到 __isoTestHooks，請確認 index.html 已載入最新版測試支援介面。');
+        }
+        return window.__isoTestHooks;
+    }
+
+    function getAppState() {
+        return getTestHooks().getState();
+    }
+
+    function getTestProject() {
+        return getTestHooks().getProject(TEST_PROJECT_NAME);
+    }
 
     // Logs output to UI Console
     function logToConsole(message) {
@@ -397,15 +416,7 @@
         
         // Force reload / clear current project state locally for a clean run
         if (typeof window.renderHome === 'function') {
-            // Remove test database entry if exists to avoid collision
-            const localDb = JSON.parse(localStorage.getItem('isoDB') || '{}');
-            if (localDb['1150606_UI_DrillTest']) {
-                delete localDb['1150606_UI_DrillTest'];
-                localStorage.setItem('isoDB', JSON.stringify(localDb));
-            }
-            
-            // Set currentProject to null and go back to home tab
-            window.currentProject = null;
+            getTestHooks().resetTestProject(TEST_PROJECT_NAME);
             if (window.autoSyncInterval) {
                 clearInterval(window.autoSyncInterval);
                 window.autoSyncInterval = null;
@@ -444,7 +455,7 @@
 
         // Fill inputs
         opName.value = '安全官自動測試';
-        projName.value = '1150606_UI_DrillTest';
+        projName.value = TEST_PROJECT_NAME;
         opName.dispatchEvent(new Event('input'));
         projName.dispatchEvent(new Event('input'));
         
@@ -458,18 +469,18 @@
             updateStepStatus('step_create_guard', 'failed', `單擊後按鈕未正確變更為「確定操作？」，目前文字: 「${btn.innerText}」`);
             throw new Error('Guard fail');
         }
-        logToConsole("已進入防誤觸警告狀態（變紅且顯示警告字樣）。等待 3.5 秒超時自動恢復。");
+        logToConsole("已進入防誤觸警告狀態（變紅且顯示警告字樣）。等待 6.5 秒超時自動恢復。");
         
-        await delay(3500); // Guard timeout is 3000ms
+        await delay(CONFIRM_RESET_WAIT_MS);
 
         // Verify it reset
         if (btn.innerText === confirmText || btn.dataset.confirm === "yes") {
-            updateStepStatus('step_create_guard', 'failed', '3.5 秒超時後，防誤觸按鈕未自動重設回原始文字');
+            updateStepStatus('step_create_guard', 'failed', '6.5 秒超時後，防誤觸按鈕未自動重設回原始文字');
             throw new Error('Timeout reset fail');
         }
         
         // Verify no project was created
-        if (window.currentProject === '1150606_UI_DrillTest') {
+        if (getAppState().currentProject === TEST_PROJECT_NAME) {
             updateStepStatus('step_create_guard', 'failed', '單擊且超時後，系統仍然建立了救災專案！');
             throw new Error('Invalid action execution');
         }
@@ -492,16 +503,16 @@
         await delay(150); // fast second click
         btn.click();
 
-        await delay(600); // Wait for project creation and redirection
+        await delay(CREATE_PROJECT_WAIT_MS); // Wait for project creation and redirection
 
         // Verify redirection and project loaded
         const briefingTab = document.getElementById('page-briefing');
-        if (window.currentProject !== '1150606_UI_DrillTest' || !briefingTab || !briefingTab.classList.contains('active')) {
+        if (getAppState().currentProject !== TEST_PROJECT_NAME || !briefingTab || !briefingTab.classList.contains('active')) {
             updateStepStatus('step_create_exec', 'failed', '雙擊後未成功建立專案或未跳轉至「📋 簡報表」頁面');
             throw new Error('Double click execution fail');
         }
 
-        updateStepStatus('step_create_exec', 'passed', '專案 1150606_UI_DrillTest 雙擊建立成功且已跳轉簡報頁');
+        updateStepStatus('step_create_exec', 'passed', `專案 ${TEST_PROJECT_NAME} 雙擊建立成功且已跳轉簡報頁`);
     }
 
     // Step 4: Edit Briefing and Unit Conversion
@@ -513,9 +524,11 @@
         const isoEl = document.getElementById('b_iso');
         const usageEl = document.getElementById('b_usage');
         const structEl = document.getElementById('b_structure');
+        const areaInputEl = document.getElementById('b_area_input');
+        const areaUnitEl = document.getElementById('b_area_unit');
         const areaEl = document.getElementById('b_area');
         
-        if (!icEl || !isoEl || !usageEl || !structEl || !areaEl) {
+        if (!icEl || !isoEl || !usageEl || !structEl || !areaInputEl || !areaUnitEl || !areaEl) {
             updateStepStatus('step_briefing_edit', 'failed', '找不到簡報表表單欄位');
             throw new Error('Form fields missing');
         }
@@ -525,36 +538,28 @@
         isoEl.value = '安全官自動測試員';
         usageEl.value = '防誤觸測試大樓';
         structEl.value = 'RC';
-        areaEl.value = '100'; // Set 100 first
+        areaInputEl.value = '100';
+        areaUnitEl.value = 'ping';
 
         icEl.dispatchEvent(new Event('input'));
         isoEl.dispatchEvent(new Event('input'));
         usageEl.dispatchEvent(new Event('input'));
         structEl.dispatchEvent(new Event('change'));
-        areaEl.dispatchEvent(new Event('input'));
         
         logToConsole("填寫簡報表完成。測試「單層面積單位連動換算」。");
         
-        // Verify Ping to Sqm unit toggle
-        const pingRadio = document.querySelector('input[name="area_unit"][value="ping"]');
-        const sqmRadio = document.querySelector('input[name="area_unit"][value="sqm"]');
-        
-        if (pingRadio && sqmRadio) {
-            pingRadio.checked = true;
-            pingRadio.dispatchEvent(new Event('change'));
-            
-            // Switch to sqm, area value should change
-            sqmRadio.checked = true;
-            sqmRadio.dispatchEvent(new Event('change'));
-            
-            const areaValue = parseFloat(areaEl.value);
-            logToConsole(`單位由「坪」切換為「平方公尺」，自動換算結果: ${areaValue}`);
-            if (Math.abs(areaValue - 330.58) > 1.0) { // 100 ping = ~330.58 sqm
-                updateStepStatus('step_briefing_edit', 'failed', `單層面積切換單位換算數值不正確，期望值: ~330.58，實際值: ${areaValue}`);
-                throw new Error('Unit conversion mismatch');
-            }
+        if (typeof window.convertArea === 'function') {
+            window.convertArea();
         } else {
-            logToConsole("[WARN] 找不到面積單位切換單選鈕，跳過該項驗證。");
+            areaUnitEl.dispatchEvent(new Event('change'));
+        }
+
+        const areaValue = parseFloat(areaEl.value);
+        const inputValue = parseFloat(areaInputEl.value);
+        logToConsole(`單位由「坪」自動換算為「平方公尺」，hidden 結果: ${areaValue}，輸入框結果: ${inputValue}`);
+        if (Math.abs(areaValue - 330.58) > 1.0 || Math.abs(inputValue - 330.58) > 1.0 || areaUnitEl.value !== 'm2') {
+            updateStepStatus('step_briefing_edit', 'failed', `單層面積換算不正確，期望值: ~330.58 m2，hidden: ${areaValue}，input: ${inputValue}，unit: ${areaUnitEl.value}`);
+            throw new Error('Unit conversion mismatch');
         }
 
         // Trigger Sync Briefing
@@ -624,16 +629,16 @@
             throw new Error('Medic guard fail');
         }
 
-        logToConsole("警告狀態已建立。等待 3.5 秒超時自動恢復...");
-        await delay(3500);
+        logToConsole("警告狀態已建立。等待 6.5 秒超時自動恢復...");
+        await delay(CONFIRM_RESET_WAIT_MS);
 
         if (btnAdd.innerText === "⚠️ 確定操作？" || btnAdd.dataset.confirm === "yes") {
-            updateStepStatus('step_medic_guard', 'failed', 'MEDIC 加入按鈕在 3.5 秒後未自動恢復');
+            updateStepStatus('step_medic_guard', 'failed', 'MEDIC 加入按鈕在 6.5 秒後未自動恢復');
             throw new Error('Medic reset fail');
         }
 
         // Verify no entry added
-        const medicList = window.db['1150606_UI_DrillTest']?.medic || [];
+        const medicList = getTestProject()?.medic || [];
         if (medicList.length > 0) {
             updateStepStatus('step_medic_guard', 'failed', '單擊且超時後，系統仍將 MEDIC 項目加入了列表');
             throw new Error('Medic entry added invalidly');
@@ -660,7 +665,7 @@
         await delay(500); // Wait for rendering
 
         // Verify entry added
-        const medicList = window.db['1150606_UI_DrillTest']?.medic || [];
+        const medicList = getTestProject()?.medic || [];
         if (medicList.length === 0) {
             updateStepStatus('step_medic_exec', 'failed', '雙擊後，本地資料庫 MEDIC 陣列仍為空');
             throw new Error('Double click add failed');
@@ -683,8 +688,8 @@
             updateStepStatus('step_medic_exec', 'failed', '單擊行內結案按鈕後未顯示「⚠️ 確定操作？」');
             throw new Error('Row action guard fail');
         }
-        logToConsole("行內「結案」按鈕已變紅警告。等待 3.5 秒自動重置...");
-        await delay(3500);
+        logToConsole("行內「結案」按鈕已變紅警告。等待 6.5 秒自動重置...");
+        await delay(CONFIRM_RESET_WAIT_MS);
 
         if (closeBtn.innerText === "⚠️ 確定操作？" || closeBtn.dataset.confirm === "yes") {
             updateStepStatus('step_medic_exec', 'failed', '行內結案按鈕超時後未自動重置');
@@ -744,8 +749,8 @@
             updateStepStatus('step_finish_guard', 'failed', '單擊結案按鈕未正確變更為 Stage 1 (橘色警告)');
             throw new Error('Stage 1 transition fail');
         }
-        logToConsole("已成功觸發第一階段橘色警告。等待 4.5 秒自動重設...");
-        await delay(4500); // reset timer is 4000ms
+        logToConsole("已成功觸發第一階段橘色警告。等待 6.5 秒自動重設...");
+        await delay(CONFIRM_RESET_WAIT_MS);
 
         if (finishBtn.dataset.stage === "1") {
             updateStepStatus('step_finish_guard', 'failed', 'Stage 1 超時後按鈕未自動重設');
@@ -763,8 +768,8 @@
             updateStepStatus('step_finish_guard', 'failed', '連點兩次結案按鈕未正確變更為 Stage 2 (紅色警告)');
             throw new Error('Stage 2 transition fail');
         }
-        logToConsole("已成功觸發第二階段紅色警告。等待 4.5 秒自動重設...");
-        await delay(4500);
+        logToConsole("已成功觸發第二階段紅色警告。等待 6.5 秒自動重設...");
+        await delay(CONFIRM_RESET_WAIT_MS);
 
         if (finishBtn.dataset.stage === "2") {
             updateStepStatus('step_finish_guard', 'failed', 'Stage 2 超時後按鈕未自動重設');
@@ -779,11 +784,11 @@
         await delay(200);
         finishBtn.click(); // Execute
         
-        await delay(1200); // Wait for async execution of executeFinishCase
+        await delay(FINISH_EXEC_WAIT_MS); // Wait for async execution of executeFinishCase
 
         // Verify read only
         const badge = document.getElementById('lockedBadge');
-        if (!window.isReadOnly || !badge || badge.style.display === 'none') {
+        if (!getAppState().isReadOnly || !badge || badge.style.display === 'none') {
             updateStepStatus('step_finish_guard', 'failed', '三連擊後，網頁未進入唯讀鎖定狀態或鎖定徽章未顯示');
             throw new Error('Case final lock fail');
         }
@@ -804,14 +809,14 @@
                 const branch = localStorage.getItem('iso_github_branch') || 'main';
                 const pat = localStorage.getItem('iso_github_pat') || '';
                 
-                const getResp = await fetch(`https://api.github.com/repos/${repo}/contents/drills/1150606_UI_DrillTest.json?ref=${branch}`, {
+                const getResp = await fetch(`https://api.github.com/repos/${repo}/contents/drills/${TEST_PROJECT_NAME}.json?ref=${branch}`, {
                     headers: { 'Authorization': `token ${pat}`, 'Accept': 'application/vnd.github.v3+json' }
                 });
                 if (getResp.ok) {
                     const fileData = await getResp.json();
                     const sha = fileData.sha;
                     
-                    const delResp = await fetch(`https://api.github.com/repos/${repo}/contents/drills/1150606_UI_DrillTest.json`, {
+                    const delResp = await fetch(`https://api.github.com/repos/${repo}/contents/drills/${TEST_PROJECT_NAME}.json`, {
                         method: 'DELETE',
                         headers: {
                             'Authorization': `token ${pat}`,
@@ -825,7 +830,7 @@
                         })
                     });
                     if (delResp.ok) {
-                        logToConsole("[CLEANUP] 已成功刪除 GitHub 上的測試專案檔案 1150606_UI_DrillTest.json");
+                        logToConsole(`[CLEANUP] 已成功刪除 GitHub 上的測試專案檔案 ${TEST_PROJECT_NAME}.json`);
                     } else {
                         logToConsole(`[WARN] 清理測試專案檔案失敗，GitHub HTTP: ${delResp.status}`);
                     }

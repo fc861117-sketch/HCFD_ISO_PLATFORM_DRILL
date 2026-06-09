@@ -531,6 +531,29 @@
     window.lastBHash = ""; window.lastMHash = ""; window.autoSyncInterval = null;
     let isSyncLocked = false; let isReadOnly = false;
 
+    window.__isoTestHooks = {
+        getState: () => ({
+            currentProject,
+            currentModifier,
+            isReadOnly,
+            isSyncLocked
+        }),
+        getProject: (name) => db[name] || null,
+        resetTestProject: (name) => {
+            if (name && db[name]) delete db[name];
+            currentProject = null;
+            isReadOnly = false;
+            isSyncLocked = false;
+            localStorage.removeItem('isoCurrentProject');
+            localStorage.removeItem('isoLastTab');
+            if (window.autoSyncInterval) {
+                clearInterval(window.autoSyncInterval);
+                window.autoSyncInterval = null;
+            }
+            saveDB();
+        }
+    };
+
     // --- 視覺化電子羅盤專用變數 ---
     let liveOrientationHandler = null;
     let isCompassRunning = false;
