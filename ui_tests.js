@@ -131,6 +131,25 @@
         btn.disabled = false;
     }
 
+    function setControlValue(id, value, eventType = 'input') {
+        const el = document.getElementById(id);
+        if (!el) throw new Error(`找不到欄位 #${id}`);
+        el.value = value;
+        el.dispatchEvent(new Event(eventType, { bubbles: true }));
+        if (eventType !== 'change') {
+            el.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        return el;
+    }
+
+    function assertControlValue(id, expected) {
+        const el = document.getElementById(id);
+        if (!el) throw new Error(`找不到欄位 #${id}`);
+        if (String(el.value) !== String(expected)) {
+            throw new Error(`#${id} 欄位值錯誤，期望 ${expected}，實際 ${el.value}`);
+        }
+    }
+
     function getTestHooks() {
         if (!window.__isoTestHooks) {
             throw new Error('找不到 __isoTestHooks，請確認 index.html 已載入最新版測試支援介面。');
@@ -282,6 +301,11 @@
             id: 'step_finish_guard',
             title: '7. 專案結案三階段防誤觸與鎖定',
             desc: '單擊及雙擊「結案並鎖定」按鈕確認自動超時恢復，最後連續點擊三次結案，驗證防讀鎖定。'
+        },
+        {
+            id: 'step_subpage_smoke',
+            title: '8. 選單子頁功能 Smoke Tests',
+            desc: '以 iframe 載入 ISO Guide、風險決策模型、NOAA、HAZMAT，驗證主要輸入、切換與搜尋互動。'
         }
     ];
 
@@ -423,6 +447,9 @@
 
             // Step 7
             await runStepFinishGuard();
+
+            // Step 8
+            await runStepSubpageSmokeTests();
 
             logToConsole("--- 所有 UI 整合測試均已成功通過！ ---");
             if (summaryEl) {
@@ -579,18 +606,41 @@
             throw new Error('Form fields missing');
         }
 
-        // Fill values
-        icEl.value = '指揮官自動測試員';
-        isoEl.value = '安全官自動測試員';
-        usageEl.value = '防誤觸測試大樓';
-        structEl.value = 'RC';
-        areaInputEl.value = '100';
-        areaUnitEl.value = 'ping';
-
-        icEl.dispatchEvent(new Event('input'));
-        isoEl.dispatchEvent(new Event('input'));
-        usageEl.dispatchEvent(new Event('input'));
-        structEl.dispatchEvent(new Event('change'));
+        // Fill every static selectable/input briefing field on the homepage.
+        assertControlValue('modifierName', '安全官自動測試');
+        assertControlValue('b_caseName', TEST_PROJECT_NAME);
+        setControlValue('b_ic', '指揮官自動測試員');
+        setControlValue('b_iso', '安全官自動測試員');
+        setControlValue('b_usage', '其他', 'change');
+        setControlValue('b_usage_other', '自動測試混合用途');
+        setControlValue('b_structure', '其他', 'change');
+        setControlValue('b_structure_other', '自動測試複合構造');
+        setControlValue('b_area_input', '100');
+        setControlValue('b_area_unit', 'ping', 'change');
+        setControlValue('b_arriveTime', '08:10', 'change');
+        setControlValue('c_time', '08:12', 'change');
+        setControlValue('b_floorUp', '5', 'change');
+        setControlValue('b_floorDown', '1', 'change');
+        setControlValue('c_trappedState', '有', 'change');
+        setControlValue('c_deployCount', '4', 'change');
+        setControlValue('c_rescued', '1', 'change');
+        setControlValue('c_toRescue', '2', 'change');
+        setControlValue('c_trapLocation', '3樓東側');
+        setControlValue('c_notes', '自動測試確認事項');
+        setControlValue('s_time', '08:20', 'change');
+        setControlValue('e_weather', '☀️ 晴天', 'change');
+        window.setWind('東北風', null);
+        setControlValue('s_advice', '自動測試戰術建議');
+        for (let i = 0; i < 4; i++) {
+            setControlValue(`r_${i}_floor`, String(i + 1), 'change');
+            setControlValue(`r_${i}_teams`, String(i + 1), 'change');
+            setControlValue(`r_${i}_fire`, i >= 2 ? '2火舌' : '1火光', 'change');
+            setControlValue(`r_${i}_smoke`, i >= 1 ? '2大' : '1小', 'change');
+            setControlValue(`r_${i}_door`, i % 2 === 0 ? '有' : '無', 'change');
+            setControlValue(`r_${i}_window`, i % 2 === 1 ? '有' : '無', 'change');
+            setControlValue(`r_${i}_risk`, `第${i + 1}面自動測試風險`);
+            setControlValue(`r_${i}_time`, `08:2${i}`, 'change');
+        }
         
         logToConsole("填寫簡報表完成。測試「單層面積單位連動換算」。");
         
@@ -654,6 +704,7 @@
         }
 
         // Fill MEDIC fields
+        setControlValue('m_time', '08:30', 'change');
         medicM.value = '模擬高溫煙熱監測';
         medicE.value = '有滾燃閃燃危害';
         medicD.value = '佈線進行冷卻';
@@ -891,6 +942,139 @@
         }
 
         updateStepStatus('step_finish_guard', 'passed', '三階段結案防呆超時重設與最終鎖定功能完美驗證！');
+    }
+
+    async function loadSmokeFrame(path) {
+        const frame = document.createElement('iframe');
+        frame.style.cssText = 'position:absolute; width:1px; height:1px; opacity:0; pointer-events:none; border:0;';
+        frame.src = new URL(path, window.location.href).href;
+        document.body.appendChild(frame);
+
+        await new Promise((resolve, reject) => {
+            const timer = setTimeout(() => reject(new Error(`載入子頁逾時: ${path}`)), 10000);
+            frame.onload = () => {
+                clearTimeout(timer);
+                resolve();
+            };
+            frame.onerror = () => {
+                clearTimeout(timer);
+                reject(new Error(`載入子頁失敗: ${path}`));
+            };
+        });
+
+        if (!frame.contentDocument) {
+            frame.remove();
+            throw new Error(`無法存取子頁 DOM: ${path}`);
+        }
+        return frame;
+    }
+
+    function setFrameControl(frame, id, value, eventType = 'input') {
+        const el = frame.contentDocument.getElementById(id);
+        if (!el) throw new Error(`子頁 ${frame.src} 找不到欄位 #${id}`);
+        el.value = value;
+        el.dispatchEvent(new Event(eventType, { bubbles: true }));
+        if (eventType !== 'change') el.dispatchEvent(new Event('change', { bubbles: true }));
+        return el;
+    }
+
+    async function runStepSubpageSmokeTests() {
+        updateStepStatus('step_subpage_smoke', 'running');
+        const loadedFrames = [];
+        try {
+            // ISO Guide: tab switching and checklist persistence IDs.
+            const isoFrame = await loadSmokeFrame('ISO guide/index.html');
+            loadedFrames.push(isoFrame);
+            const isoDoc = isoFrame.contentDocument;
+            const isoWin = isoFrame.contentWindow;
+            await waitFor(() => typeof isoWin.openTab === 'function', 3000);
+            const checkboxes = Array.from(isoDoc.querySelectorAll('.checklist input[type="checkbox"]'));
+            const missingIds = checkboxes.filter(cb => !cb.id);
+            if (checkboxes.length < 13 || missingIds.length > 0) {
+                throw new Error(`ISO Guide checkbox id 不完整，總數 ${checkboxes.length}，缺 id ${missingIds.length}`);
+            }
+            const guideTabs = ['tab-m', 'tab-e', 'tab-d', 'tab-i', 'tab-c', 'tab-post'];
+            guideTabs.forEach((tabId, index) => {
+                const btn = isoDoc.querySelectorAll('.tab-btn')[index];
+                isoWin.openTab({ currentTarget: btn }, tabId);
+                if (!isoDoc.getElementById(tabId).classList.contains('active')) {
+                    throw new Error(`ISO Guide tab 切換失敗: ${tabId}`);
+                }
+            });
+            const firstCheckbox = checkboxes[0];
+            firstCheckbox.checked = true;
+            firstCheckbox.dispatchEvent(new Event('change', { bubbles: true }));
+            if (isoWin.localStorage.getItem('isoGuide_' + firstCheckbox.id) !== 'true') {
+                throw new Error('ISO Guide checklist 狀態未寫入 localStorage');
+            }
+            logToConsole(`[SUBPAGE] ISO Guide: ${checkboxes.length} 個 checklist checkbox 與 ${guideTabs.length} 個 tab 通過`);
+
+            // Risk model: SPE ranges, VTS, and matrix ranges.
+            const riskFrame = await loadSmokeFrame('風險決策模型/index.html');
+            loadedFrames.push(riskFrame);
+            const riskDoc = riskFrame.contentDocument;
+            const riskWin = riskFrame.contentWindow;
+            await waitFor(() => typeof riskWin.calculateSPE === 'function' && riskDoc.getElementById('risk-table')?.children.length > 0, 4000);
+            setFrameControl(riskFrame, 's-range', '8');
+            setFrameControl(riskFrame, 'p-range', '7');
+            setFrameControl(riskFrame, 'e-range', '6');
+            riskWin.calculateSPE();
+            if (!riskDoc.getElementById('spe-result').textContent.includes('336')) {
+                throw new Error('風險模型 SPE range 計算未更新');
+            }
+            riskWin.setVTS('s', 'total', riskDoc.getElementById('s-group').children[2]);
+            if (!riskDoc.getElementById('vts-result').textContent.includes('防禦式')) {
+                throw new Error('風險模型 VTS 切換未更新');
+            }
+            setFrameControl(riskFrame, 'm-p-range', '5');
+            setFrameControl(riskFrame, 'm-s-range', '4');
+            riskWin.updateMatrix();
+            if (!riskDoc.getElementById('cell-5-4').classList.contains('active-cell')) {
+                throw new Error('風險模型矩陣 range 未標示 active cell');
+            }
+            logToConsole('[SUBPAGE] 風險決策模型: SPE/VTS/矩陣 range 通過');
+
+            // NOAA: temperature, humidity, and PPE compensation.
+            const noaaFrame = await loadSmokeFrame('環境氣候監控及NOAA/index.html');
+            loadedFrames.push(noaaFrame);
+            const noaaDoc = noaaFrame.contentDocument;
+            const noaaWin = noaaFrame.contentWindow;
+            await waitFor(() => typeof noaaWin.calculateHeatIndex === 'function', 3000);
+            setFrameControl(noaaFrame, 'temp-range', '40', 'input');
+            setFrameControl(noaaFrame, 'hum-range', '80', 'input');
+            noaaWin.calculateHeatIndex();
+            const firstTemp = parseInt(noaaDoc.getElementById('result-temp').textContent, 10);
+            noaaWin.setPPE(10, noaaDoc.getElementById('ppe-group').children[2]);
+            const ppeTemp = parseInt(noaaDoc.getElementById('result-temp').textContent, 10);
+            if (!Number.isFinite(firstTemp) || ppeTemp <= firstTemp) {
+                throw new Error('NOAA range 或 PPE 溫度補償未更新');
+            }
+            logToConsole('[SUBPAGE] NOAA: 溫度/濕度 range 與 PPE 補償通過');
+
+            // HAZMAT: search and reference tabs.
+            const hazmatFrame = await loadSmokeFrame('Hazmat/index.html');
+            loadedFrames.push(hazmatFrame);
+            const hazmatDoc = hazmatFrame.contentDocument;
+            const hazmatWin = hazmatFrame.contentWindow;
+            await waitFor(() => typeof hazmatWin.handleSearch === 'function', 4000);
+            setFrameControl(hazmatFrame, 'search-input', '1001');
+            hazmatWin.handleSearch();
+            if (hazmatDoc.getElementById('search-results').style.display === 'none' || !hazmatDoc.getElementById('search-results').textContent.trim()) {
+                throw new Error('HAZMAT 搜尋未顯示結果');
+            }
+            hazmatWin.switchTab('tw-tab', hazmatDoc.querySelectorAll('.tab-btn')[1]);
+            if (!hazmatDoc.getElementById('tw-tab').classList.contains('active')) {
+                throw new Error('HAZMAT tab 切換失敗');
+            }
+            logToConsole('[SUBPAGE] HAZMAT: 搜尋與 tab 切換通過');
+
+            updateStepStatus('step_subpage_smoke', 'passed', 'ISO Guide、風險模型、NOAA、HAZMAT 子頁 smoke tests 通過');
+        } catch (error) {
+            updateStepStatus('step_subpage_smoke', 'failed', error.message);
+            throw error;
+        } finally {
+            loadedFrames.forEach(frame => frame.remove());
+        }
     }
 
 })();

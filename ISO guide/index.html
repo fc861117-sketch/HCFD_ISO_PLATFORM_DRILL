@@ -391,17 +391,17 @@
         <div class="category-box">
             <h3>🚧 區域劃設與 1.5倍倒塌防護圈</h3>
             <ul class="checklist">
-                <li><input type="checkbox"> <span><strong>禁止進入區 (No-Entry Zone)：</strong>有倒塌風險時，管制範圍 <strong>至少為建築物高度的 1.5 倍以上</strong>，全員嚴禁進入。</span></li>
-                <li><input type="checkbox"> <span><strong>熱區 (Hot Zone)：</strong>必須穿戴完整個人防護裝備 (PPE) 與 SCBA 才能進入。</span></li>
-                <li><input type="checkbox"> <span><strong>暖區與冷區：</strong>暖區設立除汙站 (Decon) 與 RIC 集結區；冷區設置指揮站與 REHAB 休息區。</span></li>
+                <li><input type="checkbox" id="chk-d-1"> <span><strong>禁止進入區 (No-Entry Zone)：</strong>有倒塌風險時，管制範圍 <strong>至少為建築物高度的 1.5 倍以上</strong>，全員嚴禁進入。</span></li>
+                <li><input type="checkbox" id="chk-d-2"> <span><strong>熱區 (Hot Zone)：</strong>必須穿戴完整個人防護裝備 (PPE) 與 SCBA 才能進入。</span></li>
+                <li><input type="checkbox" id="chk-d-3"> <span><strong>暖區與冷區：</strong>暖區設立除汙站 (Decon) 與 RIC 集結區；冷區設置指揮站與 REHAB 休息區。</span></li>
             </ul>
         </div>
 
         <div class="category-box">
             <h3>🚑 消防員後勤照護 (REHAB)</h3>
             <ul class="checklist">
-                <li><input type="checkbox"> <span>確保 REHAB 區位於冷區、上風處且環境安靜，備有救護人員監測生理徵象。</span></li>
-                <li><input type="checkbox"> <span><strong>20法則：</strong>消耗 1 支氣瓶或連續高強度作業 20-40 分鐘，強制脫裝休息至少 10-20 分鐘，主動補充水分。</span></li>
+                <li><input type="checkbox" id="chk-d-4"> <span>確保 REHAB 區位於冷區、上風處且環境安靜，備有救護人員監測生理徵象。</span></li>
+                <li><input type="checkbox" id="chk-d-5"> <span><strong>20法則：</strong>消耗 1 支氣瓶或連續高強度作業 20-40 分鐘，強制脫裝休息至少 10-20 分鐘，主動補充水分。</span></li>
             </ul>
         </div>
     </div>
@@ -460,8 +460,8 @@
         <div class="category-box cat-fire">
             <h3>🚨 緊急通訊與 PAR (人員清點)</h3>
             <ul class="checklist">
-                <li><input type="checkbox"> <span><strong>MAYDAY 頻道淨空：</strong>確認 MAYDAY 事件發生時，指揮官或安全官應通報所有人員將該頻道淨空，維持其他無危害作業。</span></li>
-                <li><input type="checkbox"> <span><strong>時機執行 PAR：</strong>當戰術由攻擊轉防禦、發生 MAYDAY、局部坍塌，或 MAYDAY 狀況解除時，必須立即實施 PAR (Personnel Accountability Report) 確認所有人命安全。</span></li>
+                <li><input type="checkbox" id="chk-c-1"> <span><strong>MAYDAY 頻道淨空：</strong>確認 MAYDAY 事件發生時，指揮官或安全官應通報所有人員將該頻道淨空，維持其他無危害作業。</span></li>
+                <li><input type="checkbox" id="chk-c-2"> <span><strong>時機執行 PAR：</strong>當戰術由攻擊轉防禦、發生 MAYDAY、局部坍塌，或 MAYDAY 狀況解除時，必須立即實施 PAR (Personnel Accountability Report) 確認所有人命安全。</span></li>
             </ul>
         </div>
     </div>
@@ -469,10 +469,10 @@
     <div id="tab-post" class="tab-content">
         <h2>任務結束與災後作業 <span class="medic-tag">Post-Incident</span></h2>
         <ul class="checklist">
-            <li><input type="checkbox"> <span><strong>全員清點 (PAR)：</strong>所有作業結束後，確保現場各單位完成人員清點 (Personnel Accountability Report)。</span></li>
-            <li><input type="checkbox"> <span><strong>現場初步除汙 (On-scene Decon)：</strong>卸下面罩前，完成消防衣初步沖洗，降低致癌物（多環芳香烴）附著。</span></li>
-            <li><input type="checkbox"> <span><strong>裝備隔離：</strong>受汙染的防護裝備應放入專用防漏袋，與一般衣物及駕駛座隔離。</span></li>
-            <li><input type="checkbox"> <span><strong>災後檢討 (AAR)：</strong>記錄本次救災的優良處置與安全缺失，防範未來危害。</span></li>
+            <li><input type="checkbox" id="chk-post-1"> <span><strong>全員清點 (PAR)：</strong>所有作業結束後，確保現場各單位完成人員清點 (Personnel Accountability Report)。</span></li>
+            <li><input type="checkbox" id="chk-post-2"> <span><strong>現場初步除汙 (On-scene Decon)：</strong>卸下面罩前，完成消防衣初步沖洗，降低致癌物（多環芳香烴）附著。</span></li>
+            <li><input type="checkbox" id="chk-post-3"> <span><strong>裝備隔離：</strong>受汙染的防護裝備應放入專用防漏袋，與一般衣物及駕駛座隔離。</span></li>
+            <li><input type="checkbox" id="chk-post-4"> <span><strong>災後檢討 (AAR)：</strong>記錄本次救災的優良處置與安全缺失，防範未來危害。</span></li>
         </ul>
     </div>
 

@@ -65,11 +65,20 @@
    # Clone 本專案
    git clone https://github.com/fc861117-sketch/HCFD_ISO_PLATFORM_DRILL.git
    ```
-   * **本機靜態預覽**：可直接雙擊打開 `index.html`（部分定位功能可能會受到瀏覽器安全限制限制）。
-   * **Jekyll 本地伺服器預覽**：
+    * **本機靜態預覽**：可直接雙擊打開 `index.html`（部分定位功能可能會受到瀏覽器安全限制限制）。
+    * **Jekyll 本地伺服器預覽**：
      ```bash
      bundle exec jekyll serve
      ```
+
+## ✅ 自動測試覆蓋範圍
+
+選單中的「UI 自動化整合測試」預設採用模擬單機模式，不會寫入 GitHub。測試內容包含：
+
+- 首頁 31 個可輸入/選取欄位：專案建立、操作人員、簡報表、面積換算、樓層、受困資訊、天氣、風向、戰術建議、偵查四面向與 MEDIC 表單。
+- 防誤觸流程：建立專案、MEDIC 新增、行內結案、專案三階段結案鎖定。
+- 子頁 smoke tests：ISO Guide tab/checklist、風險決策模型 SPE/VTS/矩陣 range、NOAA 溫濕度/PPE 補償、HAZMAT 搜尋與 tab 切換。
+- 測試初始化會清除 `1150606_UI_DrillTest` 暫存資料與上次專案記憶，避免重複測試互相干擾。
 
 ---
 
