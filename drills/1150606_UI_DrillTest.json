@@ -69,7 +69,8 @@
     "r_3_time": "",
     "r_3_photo_url": "",
     "r_3_photo_id": "",
-    "r_3_photo_formula": ""
+    "r_3_photo_formula": "",
+    "isLocked": true
   },
   "medic": [
     {
