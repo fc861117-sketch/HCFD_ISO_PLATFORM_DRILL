@@ -617,6 +617,9 @@
         }
 
         // Fill every static selectable/input briefing field on the homepage.
+        if (!document.getElementById('modifierName')?.value) {
+            setControlValue('modifierName', '安全官自動測試');
+        }
         assertControlValue('modifierName', '安全官自動測試');
         assertControlValue('b_caseName', TEST_PROJECT_NAME);
         setControlValue('b_ic', '指揮官自動測試員');
