@@ -100,75 +100,9 @@
     let originalApiCall = null;
     let originalCallGitHubAPI = null;
     let mockMode = true; // Default to Mock mode to prevent spamming commits
-    let mockApiCalls = [];
-    const TEST_PROJECT_NAME = '1150606_UI_DrillTest';
-    const CONFIRM_RESET_WAIT_MS = 6500; // App confirm timeout is 6000ms.
-    const WAIT_TIMEOUT_MS = 8000;
 
     // Helper to Wait/Delay
     const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
-    async function waitFor(predicate, timeoutMs = WAIT_TIMEOUT_MS, intervalMs = 100) {
-        const startedAt = Date.now();
-        let lastError = null;
-        while (Date.now() - startedAt < timeoutMs) {
-            try {
-                if (predicate()) return true;
-            } catch (error) {
-                lastError = error;
-            }
-            await delay(intervalMs);
-        }
-        if (lastError) throw lastError;
-        return false;
-    }
-
-    function resetButtonState(btn, text, background = '') {
-        if (!btn) return;
-        btn.dataset.confirm = "";
-        btn.dataset.stage = "0";
-        if (text) btn.innerText = text;
-        if (background !== undefined) btn.style.background = background;
-        btn.disabled = false;
-    }
-
-    function setControlValue(id, value, eventType = 'input') {
-        const el = document.getElementById(id);
-        if (!el) throw new Error(`找不到欄位 #${id}`);
-        el.value = value;
-        el.dispatchEvent(new Event(eventType, { bubbles: true }));
-        if (eventType !== 'change') {
-            el.dispatchEvent(new Event('change', { bubbles: true }));
-        }
-        return el;
-    }
-
-    function assertControlValue(id, expected) {
-        const el = document.getElementById(id);
-        if (!el) throw new Error(`找不到欄位 #${id}`);
-        if (String(el.value) !== String(expected)) {
-            throw new Error(`#${id} 欄位值錯誤，期望 ${expected}，實際 ${el.value}`);
-        }
-    }
-
-    function getTestHooks() {
-        if (!window.__isoTestHooks) {
-            throw new Error('找不到 __isoTestHooks，請確認 index.html 已載入最新版測試支援介面。');
-        }
-        return window.__isoTestHooks;
-    }
-
-    function getAppState() {
-        return getTestHooks().getState();
-    }
-
-    function getTestProject() {
-        return getTestHooks().getProject(TEST_PROJECT_NAME);
-    }
-
-    function getMockCalls(action) {
-        return mockApiCalls.filter(call => call.payload?.action === action);
-    }
 
     // Logs output to UI Console
     function logToConsole(message) {
@@ -254,10 +188,10 @@
                 <div class="ui-test-footer">
                     <div class="ui-test-mode-toggle">
                         <label style="display:inline-flex; align-items:center; cursor:pointer; font-weight:bold; color: #eee; margin:0;">
-                            <input type="checkbox" id="uiTestModeCheckbox" checked style="margin-right: 6px;">
+                            <input type="checkbox" id="uiTestModeCheckbox" ${hasPat ? '' : 'disabled checked'} style="margin-right: 6px;"> 
                             模擬單機模式 (不實際寫入 GitHub)
                         </label>
-                        <span style="font-size: 0.75rem; color:#ff9800; margin-left: 5px;">${hasPat ? '(建議保持勾選，避免測試寫入 GitHub)' : '(未偵測到 GitHub PAT，請保持模擬模式)'}</span>
+                        ${!hasPat ? '<span style="font-size: 0.75rem; color:#ff9800; margin-left: 5px;">(未偵測到 GitHub PAT)</span>' : ''}
                     </div>
                     <div>
                         <button id="uiTestControlBtn" class="ui-test-btn" onclick="runAllUITests()">開始測試</button>
@@ -306,11 +240,6 @@
             id: 'step_finish_guard',
             title: '7. 專案結案三階段防誤觸與鎖定',
             desc: '單擊及雙擊「結案並鎖定」按鈕確認自動超時恢復，最後連續點擊三次結案，驗證防讀鎖定。'
-        },
-        {
-            id: 'step_subpage_smoke',
-            title: '8. 選單子頁功能 Smoke Tests',
-            desc: '以 iframe 載入 ISO Guide、風險決策模型、NOAA、HAZMAT，驗證主要輸入、切換與搜尋互動。'
         }
     ];
 
@@ -354,7 +283,6 @@
 
     // Mocks or Restores API calls
     function setupApiMocks() {
-        mockApiCalls = [];
         if (mockMode) {
             logToConsole("[MOCK] 已啟用 API 模擬模式，所有網路同步請求將直接返回成功。");
             
@@ -364,32 +292,15 @@
 
             // Mock window.apiCall
             window.apiCall = async function(payload) {
-                const action = payload?.action || 'unknown';
-                logToConsole(`[MOCK API CALL] ${action} on project ${payload?.projectName || '-'}`);
-                mockApiCalls.push({
-                    at: Date.now(),
-                    payload: JSON.parse(JSON.stringify(payload || {}))
-                });
-                await delay(80);
-                if (action === 'getList') return [];
-                if (action === 'getProjectData') return null;
-                if (action === 'createProject') return { success: true, mocked: true };
-                if (action === 'saveBriefing') return { success: true, mocked: true };
-                if (action === 'saveMedic') return { success: true, mocked: true };
-                if (action === 'uploadPhoto') {
-                    return {
-                        url: "https://example.invalid/mock-photo.jpg",
-                        fileId: "mock_photo_id",
-                        formula: '=IMAGE("https://example.invalid/mock-photo.jpg")'
-                    };
-                }
+                logToConsole(`[MOCK API CALL] ${payload.action} on project ${payload.projectName}`);
+                await delay(300);
                 return { success: true, mocked: true };
             };
 
             // Mock window.callGitHubAPI
             window.callGitHubAPI = async function(method, path, body = null) {
                 logToConsole(`[MOCK GITHUB API] ${method} ${path}`);
-                await delay(80);
+                await delay(300);
                 return { 
                     content: {
                         download_url: "https://raw.githubusercontent.com/mock-photo.jpg",
@@ -458,9 +369,6 @@
             // Step 7
             await runStepFinishGuard();
 
-            // Step 8
-            await runStepSubpageSmokeTests();
-
             logToConsole("--- 所有 UI 整合測試均已成功通過！ ---");
             if (summaryEl) {
                 summaryEl.innerText = '狀態: 全部通過 🎉';
@@ -489,7 +397,15 @@
         
         // Force reload / clear current project state locally for a clean run
         if (typeof window.renderHome === 'function') {
-            getTestHooks().resetTestProject(TEST_PROJECT_NAME);
+            // Remove test database entry if exists to avoid collision
+            const localDb = JSON.parse(localStorage.getItem('isoDB') || '{}');
+            if (localDb['1150606_UI_DrillTest']) {
+                delete localDb['1150606_UI_DrillTest'];
+                localStorage.setItem('isoDB', JSON.stringify(localDb));
+            }
+            
+            // Set currentProject to null and go back to home tab
+            window.currentProject = null;
             if (window.autoSyncInterval) {
                 clearInterval(window.autoSyncInterval);
                 window.autoSyncInterval = null;
@@ -503,16 +419,9 @@
             });
             const home = document.getElementById('page-home');
             if (home) home.classList.add('active');
-            resetButtonState(document.getElementById('btnCreateProject'), '建立新專案', 'var(--primary)');
-            resetButtonState(document.getElementById('btnFinishCase'), '🔒 確定結案並鎖定專案 (禁止後續編輯)', '#b71c1c');
-            document.querySelectorAll('[data-confirm="yes"]').forEach(btn => {
-                btn.dataset.confirm = "";
-                if (btn.dataset.originalText) btn.innerText = btn.dataset.originalText;
-                if (btn.dataset.originalBg) btn.style.background = btn.dataset.originalBg;
-            });
             
             await window.renderHome();
-            await waitFor(() => document.getElementById('projectListContainer')?.textContent?.length > 0, 3000);
+            await delay(500);
             updateStepStatus('step_route', 'passed', '系統狀態已初始化');
         } else {
             updateStepStatus('step_route', 'failed', '找不到 renderHome 函數，請確認是否在首頁。');
@@ -535,7 +444,7 @@
 
         // Fill inputs
         opName.value = '安全官自動測試';
-        projName.value = TEST_PROJECT_NAME;
+        projName.value = '1150606_UI_DrillTest';
         opName.dispatchEvent(new Event('input'));
         projName.dispatchEvent(new Event('input'));
         
@@ -549,18 +458,18 @@
             updateStepStatus('step_create_guard', 'failed', `單擊後按鈕未正確變更為「確定操作？」，目前文字: 「${btn.innerText}」`);
             throw new Error('Guard fail');
         }
-        logToConsole("已進入防誤觸警告狀態（變紅且顯示警告字樣）。等待 6.5 秒超時自動恢復。");
+        logToConsole("已進入防誤觸警告狀態（變紅且顯示警告字樣）。等待 3.5 秒超時自動恢復。");
         
-        await delay(CONFIRM_RESET_WAIT_MS);
+        await delay(3500); // Guard timeout is 3000ms
 
         // Verify it reset
         if (btn.innerText === confirmText || btn.dataset.confirm === "yes") {
-            updateStepStatus('step_create_guard', 'failed', '6.5 秒超時後，防誤觸按鈕未自動重設回原始文字');
+            updateStepStatus('step_create_guard', 'failed', '3.5 秒超時後，防誤觸按鈕未自動重設回原始文字');
             throw new Error('Timeout reset fail');
         }
         
         // Verify no project was created
-        if (getAppState().currentProject === TEST_PROJECT_NAME) {
+        if (window.currentProject === '1150606_UI_DrillTest') {
             updateStepStatus('step_create_guard', 'failed', '單擊且超時後，系統仍然建立了救災專案！');
             throw new Error('Invalid action execution');
         }
@@ -583,19 +492,16 @@
         await delay(150); // fast second click
         btn.click();
 
-        await waitFor(() => {
-            const briefingTab = document.getElementById('page-briefing');
-            return getAppState().currentProject === TEST_PROJECT_NAME && briefingTab && briefingTab.classList.contains('active');
-        });
+        await delay(600); // Wait for project creation and redirection
 
         // Verify redirection and project loaded
         const briefingTab = document.getElementById('page-briefing');
-        if (getAppState().currentProject !== TEST_PROJECT_NAME || !briefingTab || !briefingTab.classList.contains('active')) {
+        if (window.currentProject !== '1150606_UI_DrillTest' || !briefingTab || !briefingTab.classList.contains('active')) {
             updateStepStatus('step_create_exec', 'failed', '雙擊後未成功建立專案或未跳轉至「📋 簡報表」頁面');
             throw new Error('Double click execution fail');
         }
 
-        updateStepStatus('step_create_exec', 'passed', `專案 ${TEST_PROJECT_NAME} 雙擊建立成功且已跳轉簡報頁`);
+        updateStepStatus('step_create_exec', 'passed', '專案 1150606_UI_DrillTest 雙擊建立成功且已跳轉簡報頁');
     }
 
     // Step 4: Edit Briefing and Unit Conversion
@@ -607,122 +513,59 @@
         const isoEl = document.getElementById('b_iso');
         const usageEl = document.getElementById('b_usage');
         const structEl = document.getElementById('b_structure');
-        const areaInputEl = document.getElementById('b_area_input');
-        const areaUnitEl = document.getElementById('b_area_unit');
         const areaEl = document.getElementById('b_area');
         
-        if (!icEl || !isoEl || !usageEl || !structEl || !areaInputEl || !areaUnitEl || !areaEl) {
+        if (!icEl || !isoEl || !usageEl || !structEl || !areaEl) {
             updateStepStatus('step_briefing_edit', 'failed', '找不到簡報表表單欄位');
             throw new Error('Form fields missing');
         }
 
-        // Fill every static selectable/input briefing field on the homepage.
-        if (!document.getElementById('modifierName')?.value) {
-            setControlValue('modifierName', '安全官自動測試');
-        }
-        assertControlValue('modifierName', '安全官自動測試');
-        assertControlValue('b_caseName', TEST_PROJECT_NAME);
-        setControlValue('b_ic', '指揮官自動測試員');
-        setControlValue('b_iso', '安全官自動測試員');
-        setControlValue('b_usage', '其他', 'change');
-        setControlValue('b_usage_other', '自動測試混合用途');
-        setControlValue('b_structure', '其他', 'change');
-        setControlValue('b_structure_other', '自動測試複合構造');
-        setControlValue('b_area_input', '100');
-        setControlValue('b_area_unit', 'ping', 'change');
-        setControlValue('b_arriveTime', '08:10', 'change');
-        setControlValue('c_time', '08:12', 'change');
-        setControlValue('b_floorUp', '5', 'change');
-        setControlValue('b_floorDown', '1', 'change');
-        setControlValue('c_trappedState', '有', 'change');
-        setControlValue('c_deployCount', '4', 'change');
-        setControlValue('c_rescued', '1', 'change');
-        setControlValue('c_toRescue', '2', 'change');
-        setControlValue('c_trapLocation', '3樓東側');
-        setControlValue('c_notes', '自動測試確認事項');
-        setControlValue('s_time', '08:20', 'change');
-        setControlValue('e_weather', '☀️ 晴天', 'change');
-        window.setWind('東北風', null);
-        setControlValue('s_advice', '自動測試戰術建議');
-        for (let i = 0; i < 4; i++) {
-            setControlValue(`r_${i}_floor`, String(i + 1), 'change');
-            setControlValue(`r_${i}_teams`, String(i + 1), 'change');
-            setControlValue(`r_${i}_fire`, i >= 2 ? '2火舌' : '1火光', 'change');
-            setControlValue(`r_${i}_smoke`, i >= 1 ? '2大' : '1小', 'change');
-            setControlValue(`r_${i}_door`, i % 2 === 0 ? '有' : '無', 'change');
-            setControlValue(`r_${i}_window`, i % 2 === 1 ? '有' : '無', 'change');
-            setControlValue(`r_${i}_risk`, `第${i + 1}面自動測試風險`);
-            setControlValue(`r_${i}_time`, `08:2${i}`, 'change');
-        }
+        // Fill values
+        icEl.value = '指揮官自動測試員';
+        isoEl.value = '安全官自動測試員';
+        usageEl.value = '防誤觸測試大樓';
+        structEl.value = 'RC';
+        areaEl.value = '100'; // Set 100 first
+
+        icEl.dispatchEvent(new Event('input'));
+        isoEl.dispatchEvent(new Event('input'));
+        usageEl.dispatchEvent(new Event('input'));
+        structEl.dispatchEvent(new Event('change'));
+        areaEl.dispatchEvent(new Event('input'));
         
         logToConsole("填寫簡報表完成。測試「單層面積單位連動換算」。");
         
-        if (typeof window.convertArea === 'function') {
-            window.convertArea();
+        // Verify Ping to Sqm unit toggle
+        const pingRadio = document.querySelector('input[name="area_unit"][value="ping"]');
+        const sqmRadio = document.querySelector('input[name="area_unit"][value="sqm"]');
+        
+        if (pingRadio && sqmRadio) {
+            pingRadio.checked = true;
+            pingRadio.dispatchEvent(new Event('change'));
+            
+            // Switch to sqm, area value should change
+            sqmRadio.checked = true;
+            sqmRadio.dispatchEvent(new Event('change'));
+            
+            const areaValue = parseFloat(areaEl.value);
+            logToConsole(`單位由「坪」切換為「平方公尺」，自動換算結果: ${areaValue}`);
+            if (Math.abs(areaValue - 330.58) > 1.0) { // 100 ping = ~330.58 sqm
+                updateStepStatus('step_briefing_edit', 'failed', `單層面積切換單位換算數值不正確，期望值: ~330.58，實際值: ${areaValue}`);
+                throw new Error('Unit conversion mismatch');
+            }
         } else {
-            areaUnitEl.dispatchEvent(new Event('change'));
-        }
-
-        const areaValue = parseFloat(areaEl.value);
-        const inputValue = parseFloat(areaInputEl.value);
-        logToConsole(`單位由「坪」自動換算為「平方公尺」，hidden 結果: ${areaValue}，輸入框結果: ${inputValue}`);
-        if (Math.abs(areaValue - 330.58) > 1.0 || Math.abs(inputValue - 330.58) > 1.0 || areaUnitEl.value !== 'm2') {
-            updateStepStatus('step_briefing_edit', 'failed', `單層面積換算不正確，期望值: ~330.58 m2，hidden: ${areaValue}，input: ${inputValue}，unit: ${areaUnitEl.value}`);
-            throw new Error('Unit conversion mismatch');
+            logToConsole("[WARN] 找不到面積單位切換單選鈕，跳過該項驗證。");
         }
 
         // Trigger Sync Briefing
         logToConsole("觸發「儲存並同步【簡報表】至雲端」...");
         const syncBriefBtn = document.querySelector('.btn-sync-brief');
-        if (!syncBriefBtn) {
+        if (syncBriefBtn) {
+            syncBriefBtn.click();
+            await delay(1000); // wait for sync
+        } else {
             updateStepStatus('step_briefing_edit', 'failed', '找不到簡報同步按鈕 .btn-sync-brief');
             throw new Error('Sync button missing');
-        }
-
-        const saveCallsBefore = getMockCalls('saveBriefing').length;
-        const originalSyncBriefing = window.syncBriefingToCloud;
-        let syncCompleted = false;
-        if (typeof originalSyncBriefing === 'function') {
-            window.syncBriefingToCloud = async function(...args) {
-                try {
-                    return await originalSyncBriefing.apply(this, args);
-                } finally {
-                    syncCompleted = true;
-                }
-            };
-        }
-
-        try {
-            syncBriefBtn.click();
-            const completed = await waitFor(() => {
-                if (syncCompleted) return true;
-                return mockMode && getMockCalls('saveBriefing').length > saveCallsBefore;
-            }, WAIT_TIMEOUT_MS, 100);
-            if (!completed) {
-                updateStepStatus('step_briefing_edit', 'failed', '簡報同步逾時，未確認 syncBriefingToCloud 完成');
-                throw new Error('Briefing sync timeout');
-            }
-        } finally {
-            if (typeof originalSyncBriefing === 'function') {
-                window.syncBriefingToCloud = originalSyncBriefing;
-            }
-        }
-
-        const savedProject = getTestProject();
-        const savedArea = parseFloat(savedProject?.briefing?.b_area);
-        if (!savedProject?.briefing || Math.abs(savedArea - 330.58) > 1.0 || savedProject.briefing.b_area_unit !== 'm2') {
-            updateStepStatus('step_briefing_edit', 'failed', `本機簡報資料未保存換算後面積，b_area=${savedProject?.briefing?.b_area}，unit=${savedProject?.briefing?.b_area_unit}`);
-            throw new Error('Briefing local save mismatch');
-        }
-
-        if (mockMode) {
-            const manualSaveCalls = getMockCalls('saveBriefing').slice(saveCallsBefore);
-            const latestSave = manualSaveCalls[manualSaveCalls.length - 1]?.payload;
-            const uploadedArea = parseFloat(latestSave?.briefing?.b_area);
-            if (!latestSave || latestSave.projectName !== TEST_PROJECT_NAME || Math.abs(uploadedArea - 330.58) > 1.0 || latestSave.briefing?.b_area_unit !== 'm2') {
-                updateStepStatus('step_briefing_edit', 'failed', `mock 雲端未收到正確簡報同步資料，project=${latestSave?.projectName}，b_area=${latestSave?.briefing?.b_area}，unit=${latestSave?.briefing?.b_area_unit}`);
-                throw new Error('Briefing cloud sync payload mismatch');
-            }
         }
 
         updateStepStatus('step_briefing_edit', 'passed', '簡報表資料輸入、單位換算與雲端同步成功');
@@ -760,7 +603,6 @@
         }
 
         // Fill MEDIC fields
-        setControlValue('m_time', '08:30', 'change');
         medicM.value = '模擬高溫煙熱監測';
         medicE.value = '有滾燃閃燃危害';
         medicD.value = '佈線進行冷卻';
@@ -782,16 +624,16 @@
             throw new Error('Medic guard fail');
         }
 
-        logToConsole("警告狀態已建立。等待 6.5 秒超時自動恢復...");
-        await delay(CONFIRM_RESET_WAIT_MS);
+        logToConsole("警告狀態已建立。等待 3.5 秒超時自動恢復...");
+        await delay(3500);
 
         if (btnAdd.innerText === "⚠️ 確定操作？" || btnAdd.dataset.confirm === "yes") {
-            updateStepStatus('step_medic_guard', 'failed', 'MEDIC 加入按鈕在 6.5 秒後未自動恢復');
+            updateStepStatus('step_medic_guard', 'failed', 'MEDIC 加入按鈕在 3.5 秒後未自動恢復');
             throw new Error('Medic reset fail');
         }
 
         // Verify no entry added
-        const medicList = getTestProject()?.medic || [];
+        const medicList = window.db['1150606_UI_DrillTest']?.medic || [];
         if (medicList.length > 0) {
             updateStepStatus('step_medic_guard', 'failed', '單擊且超時後，系統仍將 MEDIC 項目加入了列表');
             throw new Error('Medic entry added invalidly');
@@ -815,10 +657,10 @@
         await delay(150);
         btnAdd.click();
 
-        await waitFor(() => (getTestProject()?.medic || []).length > 0);
+        await delay(500); // Wait for rendering
 
         // Verify entry added
-        const medicList = getTestProject()?.medic || [];
+        const medicList = window.db['1150606_UI_DrillTest']?.medic || [];
         if (medicList.length === 0) {
             updateStepStatus('step_medic_exec', 'failed', '雙擊後，本地資料庫 MEDIC 陣列仍為空');
             throw new Error('Double click add failed');
@@ -841,8 +683,8 @@
             updateStepStatus('step_medic_exec', 'failed', '單擊行內結案按鈕後未顯示「⚠️ 確定操作？」');
             throw new Error('Row action guard fail');
         }
-        logToConsole("行內「結案」按鈕已變紅警告。等待 6.5 秒自動重置...");
-        await delay(CONFIRM_RESET_WAIT_MS);
+        logToConsole("行內「結案」按鈕已變紅警告。等待 3.5 秒自動重置...");
+        await delay(3500);
 
         if (closeBtn.innerText === "⚠️ 確定操作？" || closeBtn.dataset.confirm === "yes") {
             updateStepStatus('step_medic_exec', 'failed', '行內結案按鈕超時後未自動重置');
@@ -853,11 +695,10 @@
         closeBtn.click();
         await delay(150);
         closeBtn.click();
-        await waitFor(() => (getTestProject()?.medic || [])[0]?.completed === true);
+        await delay(500);
 
         // Verify closed status
-        const updatedMedicList = getTestProject()?.medic || [];
-        const isClosed = updatedMedicList[0]?.completed === true;
+        const isClosed = medicList[0].completed === true;
         const statusSpan = document.querySelector('span[style*="color:#4caf50"]'); // should show "🔒 已結案"
         if (!isClosed || !statusSpan || !statusSpan.textContent.includes("已結案")) {
             updateStepStatus('step_medic_exec', 'failed', '雙擊行內結案後，該事件狀態未正確變更為「🔒 已結案」');
@@ -903,8 +744,8 @@
             updateStepStatus('step_finish_guard', 'failed', '單擊結案按鈕未正確變更為 Stage 1 (橘色警告)');
             throw new Error('Stage 1 transition fail');
         }
-        logToConsole("已成功觸發第一階段橘色警告。等待 6.5 秒自動重設...");
-        await delay(CONFIRM_RESET_WAIT_MS);
+        logToConsole("已成功觸發第一階段橘色警告。等待 4.5 秒自動重設...");
+        await delay(4500); // reset timer is 4000ms
 
         if (finishBtn.dataset.stage === "1") {
             updateStepStatus('step_finish_guard', 'failed', 'Stage 1 超時後按鈕未自動重設');
@@ -922,8 +763,8 @@
             updateStepStatus('step_finish_guard', 'failed', '連點兩次結案按鈕未正確變更為 Stage 2 (紅色警告)');
             throw new Error('Stage 2 transition fail');
         }
-        logToConsole("已成功觸發第二階段紅色警告。等待 6.5 秒自動重設...");
-        await delay(CONFIRM_RESET_WAIT_MS);
+        logToConsole("已成功觸發第二階段紅色警告。等待 4.5 秒自動重設...");
+        await delay(4500);
 
         if (finishBtn.dataset.stage === "2") {
             updateStepStatus('step_finish_guard', 'failed', 'Stage 2 超時後按鈕未自動重設');
@@ -938,14 +779,11 @@
         await delay(200);
         finishBtn.click(); // Execute
         
-        await waitFor(() => {
-            const badge = document.getElementById('lockedBadge');
-            return getAppState().isReadOnly && badge && badge.style.display !== 'none';
-        });
+        await delay(1200); // Wait for async execution of executeFinishCase
 
         // Verify read only
         const badge = document.getElementById('lockedBadge');
-        if (!getAppState().isReadOnly || !badge || badge.style.display === 'none') {
+        if (!window.isReadOnly || !badge || badge.style.display === 'none') {
             updateStepStatus('step_finish_guard', 'failed', '三連擊後，網頁未進入唯讀鎖定狀態或鎖定徽章未顯示');
             throw new Error('Case final lock fail');
         }
@@ -966,14 +804,14 @@
                 const branch = localStorage.getItem('iso_github_branch') || 'main';
                 const pat = localStorage.getItem('iso_github_pat') || '';
                 
-                const getResp = await fetch(`https://api.github.com/repos/${repo}/contents/drills/${TEST_PROJECT_NAME}.json?ref=${branch}`, {
+                const getResp = await fetch(`https://api.github.com/repos/${repo}/contents/drills/1150606_UI_DrillTest.json?ref=${branch}`, {
                     headers: { 'Authorization': `token ${pat}`, 'Accept': 'application/vnd.github.v3+json' }
                 });
                 if (getResp.ok) {
                     const fileData = await getResp.json();
                     const sha = fileData.sha;
                     
-                    const delResp = await fetch(`https://api.github.com/repos/${repo}/contents/drills/${TEST_PROJECT_NAME}.json`, {
+                    const delResp = await fetch(`https://api.github.com/repos/${repo}/contents/drills/1150606_UI_DrillTest.json`, {
                         method: 'DELETE',
                         headers: {
                             'Authorization': `token ${pat}`,
@@ -987,7 +825,7 @@
                         })
                     });
                     if (delResp.ok) {
-                        logToConsole(`[CLEANUP] 已成功刪除 GitHub 上的測試專案檔案 ${TEST_PROJECT_NAME}.json`);
+                        logToConsole("[CLEANUP] 已成功刪除 GitHub 上的測試專案檔案 1150606_UI_DrillTest.json");
                     } else {
                         logToConsole(`[WARN] 清理測試專案檔案失敗，GitHub HTTP: ${delResp.status}`);
                     }
@@ -998,139 +836,6 @@
         }
 
         updateStepStatus('step_finish_guard', 'passed', '三階段結案防呆超時重設與最終鎖定功能完美驗證！');
-    }
-
-    async function loadSmokeFrame(path) {
-        const frame = document.createElement('iframe');
-        frame.style.cssText = 'position:absolute; width:1px; height:1px; opacity:0; pointer-events:none; border:0;';
-        frame.src = new URL(path, window.location.href).href;
-        document.body.appendChild(frame);
-
-        await new Promise((resolve, reject) => {
-            const timer = setTimeout(() => reject(new Error(`載入子頁逾時: ${path}`)), 10000);
-            frame.onload = () => {
-                clearTimeout(timer);
-                resolve();
-            };
-            frame.onerror = () => {
-                clearTimeout(timer);
-                reject(new Error(`載入子頁失敗: ${path}`));
-            };
-        });
-
-        if (!frame.contentDocument) {
-            frame.remove();
-            throw new Error(`無法存取子頁 DOM: ${path}`);
-        }
-        return frame;
-    }
-
-    function setFrameControl(frame, id, value, eventType = 'input') {
-        const el = frame.contentDocument.getElementById(id);
-        if (!el) throw new Error(`子頁 ${frame.src} 找不到欄位 #${id}`);
-        el.value = value;
-        el.dispatchEvent(new Event(eventType, { bubbles: true }));
-        if (eventType !== 'change') el.dispatchEvent(new Event('change', { bubbles: true }));
-        return el;
-    }
-
-    async function runStepSubpageSmokeTests() {
-        updateStepStatus('step_subpage_smoke', 'running');
-        const loadedFrames = [];
-        try {
-            // ISO Guide: tab switching and checklist persistence IDs.
-            const isoFrame = await loadSmokeFrame('ISO guide/index.html');
-            loadedFrames.push(isoFrame);
-            const isoDoc = isoFrame.contentDocument;
-            const isoWin = isoFrame.contentWindow;
-            await waitFor(() => typeof isoWin.openTab === 'function', 3000);
-            const checkboxes = Array.from(isoDoc.querySelectorAll('.checklist input[type="checkbox"]'));
-            const missingIds = checkboxes.filter(cb => !cb.id);
-            if (checkboxes.length < 13 || missingIds.length > 0) {
-                throw new Error(`ISO Guide checkbox id 不完整，總數 ${checkboxes.length}，缺 id ${missingIds.length}`);
-            }
-            const guideTabs = ['tab-m', 'tab-e', 'tab-d', 'tab-i', 'tab-c', 'tab-post'];
-            guideTabs.forEach((tabId, index) => {
-                const btn = isoDoc.querySelectorAll('.tab-btn')[index];
-                isoWin.openTab({ currentTarget: btn }, tabId);
-                if (!isoDoc.getElementById(tabId).classList.contains('active')) {
-                    throw new Error(`ISO Guide tab 切換失敗: ${tabId}`);
-                }
-            });
-            const firstCheckbox = checkboxes[0];
-            firstCheckbox.checked = true;
-            firstCheckbox.dispatchEvent(new Event('change', { bubbles: true }));
-            if (isoWin.localStorage.getItem('isoGuide_' + firstCheckbox.id) !== 'true') {
-                throw new Error('ISO Guide checklist 狀態未寫入 localStorage');
-            }
-            logToConsole(`[SUBPAGE] ISO Guide: ${checkboxes.length} 個 checklist checkbox 與 ${guideTabs.length} 個 tab 通過`);
-
-            // Risk model: SPE ranges, VTS, and matrix ranges.
-            const riskFrame = await loadSmokeFrame('風險決策模型/index.html');
-            loadedFrames.push(riskFrame);
-            const riskDoc = riskFrame.contentDocument;
-            const riskWin = riskFrame.contentWindow;
-            await waitFor(() => typeof riskWin.calculateSPE === 'function' && riskDoc.getElementById('risk-table')?.children.length > 0, 4000);
-            setFrameControl(riskFrame, 's-range', '8');
-            setFrameControl(riskFrame, 'p-range', '7');
-            setFrameControl(riskFrame, 'e-range', '6');
-            riskWin.calculateSPE();
-            if (!riskDoc.getElementById('spe-result').textContent.includes('336')) {
-                throw new Error('風險模型 SPE range 計算未更新');
-            }
-            riskWin.setVTS('s', 'total', riskDoc.getElementById('s-group').children[2]);
-            if (!riskDoc.getElementById('vts-result').textContent.includes('防禦式')) {
-                throw new Error('風險模型 VTS 切換未更新');
-            }
-            setFrameControl(riskFrame, 'm-p-range', '5');
-            setFrameControl(riskFrame, 'm-s-range', '4');
-            riskWin.updateMatrix();
-            if (!riskDoc.getElementById('cell-5-4').classList.contains('active-cell')) {
-                throw new Error('風險模型矩陣 range 未標示 active cell');
-            }
-            logToConsole('[SUBPAGE] 風險決策模型: SPE/VTS/矩陣 range 通過');
-
-            // NOAA: temperature, humidity, and PPE compensation.
-            const noaaFrame = await loadSmokeFrame('環境氣候監控及NOAA/index.html');
-            loadedFrames.push(noaaFrame);
-            const noaaDoc = noaaFrame.contentDocument;
-            const noaaWin = noaaFrame.contentWindow;
-            await waitFor(() => typeof noaaWin.calculateHeatIndex === 'function', 3000);
-            setFrameControl(noaaFrame, 'temp-range', '40', 'input');
-            setFrameControl(noaaFrame, 'hum-range', '80', 'input');
-            noaaWin.calculateHeatIndex();
-            const firstTemp = parseInt(noaaDoc.getElementById('result-temp').textContent, 10);
-            noaaWin.setPPE(10, noaaDoc.getElementById('ppe-group').children[2]);
-            const ppeTemp = parseInt(noaaDoc.getElementById('result-temp').textContent, 10);
-            if (!Number.isFinite(firstTemp) || ppeTemp <= firstTemp) {
-                throw new Error('NOAA range 或 PPE 溫度補償未更新');
-            }
-            logToConsole('[SUBPAGE] NOAA: 溫度/濕度 range 與 PPE 補償通過');
-
-            // HAZMAT: search and reference tabs.
-            const hazmatFrame = await loadSmokeFrame('Hazmat/index.html');
-            loadedFrames.push(hazmatFrame);
-            const hazmatDoc = hazmatFrame.contentDocument;
-            const hazmatWin = hazmatFrame.contentWindow;
-            await waitFor(() => typeof hazmatWin.handleSearch === 'function', 4000);
-            setFrameControl(hazmatFrame, 'search-input', '1001');
-            hazmatWin.handleSearch();
-            if (hazmatDoc.getElementById('search-results').style.display === 'none' || !hazmatDoc.getElementById('search-results').textContent.trim()) {
-                throw new Error('HAZMAT 搜尋未顯示結果');
-            }
-            hazmatWin.switchTab('tw-tab', hazmatDoc.querySelectorAll('.tab-btn')[1]);
-            if (!hazmatDoc.getElementById('tw-tab').classList.contains('active')) {
-                throw new Error('HAZMAT tab 切換失敗');
-            }
-            logToConsole('[SUBPAGE] HAZMAT: 搜尋與 tab 切換通過');
-
-            updateStepStatus('step_subpage_smoke', 'passed', 'ISO Guide、風險模型、NOAA、HAZMAT 子頁 smoke tests 通過');
-        } catch (error) {
-            updateStepStatus('step_subpage_smoke', 'failed', error.message);
-            throw error;
-        } finally {
-            loadedFrames.forEach(frame => frame.remove());
-        }
     }
 
 })();

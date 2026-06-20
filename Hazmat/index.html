@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>HCFD // 危害辨識系統 (ISO)</title>
+    <title>【演練專用】HCFD // 化學危害辨識系統</title>
     <script>
         MathJax = {
             tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }
@@ -251,233 +251,23 @@
 .sds-link-btn:hover {
     filter: brightness(1.2);
 }
-
-        /* 主分頁導航列 */
-        .main-nav {
-            display: flex;
-            gap: 10px;
-            margin: 10px auto 20px auto;
-            max-width: 600px;
-            padding: 0 10px;
-        }
-        .nav-btn {
-            flex: 1;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid #444;
-            background: #222;
-            color: #aaa;
-            font-size: 0.95rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-align: center;
-        }
-        .nav-btn.active {
-            background: var(--accent-color);
-            color: black;
-            border-color: var(--accent-color);
-            box-shadow: 0 0 15px rgba(255,193,7,0.3);
-        }
-        .nav-btn:hover:not(.active) {
-            background: #333;
-            color: white;
-        }
-
-        /* 混合籃與反應預測樣式 */
-        .compat-container {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-        .compat-search-section {
-            background: #222;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #333;
-        }
-        .compat-box {
-            position: relative;
-        }
-        .compat-results {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: #2a2a2a;
-            border: 1px solid #444;
-            border-radius: 6px;
-            max-height: 200px;
-            overflow-y: auto;
-            z-index: 100;
-            display: none;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-        }
-        .compat-result-item {
-            padding: 10px;
-            cursor: pointer;
-            border-bottom: 1px solid #333;
-            font-size: 0.95rem;
-            color: white;
-            text-align: left;
-        }
-        .compat-result-item:hover {
-            background: var(--accent-color);
-            color: black;
-        }
-        
-        .basket-section {
-            background: #222;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #333;
-        }
-        .basket-title {
-            font-size: 1.1rem;
-            font-weight: bold;
-            color: var(--accent-color);
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .basket-list {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .basket-item {
-            background: #2d2d2d;
-            border: 1px solid #444;
-            padding: 10px 15px;
-            border-radius: 6px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .basket-item-info {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-            text-align: left;
-        }
-        .basket-item-name {
-            font-weight: bold;
-            color: white;
-        }
-        .basket-item-meta {
-            font-size: 0.8rem;
-            color: #aaa;
-        }
-        .basket-remove-btn {
-            background: var(--danger);
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            font-weight: bold;
-        }
-        
-        .report-section {
-            background: #222;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #333;
-        }
-        .report-title {
-            font-size: 1.1rem;
-            font-weight: bold;
-            color: #ffeb3b;
-            margin-bottom: 12px;
-            border-bottom: 1px solid #333;
-            padding-bottom: 8px;
-            text-align: left;
-        }
-        .hazard-card {
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 12px;
-            border-left: 5px solid;
-            background: rgba(255,255,255,0.03);
-            text-align: left;
-        }
-        .hazard-card.danger {
-            border-left-color: var(--danger);
-            background: rgba(244, 67, 54, 0.1);
-        }
-        .hazard-card.warning {
-            border-left-color: #ff9800;
-            background: rgba(255, 152, 0, 0.1);
-        }
-        .hazard-card.notice {
-            border-left-color: #ffeb3b;
-            background: rgba(255, 235, 59, 0.1);
-        }
-        .hazard-card.compatible {
-            border-left-color: #4caf50;
-            background: rgba(76, 175, 80, 0.1);
-        }
-        .hazard-header {
-            font-weight: bold;
-            font-size: 1.05rem;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .hazard-card.danger .hazard-header { color: #ff5252; }
-        .hazard-card.warning .hazard-header { color: #ffb74d; }
-        .hazard-card.notice .hazard-header { color: #fff176; }
-        .hazard-card.compatible .hazard-header { color: #81c784; }
-        
-        .hazard-desc {
-            font-size: 0.95rem;
-            line-height: 1.5;
-            color: #ddd;
-        }
-        .add-to-basket-btn {
-            background: #ffc107;
-            color: black;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
-            font-size: 0.85rem;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-            transition: all 0.2s;
-        }
-        .add-to-basket-btn:hover {
-            filter: brightness(1.2);
-        }
     </style>
 </head>
 <body>
-    {% include nav.html %}
-
+{% include nav.html %}
     <div class="page-watermark"></div>
     
     <!-- 置頂列 -->
     <div class="top-bar">
-        <h1>HCFD // 危害辨識 (ISO)</h1>
+        <h1>【演練專用】HCFD // 化學危害辨識系統</h1>
         <button onclick="resetSearch()" style="background:#444; color:white; border:none; padding:8px 12px; border-radius:6px; font-weight:bold; cursor:pointer;">清除重置</button>
     </div>
 
-    <!-- 主分頁導航列 -->
-    <div class="main-nav">
-        <button id="nav-search" class="nav-btn active" onclick="switchMainTab('search-tab')">🔍 危害物質檢索</button>
-        <button id="nav-compat" class="nav-btn" onclick="switchMainTab('compat-tab')">🧪 混合相容性評估</button>
-    </div>
-
-    <!-- Tab 1: 危害物質檢索 -->
-    <div id="search-tab" class="main-tab-content">
-        <!-- 搜尋區 (首頁卡片) -->
-        <div class="card" id="main-card">
-            <input type="text" id="search-input" class="search-box" placeholder="輸入 UN、中文名稱或 CAS..." oninput="handleSearch()" inputmode="search">
-            <div id="search-results"></div>
+    <!-- 搜尋區 (首頁卡片) -->
+    <div class="card" id="main-card">
+        
+        <input type="text" id="search-input" class="search-box" placeholder="輸入 UN、中文名稱或 CAS..." oninput="handleSearch()" inputmode="search">
+        <div id="search-results"></div>
 
         <!-- 參考圖資區 (打字時會自動隱藏) -->
         <div id="reference-section">
@@ -606,10 +396,7 @@
     <!-- 進入物質後的詳細資訊 -->
     <div id="detail-view" class="card">
         <h2 id="d-name">化學品名稱</h2>
-        <div style="color: #aaa; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
-            <div>CAS: <span id="d-cas"></span> | 類別: <span id="d-class" style="background:#ff9800;color:black;padding:2px 6px;border-radius:4px;font-weight:bold;"></span></div>
-            <button id="d-add-compat-btn" class="add-to-basket-btn" style="margin-top:0;">➕ 加入混合評估</button>
-        </div>
+        <div style="color: #aaa; margin-bottom: 15px;">CAS: <span id="d-cas"></span> | 類別: <span id="d-class" style="background:#ff9800;color:black;padding:2px 6px;border-radius:4px;font-weight:bold;"></span></div>
         <div class="nfpa-wrapper">
             <div class="nfpa-diamond">
                 <div class="nfpa-quad" id="nfpa-f" style="background:#f44336; top:0; left:0; border:1px solid #fff;"></div>
@@ -641,425 +428,25 @@
         </div>
  
         <div class="data-row"><div class="data-label">PPE 裝備要求</div><div class="data-value" id="d-ppe"></div></div>
-    </div> <!-- 閉合 detail-view -->
-</div> <!-- 閉合 search-tab -->
-
-    <!-- Tab 2: 混合相容性評估 -->
-    <div id="compat-tab" class="main-tab-content" style="display:none;">
-        <div class="card compat-container">
-            <!-- 搜尋加入區 -->
-            <div class="compat-search-section">
-                <div style="font-weight:bold; margin-bottom:8px; text-align:left; color:#aaa; font-size:0.9rem;">搜尋並加入化學物質</div>
-                <div class="compat-box">
-                    <input type="text" id="compat-input" class="search-box" placeholder="輸入 UN、名稱或 CAS 以加入混合籃..." oninput="handleCompatSearch()" style="margin-bottom:0;" autocomplete="off">
-                    <div id="compat-search-results" class="compat-results"></div>
-                </div>
-            </div>
-
-            <!-- 混合籃 -->
-            <div class="basket-section">
-                <div class="basket-title">
-                    <span>🛒 混合籃 (<span id="basket-count">0</span>)</span>
-                    <button onclick="clearBasket()" style="background:#444; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:0.8rem; cursor:pointer;">清空</button>
-                </div>
-                <div id="basket-list" class="basket-list">
-                    <div style="color:#666; text-align:center; padding:10px 0; font-size:0.95rem;">混合籃目前是空的，請在上方搜尋並加入物質。</div>
-                </div>
-            </div>
-
-            <!-- 相容性評估報告 -->
-            <div class="report-section">
-                <div class="report-title">📊 相容性評估報告</div>
-                <div id="compat-report">
-                    <div style="color:#888; text-align:center; padding:20px 0; font-size:0.95rem;">請加入至少兩種以上的物質，系統將自動進行交叉反應分析。</div>
-                </div>
-            </div>
-        </div>
-    </div>
+    
     <div class="disclaimer">
         <span>⚠️ 免責聲明與使用規範</span><br>
-        本系統已收錄共 2,863 筆緊急應變指南 (ERG 2020) 之化學物質與混合物，圖資與數據僅供「初步危害辨識」與「教育訓練」參考使用。<br>
-        化學災害現場環境複雜且瞬息萬變，實際救災戰術與防護規範，請務必嚴格核對最新版實體《緊急應變指南 (ERG)》、原廠安全資料表 (SDS)，並遵從現場指揮官之綜合專業評估。<br>
-        開發者不對因使用本系統資訊所衍生之任何意外、損害或誤判承擔法律責任。
+        本系統僅收錄約400種消防救災常見之化學物質，圖資與數據供「初步危害辨識」與「教育訓練」參考使用。</span><br>化學災害現場環境複雜且瞬息萬變，實際救災戰術與防護規範，請務必嚴格核對最新版實體《緊急應變指南 (ERG)》、原廠安全資料表 (SDS)，並遵從現場指揮官之綜合專業評估。</span><br>開發者不對因使用本系統資訊所衍生之任何意外、損害或誤判承擔法律責任。
     </div>
     <!-- 引用外部資料庫檔案 -->
-    <script src="database.js?v=13"></script>
+    <script src="database.js?v=4"></script>
 
     <script>
-        let currentItem = null;
-
-        // 主分頁切換
-        function switchMainTab(tabId) {
-            document.querySelectorAll('.main-nav .nav-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.main-tab-content').forEach(content => content.style.display = 'none');
-            
-            if (tabId === 'search-tab') {
-                document.getElementById('nav-search').classList.add('active');
-                document.getElementById('search-tab').style.display = 'block';
-            } else if (tabId === 'compat-tab') {
-                document.getElementById('nav-compat').classList.add('active');
-                document.getElementById('compat-tab').style.display = 'block';
-                renderBasket();
-            }
-        }
-
-        // 反應性群組名稱對照
-        const rgNames = {
-            1: "強無機酸",
-            2: "有機酸",
-            3: "強鹼",
-            4: "胺類",
-            5: "鹵代有機物",
-            6: "醇、醚、醣類",
-            7: "醛、酮類",
-            8: "酯類",
-            9: "氰化物",
-            10: "硫化物/亞硫酸鹽",
-            11: "活性金屬/金屬粉末",
-            12: "禁水物質/氫化物",
-            13: "強氧化劑",
-            14: "有機過氧化物",
-            15: "強還原劑",
-            16: "易燃液體/烴類",
-            17: "一般有毒/其他化學品"
-        };
-
-        // 相容性矩陣定義
-        const compatibilityRules = [
-            {
-                g1: [1, 2],
-                g2: [3, 4],
-                level: 'warning',
-                title: '劇烈中和放熱',
-                desc: '酸性物質與鹼性/胺類物質混合會發生劇烈中和反應，釋放大量熱量，可能導致液體沸騰飛濺造成熱灼傷。'
-            },
-            {
-                g1: [1, 2],
-                g2: [9],
-                level: 'danger',
-                title: '產生劇毒氣體 (氰化氫)',
-                desc: '酸性物質與氰化物接觸會立即釋放出極度致命的氰化氫 (HCN) 毒氣，現場人員吸入微量即可致死！'
-            },
-            {
-                g1: [1, 2],
-                g2: [10],
-                level: 'danger',
-                title: '產生有毒/窒息性氣體 (硫化氫/二氧化硫)',
-                desc: '酸性物質與硫化物或亞硫酸鹽反應，會產生具惡臭的劇毒硫化氫 (H2S) 氣體，或具強烈刺激性的二氧化硫 (SO2) 氣體！'
-            },
-            {
-                g1: [1, 2],
-                g2: [11, 12],
-                level: 'danger',
-                title: '釋放易燃氣體並放熱',
-                desc: '酸性物質與活性金屬或禁水物質反應，會劇烈釋放出大量易燃的氫氣 (H2)，且反應放熱極易點燃氣體引發爆炸！'
-            },
-            {
-                g1: [13],
-                g2: [15],
-                level: 'danger',
-                title: '爆炸與劇烈反應',
-                desc: '強氧化劑與強還原劑混合會發生極其劇烈的氧化還原反應，極易引發瞬間爆炸或猛烈火災！'
-            },
-            {
-                g1: [1, 2],
-                g2: [13],
-                level: 'danger',
-                title: '產生有毒/刺激性氣體 (如氯氣)',
-                desc: '強酸與次氯酸鹽（如漂白水）或強氧化劑混合，會劇烈反應並釋放出大量具強烈窒息刺激性且劇毒的氯氣 (Cl2) 或其他有毒酸性煙霧，吸入極微量即可引發化學性肺炎與急性肺水腫，極度危險！'
-            },
-            {
-                g1: [1, 2],
-                g2: [13],
-                level: 'danger',
-                title: '產生有毒/刺激性氣體 (如氯氣)',
-                desc: '強酸與次氯酸鹽（如漂白水）或強氧化劑混合，會劇烈反應並釋放出大量具強烈窒息刺激性且劇毒的氯氣 (Cl2) 或其他有毒酸性煙霧，吸入極微量即可引發化學性肺炎與急性肺水腫，極度危險！'
-            },
-            {
-                g1: [13, 14],
-                g2: [16, 6, 7, 8, 2],
-                level: 'danger',
-                title: '火災與爆炸危險 (氧化劑+可燃物)',
-                desc: '強氧化劑或有機過氧化物與可燃有機物（如易燃液體、醇、酮、酯、有機酸）接觸，會劇烈反應並顯著降低其自燃點，極易因摩擦、受熱或接觸引發猛烈火災或爆炸！'
-            },
-            {
-                g1: [13],
-                g2: [11, 12],
-                level: 'danger',
-                title: '劇烈反應與金屬火災',
-                desc: '強氧化劑與金屬粉末或活性金屬混合，在受熱或摩擦下會發生爆炸性燃燒，產生難以撲滅的高溫金屬火災！'
-            },
-            {
-                g1: [14],
-                g2: [1, 3],
-                level: 'danger',
-                title: '加速分解與爆炸 (過氧化物+酸鹼)',
-                desc: '有機過氧化物對酸鹼極為敏感，接觸強酸或強鹼會催化其劇烈自加速分解，釋放大量熱量與可燃氣體，極易引發容器爆炸！'
-            },
-            {
-                g1: [11, 12],
-                g2: [1, 3, 6],
-                level: 'danger',
-                title: '禁水放熱反應 (產生易燃氣體)',
-                desc: '活性金屬或禁水物質與含水溶液（酸、鹼溶液以及低分子量醇類）接觸，會劇烈反應並釋放氫氣或其毒性氣體（如乙炔、磷化氫），反應放熱極高，極易自燃！'
-            },
-            {
-                g1: [5],
-                g2: [11, 12],
-                level: 'danger',
-                title: '劇烈放熱或爆炸 (鹵代烴+金屬)',
-                desc: '鹵代有機物（如二氯甲烷、氯仿）與活性金屬（如鈉、鉀、鎂粉）接觸，會發生劇烈的脫鹵偶聯反應，產生極高熱量甚至引發爆炸！'
-            },
-            {
-                g1: [5],
-                g2: [3, 4],
-                level: 'warning',
-                title: '放熱與產生有毒煙霧',
-                desc: '鹵代有機物與強鹼或強胺類混合，會發生消去或親核取代反應，緩慢放熱並釋放具腐蝕性與毒性的鹵化氫氣體或煙霧。'
-            }
-        ];
-
-        let compatBasket = [];
-
-        // 搜尋化學品以加入混合籃
-        function handleCompatSearch() {
-            const query = document.getElementById('compat-input').value.trim().toLowerCase();
-            const resultsDiv = document.getElementById('compat-search-results');
-            resultsDiv.innerHTML = '';
-            
-            if (query.length < 1) {
-                resultsDiv.style.display = 'none';
-                return;
-            }
-            
-            let matches = db.filter(item => {
-                const unMatch = item.un && item.un.includes(query);
-                const casMatch = item.cas && item.cas.toLowerCase().includes(query);
-                const twMatch = item.nameTW && item.nameTW.toLowerCase().includes(query);
-                const enMatch = item.nameEN && item.nameEN.toLowerCase().includes(query);
-                return unMatch || casMatch || twMatch || enMatch;
-            });
-            
-            // 🌟 自動去重機制：使用「UN 號碼 + 去除英文字尾後的中文名稱」作為 Key，防呆且避免顯示拼寫變體的重複項
-            const uniqueMatchesCompat = [];
-            const seenKeysCompat = new Set();
-            for (const item of matches) {
-                const cleanTW = item.nameTW.replace(/\s*\([A-Za-z0-9,\.\s\-\/]+\)\s*$/, '').trim();
-                const key = `${item.un}_${cleanTW}`;
-                if (!seenKeysCompat.has(key)) {
-                    seenKeysCompat.add(key);
-                    uniqueMatchesCompat.push(item);
-                }
-            }
-            matches = uniqueMatchesCompat;
-            
-            // 智慧相關性分數排序 (將最符合的排在最上面)
-            const getRelevance = (item) => {
-                let score = 0;
-                const nameTW = (item.nameTW || '').toLowerCase();
-                const nameEN = (item.nameEN || '').toLowerCase();
-                const un = (item.un || '');
-                const cas = (item.cas || '').toLowerCase();
-                
-                // UN 號碼匹配
-                if (un === query) score += 10000;
-                else if (un.startsWith(query)) score += 8000;
-                else if (un.includes(query)) score += 6000;
-                
-                // 中文名稱匹配
-                if (nameTW === query) score += 5000;
-                else if (nameTW.startsWith(query)) score += 4000;
-                else if (nameTW.includes(query)) {
-                    score += (2000 - nameTW.indexOf(query));
-                }
-                
-                // 英文名稱匹配
-                if (nameEN === query) score += 3000;
-                else if (nameEN.startsWith(query)) score += 2000;
-                else if (nameEN.includes(query)) {
-                    score += (1000 - nameEN.indexOf(query));
-                }
-                
-                // CAS 匹配
-                if (cas === query) score += 500;
-                else if (cas.startsWith(query)) score += 300;
-                else if (cas.includes(query)) score += 100;
-                
-                return score;
-            };
-            
-            matches.sort((a, b) => getRelevance(b) - getRelevance(a));
-            matches = matches.slice(0, 10);
-            
-            if (matches.length === 0) {
-                resultsDiv.innerHTML = '<div class="compat-result-item" style="color:#aaa; cursor:default; text-align:center;">未找到相符物質</div>';
-                resultsDiv.style.display = 'block';
-                return;
-            }
-            
-            matches.forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'compat-result-item';
-                div.innerHTML = `[UN ${item.un}] ${item.nameTW} <span style="font-size:0.8rem; color:#aaa;">(${item.nameEN})</span>`;
-                div.onclick = () => {
-                    addToBasket(item);
-                    document.getElementById('compat-input').value = '';
-                    resultsDiv.style.display = 'none';
-                };
-                resultsDiv.appendChild(div);
-            });
-            resultsDiv.style.display = 'block';
-        }
-
-        // 點擊外部隱藏聯想搜尋
-        document.addEventListener('click', function(e) {
-            const compatInput = document.getElementById('compat-input');
-            const compatResults = document.getElementById('compat-search-results');
-            if (compatInput && compatResults && e.target !== compatInput && !compatResults.contains(e.target)) {
-                compatResults.style.display = 'none';
-            }
-        });
-
-        // 加入混合籃
-        function addToBasket(item) {
-            if (compatBasket.some(x => x.un === item.un && x.nameTW === item.nameTW)) {
-                alert('該物質已在混合籃中！');
-                return;
-            }
-            compatBasket.push(item);
-            renderBasket();
-            evaluateCompatibility();
-        }
-
-        // 從混合籃移除
-        function removeFromBasket(index) {
-            compatBasket.splice(index, 1);
-            renderBasket();
-            evaluateCompatibility();
-        }
-
-        // 清空混合籃
-        function clearBasket() {
-            compatBasket = [];
-            renderBasket();
-            evaluateCompatibility();
-        }
-
-        // 渲染混合籃
-        function renderBasket() {
-            const listDiv = document.getElementById('basket-list');
-            const countSpan = document.getElementById('basket-count');
-            if (!listDiv || !countSpan) return;
-            countSpan.innerText = compatBasket.length;
-            listDiv.innerHTML = '';
-            
-            if (compatBasket.length === 0) {
-                listDiv.innerHTML = '<div style="color:#666; text-align:center; padding:10px 0; font-size:0.95rem;">混合籃目前是空的，請在上方搜尋並加入物質。</div>';
-                return;
-            }
-            
-            compatBasket.forEach((item, index) => {
-                const div = document.createElement('div');
-                div.className = 'basket-item';
-                
-                const rgLabels = (item.rgs || [17]).map(rg => rgNames[rg] || "其他").join(', ');
-                
-                div.innerHTML = `
-                    <div class="basket-item-info">
-                        <div class="basket-item-name">[UN ${item.un}] ${item.nameTW}</div>
-                        <div class="basket-item-meta">CAS: ${item.cas} | 特性: ${rgLabels}</div>
-                    </div>
-                    <button class="basket-remove-btn" onclick="removeFromBasket(${index})">移除</button>
-                `;
-                listDiv.appendChild(div);
-            });
-        }
-
-        // 執行相容性評估
-        function evaluateCompatibility() {
-            const reportDiv = document.getElementById('compat-report');
-            if (!reportDiv) return;
-            reportDiv.innerHTML = '';
-            
-            if (compatBasket.length < 2) {
-                reportDiv.innerHTML = '<div style="color:#888; text-align:center; padding:20px 0; font-size:0.95rem;">請加入至少兩種以上的物質，系統將自動進行交叉反應分析。</div>';
-                return;
-            }
-            
-            const hazardsFound = [];
-            
-            for (let i = 0; i < compatBasket.length; i++) {
-                for (let j = i + 1; j < compatBasket.length; j++) {
-                    const chemA = compatBasket[i];
-                    const chemB = compatBasket[j];
-                    
-                    const rgsA = chemA.rgs || [17];
-                    const rgsB = chemB.rgs || [17];
-                    
-                    compatibilityRules.forEach(rule => {
-                        const match1 = rgsA.some(r => rule.g1.includes(r)) && rgsB.some(r => rule.g2.includes(r));
-                        const match2 = rgsB.some(r => rule.g1.includes(r)) && rgsA.some(r => rule.g2.includes(r));
-                        
-                        if (match1 || match2) {
-                            hazardsFound.push({
-                                chemA: chemA.nameTW,
-                                chemB: chemB.nameTW,
-                                level: rule.level,
-                                title: rule.title,
-                                desc: rule.desc
-                            });
-                        }
-                    });
-                }
-            }
-            
-            if (hazardsFound.length === 0) {
-                reportDiv.innerHTML = `
-                    <div class="hazard-card compatible">
-                        <div class="hazard-header">🟢 安全 (Compatible)</div>
-                        <div class="hazard-desc">目前混合籃中的化學物質在常溫常壓下未發現明顯劇烈的相容性危害，可安全共存。但實際存放與操作仍應參考各物質之 SDS 以確保萬無一失。</div>
-                    </div>
-                `;
-                return;
-            }
-            
-            const levelWeights = { 'danger': 3, 'warning': 2, 'notice': 1 };
-            hazardsFound.sort((a, b) => levelWeights[b.level] - levelWeights[a.level]);
-            
-            // 去重相同警告（避免重複兩兩比對相同規則）
-            const seenHazards = new Set();
-            hazardsFound.forEach(hazard => {
-                const uniqKey = [hazard.chemA, hazard.chemB, hazard.title].sort().join('||');
-                if (seenHazards.has(uniqKey)) return;
-                seenHazards.add(uniqKey);
-
-                const card = document.createElement('div');
-                card.className = `hazard-card ${hazard.level}`;
-                
-                let icon = '🟡 注意';
-                if (hazard.level === 'danger') icon = '🔴 嚴重危險 (Danger)';
-                else if (hazard.level === 'warning') icon = '🟠 中度危險 (Warning)';
-                
-                card.innerHTML = `
-                    <div class="hazard-header">${icon} - ${hazard.title}</div>
-                    <div class="hazard-desc">
-                        <strong>涉及物質：</strong> ${hazard.chemA} ➕ ${hazard.chemB}<br>
-                        <strong>反應危害：</strong> ${hazard.desc}
-                    </div>
-                `;
-                reportDiv.appendChild(card);
-            });
-        }
-
         const inputEl = document.getElementById('search-input');
         const resultsEl = document.getElementById('search-results');
         const detailEl = document.getElementById('detail-view');
         const refSection = document.getElementById('reference-section');
 
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        // [AI FIX] 改為導入 btn 參數，不再依賴隱式全域 event（修後 Firefox 不會失效）
+        function switchTab(tabId, btn) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.ref-content').forEach(content => content.classList.remove('active'));
-            event.target.classList.add('active');
+            if (btn) btn.classList.add('active');
             document.getElementById(tabId).classList.add('active');
         }
         
@@ -1086,59 +473,41 @@ function handleSearch() {
                 (item.cas && item.cas.toLowerCase().includes(query))
             );
 
-            // 🌟 2. 自動去重機制：使用「UN 號碼 + 去除英文字尾後的中文名稱」作為 Key，防呆且避免顯示拼寫變體的重複項
+             // 🌟 2. 自動去重機制：改用「中文名稱」防呆，避免誤殺同 UN 號碼的不同物質
             const uniqueMatches = [];
-            const seenKeys = new Set();
+            const seenNames = new Set();
             for (const item of matches) {
-                const cleanTW = item.nameTW.replace(/\s*\([A-Za-z0-9,\.\s\-\/]+\)\s*$/, '').trim();
-                const key = `${item.un}_${cleanTW}`;
-                if (!seenKeys.has(key)) {
-                    seenKeys.add(key);
+                // 這裡把 item.un 改成了 item.nameTW
+                if (!seenNames.has(item.nameTW)) {
+                    seenNames.add(item.nameTW);
                     uniqueMatches.push(item);
                 }
             }
             matches = uniqueMatches;
 
-            // 🌟 3. 智慧相關性分數排序 (將與輸入最符合的排在最上面)
-            const getRelevance = (item) => {
-                let score = 0;
-                const nameTW = (item.nameTW || '').toLowerCase();
-                const nameEN = (item.nameEN || '').toLowerCase();
-                const un = (item.un || '');
-                const cas = (item.cas || '').toLowerCase();
-                
-                // UN 號碼匹配
-                if (un === query) score += 10000;
-                else if (un.startsWith(query)) score += 8000;
-                else if (un.includes(query)) score += 6000;
-                
-                // 中文名稱匹配
-                if (nameTW === query) score += 5000;
-                else if (nameTW.startsWith(query)) score += 4000;
-                else if (nameTW.includes(query)) {
-                    score += (2000 - nameTW.indexOf(query));
-                }
-                
-                // 英文名稱匹配
-                if (nameEN === query) score += 3000;
-                else if (nameEN.startsWith(query)) score += 2000;
-                else if (nameEN.includes(query)) {
-                    score += (1000 - nameEN.indexOf(query));
-                }
-                
-                // CAS 匹配
-                if (cas === query) score += 500;
-                else if (cas.startsWith(query)) score += 300;
-                else if (cas.includes(query)) score += 100;
-                
-                return score;
-            };
-            
-            matches.sort((a, b) => getRelevance(b) - getRelevance(a));
-            // 限制前15筆以保持流暢度
-            matches = matches.slice(0, 15);
+            // 🌟 3. 智慧權重排序 (優先級：UN完全符合 > UN開頭符合 > 名稱符合 > CAS符合)
+            matches.sort((a, b) => {
+                // 權重 1: UN 完全一模一樣 (例如打 1203 就是要找 1203)
+                const aUnExact = a.un === query ? 1 : 0;
+                const bUnExact = b.un === query ? 1 : 0;
+                if (aUnExact !== bUnExact) return bUnExact - aUnExact;
+
+                // 權重 2: UN 前幾碼符合 (例如打 12 會優先顯示 1202, 1203)
+                const aUnStart = a.un.startsWith(query) ? 1 : 0;
+                const bUnStart = b.un.startsWith(query) ? 1 : 0;
+                if (aUnStart !== bUnStart) return bUnStart - aUnStart;
+
+                // 權重 3: 中文名稱包含關鍵字
+                const aNameMatch = a.nameTW.toLowerCase().includes(query) ? 1 : 0;
+                const bNameMatch = b.nameTW.toLowerCase().includes(query) ? 1 : 0;
+                if (aNameMatch !== bNameMatch) return bNameMatch - aNameMatch;
+
+                // 若以上都相同，則維持原本順序 (通常這時候就是 CAS 號碼符合的，會被排到最下面)
+                return 0;
+            });
 
             // 4. 顯示結果
+// 4. 顯示結果
             if (matches.length > 0) {
                 resultsEl.style.display = 'block';
                 matches.forEach(item => {
@@ -1187,18 +556,19 @@ function handleSearch() {
                 });
             } else {
                 resultsEl.style.display = 'block';
-                resultsEl.innerHTML = `<div style="padding:12px; color:#aaa; text-align:center;">查無相符結果</div>`;
+                const safeQuery = encodeURIComponent(query);
+                resultsEl.innerHTML = `
+                    <div style="padding:15px; color:#aaa; text-align:center; display: flex; flex-direction: column; align-items: center; gap: 12px;">
+                        <div style="font-size: 1.1rem;">查無相符結果</div>
+                        <div style="font-size: 0.9rem; color: #888;">您可以嘗試直接透過網頁搜尋該物質的安全資料表：</div>
+                        <a href="https://www.google.com/search?q=${safeQuery}+SDS+安全資料表" target="_blank" style="background: #2196f3; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 1rem; box-shadow: 0 2px 4px rgba(0,0,0,0.3); transition: background 0.2s; display: inline-flex; align-items: center; gap: 8px;" onmouseover="this.style.background='#1976d2'" onmouseout="this.style.background='#2196f3'">
+                            🔍 網頁搜尋「${query}」
+                        </a>
+                    </div>
+                `;
             }
         }
 function showDetail(item) {
-            currentItem = item;
-            const addBtn = document.getElementById('d-add-compat-btn');
-            if (addBtn) {
-                addBtn.onclick = () => {
-                    addToBasket(currentItem);
-                    alert(`已將 [${currentItem.nameTW}] 加入混合籃！`);
-                };
-            }
             // 切換畫面
             detailEl.style.display = 'block';
             document.getElementById('search-results').style.display = 'none';
@@ -1235,21 +605,11 @@ function showDetail(item) {
                 ? `<span style="color:#ff9800; font-size:0.85rem; margin-left:4px;">(${sMeanings.join('/')})</span>` 
                 : '';
 
-            // 4. 真實 SVG 圖片資料庫讀取 (支援並排顯示多重分類，如 Class 3, 6.1)
+            // 4. 真實 SVG 圖片資料庫讀取
             const cStr = String(item.class);
-            let imgHtml = '';
-            if (cStr === "N/A" || !item.class) {
-                imgHtml = `<div style="width:70px; height:70px; background-color: #FFFFFF; clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); filter: drop-shadow(2px 2px 5px rgba(0,0,0,0.8)); display:flex; align-items:center; justify-content:center; color:#333; font-size:2.2rem; font-weight:900; line-height:1; user-select:none;">❓</div>`;
-            } else {
-                const classes = cStr.split(',').map(c => c.trim()).filter(c => c);
-                imgHtml = '<div style="display:flex; gap:12px; justify-content:center; align-items:center; flex-wrap:wrap;">';
-                classes.forEach(cls => {
-                    const imgSrc = `img/class_${cls}.svg`; 
-                    const fallbackSrc = `img/class_${cls.charAt(0)}.svg`;
-                    imgHtml += `<img src="${imgSrc}" onerror="this.onerror=null; this.src='${fallbackSrc}';" style="width:70px; height:70px; background-color: #FFFFFF; clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); filter: drop-shadow(2px 2px 5px rgba(0,0,0,0.8));" alt="Class ${cls}">`;
-                });
-                imgHtml += '</div>';
-            }
+            const imgSrc = `img/class_${cStr}.svg`; 
+            const fallbackSrc = `img/class_${cStr.charAt(0)}.svg`;
+            const imgHtml = `<img src="${imgSrc}" onerror="this.onerror=null; this.src='${fallbackSrc}';" style="width:70px; height:70px; background-color: #FFFFFF; clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); filter: drop-shadow(2px 2px 5px rgba(0,0,0,0.8));" alt="Class ${cStr}">`;
 
             // 5. 建立左右並排的視覺儀表板
             const classSpan = document.getElementById('d-class');
@@ -1261,10 +621,14 @@ function showDetail(item) {
                     classSpan.parentElement.insertAdjacentElement('afterend', visBox);
                 }
                 
-                const hasNfpa = item.nfpa && (item.nfpa.f !== "" || item.nfpa.h !== "" || item.nfpa.r !== "");
-                let nfpaSectionHtml = '';
-                if (hasNfpa) {
-                    nfpaSectionHtml = `
+                visBox.innerHTML = `
+                    <div style="display:flex; flex-wrap:wrap; justify-content:space-around; align-items:center; background:#1e1e1e; padding:15px; margin:15px 0; border-radius:8px; border:1px solid #444; box-shadow:0 4px 8px rgba(0,0,0,0.5);">
+                        
+                        <div style="display:flex; flex-direction:column; align-items:center; gap:8px;">
+                            ${imgHtml}
+                            <span style="font-size:1rem; font-weight:bold; color:#ff9800; background:#111; padding:3px 8px; border-radius:4px; box-shadow:inset 0 0 3px rgba(255,152,0,0.3);">Class ${item.class}</span>
+                        </div>
+
                         <div style="display:flex; align-items:center; gap:20px;">
                             <div style="position:relative; width:60px; height:60px; transform:rotate(45deg); box-shadow: 2px 2px 6px rgba(0,0,0,0.6); flex-shrink:0;">
                                 <div style="position:absolute; top:0; left:0; width:30px; height:30px; background:#F44336; color:white; display:flex; justify-content:center; align-items:center; font-weight:900; font-size:1.1rem; border:1px solid #111;"><span style="transform:rotate(-45deg);">${item.nfpa.f}</span></div>
@@ -1279,25 +643,6 @@ function showDetail(item) {
                                 <div><span style="color:#FFEB3B;">黃:反應</span> | <span style="color:#fff;">白:特殊</span> ${sMeaningText}</div>
                             </div>
                         </div>
-                    `;
-                } else {
-                    nfpaSectionHtml = `
-                        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; border:1px dashed #555; padding:10px 15px; border-radius:6px; background:rgba(255,255,255,0.02); min-height:60px; box-sizing:border-box; max-width:260px;">
-                            <span style="color:#888; font-size:0.85rem; font-weight:bold; text-align:center;">⚠️ 暫無 NFPA 704 危害分類數據</span>
-                            <span style="color:#555; font-size:0.7rem; margin-top:2px; text-align:center;">(通用或混合物類別不適用此評等)</span>
-                        </div>
-                    `;
-                }
-
-                visBox.innerHTML = `
-                    <div style="display:flex; flex-wrap:wrap; justify-content:space-around; align-items:center; background:#1e1e1e; padding:15px; margin:15px 0; border-radius:8px; border:1px solid #444; box-shadow:0 4px 8px rgba(0,0,0,0.5);">
-                        
-                        <div style="display:flex; flex-direction:column; align-items:center; gap:8px;">
-                            ${imgHtml}
-                            <span style="font-size:1rem; font-weight:bold; color:#ff9800; background:#111; padding:3px 8px; border-radius:4px; box-shadow:inset 0 0 3px rgba(255,152,0,0.3);">Class ${item.class}</span>
-                        </div>
-
-                        ${nfpaSectionHtml}
                     </div>
                 `;
             }
@@ -1312,7 +657,8 @@ function showDetail(item) {
             const ghsBox = document.getElementById('d-ghs');
             if (ghsBox) {
                 ghsBox.innerHTML = '';
-                item.ghs[0].split(',').forEach(g => {
+                // [AI FIX] 加入 optional chaining 和空値防守，避免 ghs 陣列為空時崩潰
+                (item.ghs?.[0] || '').split(',').forEach(g => {
                     let icon = g.trim();
                     if (icon === "☢️" && item.class !== "7") icon = "🧪"; // 校正防呆
                     if(icon) {
@@ -1355,12 +701,8 @@ function showDetail(item) {
                 
                 // 🌟 修正點：精準連線至指定的「環境部化學署」最新頁面
                 btnTcs.onclick = () => {
-                    // 優先使用 CAS 號碼，如果沒有才用中文名（剝離括號以取得乾淨俗稱）
-                    let searchQuery = item.cas && item.cas !== "N/A" ? item.cas : item.nameTW;
-                    if (searchQuery === item.nameTW) {
-                        // 例如："光氣 (COCl2)" -> "光氣"
-                        searchQuery = searchQuery.split('(')[0].split('（')[0].trim();
-                    }
+                    // 優先使用 CAS 號碼，如果沒有才用中文名
+                    const searchQuery = item.cas && item.cas !== "N/A" ? item.cas : item.nameTW;
                     
                     // 1. 自動將 CAS 號碼複製到剪貼簿
                     navigator.clipboard.writeText(searchQuery).then(() => {
@@ -1412,13 +754,7 @@ function showDetail(item) {
                 sdsBox.innerHTML += `<a href="${merckUrl}" target="_blank" class="sds-link-btn" style="background:#00838f;">Merck 台灣</a>`;
          
             } else {
-                // 無 CAS 資訊時，提供基於名稱搜尋的中文 SDS 連結
-                const chemName = item.nameTW || '';
-                const enName = item.nameEN || item.name || '';
-                const twSdsKeyword = `${enName} ${chemName} SDS 安全資料表`.trim();
-                const twQuery = encodeURIComponent(twSdsKeyword);
-                const twSdsUrl = `https://www.google.com/search?q=${twQuery}`;
-                sdsBox.innerHTML = `<a href="${twSdsUrl}" target="_blank" class="sds-link-btn" style="background:#d84315; border-color:#fbe9e7;">🇹🇼 中文 SDS 搜尋 (依名稱)</a>`;
+                sdsBox.innerHTML = '<span style="color:#666; font-size:0.9rem;">此物質無 CAS 資訊，無法提供外部連結。</span>';
             }
         }
         window.scrollTo(0,0);
@@ -1430,8 +766,6 @@ function showDetail(item) {
             document.getElementById('main-card').style.display = 'block';
             resultsEl.style.display = 'none';
             refSection.style.display = 'block';
-            clearBasket();
-            switchMainTab('search-tab');
         }
 
         // 🌟 ERG 指南內容資料庫 (共涵蓋 HCFD 500 項物質之 39 種指南)
@@ -1665,76 +999,6 @@ function showDetail(item) {
                 <h4 style="color:#f44336;">⚠️ 危害潛能</h4><p><b>健康：</b>第9類其他危害物質(如石棉、PCB、廢棄物)。低至中等急毒性，但對環境水體破壞極大，或火災會釋出世紀之毒(如戴奧辛)。</p>
                 <h4 style="color:#2196f3;">🛡️ 公眾安全</h4><p><b>初期隔離：</b>至少 25 公尺。</p><p><b>防護：</b>全套消防衣及 SCBA。</p>
                 <h4 style="color:#4caf50;">🚒 緊急應變</h4><p><b>處置：</b>一般火災撲滅方式。首要任務為【攔阻消防廢水】流入下水道或河川。</p>
-            `,
-            "134": `
-                <h4 style="color:#f44336;">⚠️ 危害潛能</h4><p><b>火災：</b>【易燃固體-有毒且具腐蝕性】受熱可能劇烈燃燒。燃燒可能產生刺激性、腐蝕性且有毒氣體。與水反應可能產生易燃和有毒氣體。</p><p><b>健康：</b>有毒，吸入、食入或皮膚吸收可能致命。接觸會對皮膚和眼睛造成嚴重灼傷。</p>
-                <h4 style="color:#2196f3;">🛡️ 公眾安全</h4><p><b>初期隔離：</b>所有方向至少隔離 25 公尺（固體）或 50 公尺（液體/氣體）。</p><p><b>防護：</b>全套消防衣及 SCBA。必要時穿戴防化衣。</p>
-                <h4 style="color:#4caf50;">🚒 緊急應變</h4><p><b>火災：</b>使用乾粉、二氧化碳、水霧滅火。若遇水反應物質，【嚴禁用水】直射洩漏源。</p>
-            `,
-            "141": `
-                <h4 style="color:#f44336;">⚠️ 危害潛能</h4><p><b>火災：</b>【強氧化劑-有毒液體】本身不燃，但會極度加速周遭可燃物燃燒。與可燃物或還原劑接觸可能引發大火或爆炸.受熱分解產生有毒煙霧。</p><p><b>健康：</b>有毒，吸入、食入或皮膚接觸有害或致命。</p>
-                <h4 style="color:#2196f3;">🛡️ 公眾安全</h4><p><b>初期隔離：</b>所有方向至少隔離 50 公尺。</p><p><b>防護：</b>穿戴 A 級或 B 級化學防護衣及 SCBA。</p>
-                <h4 style="color:#4caf50;">🚒 緊急應變</h4><p><b>火災：</b>【唯一首選】使用大量水滅火。不要使用乾粉、二氧化碳或鹵代烴滅火劑（無效或會發生反應）。</p>
-            `,
-            "142": `
-                <h4 style="color:#f44336;">⚠️ 危害潛能</h4><p><b>火災：</b>【強氧化劑-有毒固體】受熱或與可燃物、還原劑接觸可能引起燃燒或爆炸。分解產生有毒氣體。</p><p><b>健康：</b>有毒，吸入、食入或皮膚接觸有害，造成嚴重化學灼傷。</p>
-                <h4 style="color:#2196f3;">🛡️ 公眾安全</h4><p><b>初期隔離：</b>所有方向至少隔離 25 公尺。</p><p><b>防護：</b>全套消防衣及 SCBA。</p>
-                <h4 style="color:#4caf50;">🚒 緊急應變</h4><p><b>火災：</b>【唯一首選】使用大量水滅火。勿用乾粉、二氧化碳或鹵代烴滅火劑。</p>
-            `,
-            "148": `
-                <h4 style="color:#f44336;">⚠️ 危害潛能</h4><p><b>火災：</b>【有機過氧化物-熱/污染敏感/溫度控制】極易燃、自燃或受熱爆炸。對熱、摩擦、震動或雜質極敏感，易自加速分解釋放有毒易燃氣體。</p><p><b>健康：</b>高腐蝕性，造成嚴重灼傷。吸入分解產物會致死。</p>
-                <h4 style="color:#2196f3;">🛡️ 公眾安全</h4><p><b>初期隔離：</b>所有方向至少隔離 100 公尺。火災時隔離 800 公尺。</p><p><b>防護：</b>全套消防衣及 SCBA。嚴防熱輻射。</p>
-                <h4 style="color:#4caf50;">🚒 緊急應變</h4><p><b>火災：</b>遠距離射水或使用無人水線。持續冷卻容器以防止溫度回升導致自加速分解。</p>
-            `,
-            "150": `
-                <h4 style="color:#f44336;">⚠️ 危害潛能</h4><p><b>火災：</b>【遇水反應物質-有毒】與水或潮濕空氣接觸會劇烈反應並釋放有毒且易燃的氣體。部分物質暴露於空氣中會自燃。</p><p><b>健康：</b>劇毒，吸入反應氣體可能致命。具強腐蝕性，接觸造成嚴重灼傷。</p>
-                <h4 style="color:#2196f3;">🛡️ 公眾安全</h4><p><b>初期隔離：</b>所有方向至少隔離 100 公尺。下風處需防護疏散。</p><p><b>防護：</b>【必須】穿戴 A 級化學氣密衣及 SCBA。</p>
-                <h4 style="color:#4caf50;">🚒 緊急應變</h4><p><b>火災：</b>【嚴禁用水】。使用乾砂、乾化學粉末或專用粉末滅火。</p>
-            `,
-            "162": `
-                <h4 style="color:#f44336;">⚠️ 危害潛能</h4><p><b>健康：</b>【放射性物質-低至中度輻射】外部照射和內部吸入/食入均有輻射暴露風險。包裝受損會導致放射性核種擴散。</p><p><b>火災：</b>物質本身不燃，但火災高溫可能破壞包裝使放射性物質洩漏。</p>
-                <h4 style="color:#2196f3;">🛡️ 公眾安全</h4><p><b>初期隔離：</b>所有方向至少隔離 25 公尺。遵循時間、距離、屏蔽原則。</p><p><b>防護：</b>全套消防衣及 SCBA。配合輻射偵測儀器。</p>
-                <h4 style="color:#4caf50;">🚒 緊急應變</h4><p><b>火災：</b>使用適合周圍火源的滅火劑。保持在安全距離進行冷卻。</p>
-            `,
-            "164": `
-                <h4 style="color:#f44336;">⚠️ 危害潛能</h4><p><b>健康：</b>【放射性物質-特殊形式/低至高輻射】高強度輻射源可能包裝於密封容器中。若包裝破損，會造成極高外部照射與吸入危害。</p><p><b>火災：</b>包裝耐高溫，但若遇極大火勢仍應嚴防受損。</p>
-                <h4 style="color:#2196f3;">🛡️ 公眾安全</h4><p><b>初期隔離：</b>所有方向至少隔離 25 公尺。若包裝破損，擴大管制範圍並實施除污。</p><p><b>防護：</b>全套消防衣及 SCBA。遵循輻射防護原則。</p>
-                <h4 style="color:#4caf50;">🚒 緊急應變</h4><p><b>火災：</b>遠距離射水冷卻。除非有必要，否則避免進入高輻射區。</p>
-            `,
-            "165": `
-                <h4 style="color:#f44336;">⚠️ 危害潛能</h4><p><b>健康：</b>【放射性物質-裂變/低至高輻射】含有易發生臨界核反應的裂變物質。具備強輻射與臨界核反應危害。</p><p><b>火災：</b>本身不燃，但受熱或損壞可能導致輻射外洩。</p>
-                <h4 style="color:#2196f3;">🛡️ 公眾安全</h4><p><b>初期隔離：</b>所有方向至少隔離 25 公尺。防範物質聚集，嚴格遵循時間與距離防護原則。</p><p><b>防護：</b>全套消防衣及 SCBA。</p>
-                <h4 style="color:#4caf50;">🚒 緊急應變</h4><p><b>火災：</b>使用適合周圍火源的滅火劑。切勿擅自移動放射性容器，防止其堆疊達到臨界質量。</p>
-            `,
-            "166": `
-                <h4 style="color:#f44336;">⚠️ 危害潛能</h4><p><b>火災：</b>【放射性-六氟化鈾/遇水反應】與水或潮濕空氣接觸會發生劇烈化學反應，釋放致命的氟化氫 (HF) 毒氣與腐蝕性氟化物。</p><p><b>健康：</b>具備化學劇毒、強腐蝕性與放射性三重危害。吸入 HF 會造成致命肺水腫。</p>
-                <h4 style="color:#2196f3;">🛡️ 公眾安全</h4><p><b>初期隔離：</b>所有方向至少隔離 100 公尺。下風處需擴大疏散。</p><p><b>防護：</b>【必須】穿戴 A 級化學氣密衣及 SCBA。</p>
-                <h4 style="color:#4caf50;">🚒 緊急應變</h4><p><b>火災：</b>【嚴禁用水】。使用乾粉、二氧化碳滅火。遠距離水霧冷卻，防止水滴入容器內。</p>
-            `,
-            "168": `
-                <h4 style="color:#f44336;">⚠️ 危害潛能</h4><p><b>火災：</b>【一氧化碳-冷凍液體】極易燃。超低溫冷凍液體。容器受熱有劇烈 BLEVE 爆炸危險。</p><p><b>健康：</b>吸入極毒，會阻斷血液攜氧造成迅速窒息致死。低溫液體接觸導致嚴重凍傷。</p>
-                <h4 style="color:#2196f3;">🛡️ 公眾安全</h4><p><b>初期隔離：</b>所有方向至少隔離 100 公尺。</p><p><b>防護：</b>全套消防衣、防凍服裝及 SCBA。</p>
-                <h4 style="color:#4caf50;">🚒 緊急應變</h4><p><b>火災：</b>【切勿撲滅漏氣火焰】除非能安全切斷氣源。使用水霧冷卻容器，並以水霧壓制蒸氣雲。</p>
-            `,
-            "169": `
-                <h4 style="color:#f44336;">⚠️ 危害潛能</h4><p><b>火災：</b>【熔融物質-高溫熱液體】處於極高溫度（通常大於 600°C）。與水接觸會引發劇烈蒸汽爆炸，甚至反應釋放易燃氫氣。會立即點燃周遭木材等可燃物。</p><p><b>健康：</b>高溫接觸會立即造成極嚴重的三度熱灼傷與燒燙傷。</p>
-                <h4 style="color:#2196f3;">🛡️ 公眾安全</h4><p><b>初期隔離：</b>所有方向至少隔離 50 公尺（防熱輻射與熔融物飛濺）。</p><p><b>防護：</b>穿戴耐熱防輻射熱衣、全套消防衣及面罩。</p>
-                <h4 style="color:#4caf50;">🚒 緊急應變</h4><p><b>火災：</b>【嚴禁直接用水】。使用乾砂、乾化學粉末或專用金屬 D 類滅火劑覆蓋滅火。</p>
-            `,
-            "172": `
-                <h4 style="color:#f44336;">⚠️ 危害潛能</h4><p><b>健康：</b>【鎵和銦-高溫液體】高溫熔融金屬。接觸會導致嚴重的熱灼傷。部分粉末具輕微毒性。</p><p><b>火災：</b>不燃。在高溫下可能與強酸反應釋放易燃氫氣。</p>
-                <h4 style="color:#2196f3;">🛡️ 公眾安全</h4><p><b>初期隔離：</b>所有方向至少隔離 25 公尺。</p><p><b>防護：</b>防高溫隔熱手套、全套消防衣。</p>
-                <h4 style="color:#4caf50;">🚒 緊急應變</h4><p><b>火災：</b>使用乾砂、乾粉或金屬 D 類滅火劑覆蓋。避免水直接與高溫金屬接觸。</p>
-            `,
-            "173": `
-                <h4 style="color:#f44336;">⚠️ 危害潛能</h4><p><b>健康：</b>【吸入極毒】吸附於多孔介質中的有毒氣體。受熱會導致吸附氣體快速脫附，釋放出具致命急毒性或強腐蝕性的氣體。</p><p><b>火災：</b>部分物質易燃或強氧化。容器受熱有爆裂危險。</p>
-                <h4 style="color:#2196f3;">🛡️ 公眾安全</h4><p><b>初期隔離：</b>所有方向至少隔離 100 公尺。下風處大範圍防護疏散。</p><p><b>防護：</b>【必須】穿戴 A 級化學氣密衣及 SCBA。</p>
-                <h4 style="color:#4caf50;">🚒 緊急應變</h4><p><b>火災：</b>勿撲滅漏氣火焰，除非能關閉氣閥。遠距離水霧冷卻容器，並以水霧擊落脫附毒氣。</p>
-            `,
-            "174": `
-                <h4 style="color:#f44336;">⚠️ 危害潛能</h4><p><b>火災：</b>【吸附氣體-易燃或氧化性】受熱脫附釋放大量易燃氣體或強助燃氧化氣體，形成爆炸性混合物。受熱有物理性爆炸危險。</p><p><b>健康：</b>窒息性或強刺激性。</p>
-                <h4 style="color:#2196f3;">🛡️ 公眾安全</h4><p><b>初期隔離：</b>所有方向至少隔離 100 公尺。</p><p><b>防護：</b>全套消防衣及 SCBA。</p>
-                <h4 style="color:#4caf50;">🚒 緊急應變</h4><p><b>火災：</b>勿撲滅漏氣火焰，除非能關閉閥門。使用水霧進行大範圍冷卻容器。</p>
             `
         };
         // ==========================================

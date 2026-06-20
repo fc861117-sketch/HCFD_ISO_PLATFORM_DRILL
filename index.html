@@ -531,31 +531,6 @@
     window.lastBHash = ""; window.lastMHash = ""; window.autoSyncInterval = null;
     let isSyncLocked = false; let isReadOnly = false;
 
-    window.__isoTestHooks = {
-        getState: () => ({
-            currentProject,
-            currentModifier,
-            isReadOnly,
-            isSyncLocked
-        }),
-        getProject: (name) => db[name] || null,
-        resetTestProject: (name) => {
-            if (name && db[name]) delete db[name];
-            currentProject = null;
-            currentModifier = "";
-            isReadOnly = false;
-            isSyncLocked = false;
-            localStorage.removeItem('isoCurrentProject');
-            localStorage.removeItem('isoLastTab');
-            localStorage.removeItem('isoUserName');
-            if (window.autoSyncInterval) {
-                clearInterval(window.autoSyncInterval);
-                window.autoSyncInterval = null;
-            }
-            saveDB();
-        }
-    };
-
     // --- 視覺化電子羅盤專用變數 ---
     let liveOrientationHandler = null;
     let isCompassRunning = false;
@@ -882,11 +857,7 @@ async function executeFinishCase() {
     async function createNewProject() {
         const name = document.getElementById('newProjectName').value.trim(); const creator = document.getElementById('newProjectCreator').value.trim(); const btn = document.getElementById('btnCreateProject');
         if(!name || !creator) return showToast("⚠️ 請輸入完整專案名稱與創建者姓名", "error");
-        currentModifier = creator;
-        localStorage.setItem('isoUserName', creator);
-        const modifierInput = document.getElementById('modifierName');
-        if (modifierInput) modifierInput.value = creator;
-        btn.innerText = "⏳ 專案建立中..."; btn.disabled = true; btn.style.background = "#555";
+        currentModifier = creator; btn.innerText = "⏳ 專案建立中..."; btn.disabled = true; btn.style.background = "#555";
 
         db[name] = { creator: creator, briefing: {}, medic: [] }; saveDB();
         try {
