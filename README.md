@@ -1,6 +1,6 @@
 # 🛡️ HCFD ISO Platform (事故安全官作業平台)
 
-[![GitHub Pages](https://img.shields.io/badge/Deployed-GitHub%20Pages-success.svg)](https://fc861117-sketch.github.io/HCFD_ISO_PLATFORM/)
+[![GitHub Pages](https://img.shields.io/badge/Deployed-GitHub%20Pages-success.svg)](https://fc861117-sketch.github.io/HCFD_ISO_PLATFORM_DRILL/)
 [![HTML5](https://img.shields.io/badge/Tech-HTML5-orange.svg)]()
 [![Jekyll](https://img.shields.io/badge/Jekyll-Page%20Builder-blue.svg)]()
 
@@ -10,7 +10,7 @@
 
 本平台在保留原始精美版面美學與核心邏輯的前提下，針對系統安全性、瀏覽器相容性、現場實用 UX 及資料持久化進行了全面性的調校與 Bug 修復，確保安全官在分秒必爭的救災現場中，能順暢、安全、無礙地使用所有決策輔助功能。
 
-🔗 **[點此訪問平台網站 (Live Demo)](https://fc861117-sketch.github.io/HCFD_ISO_PLATFORM/)**
+🔗 **[點此訪問平台網站 (Live Demo)](https://fc861117-sketch.github.io/HCFD_ISO_PLATFORM_DRILL/)**
 
 ---
 
@@ -35,7 +35,7 @@
 2. **GHS 分類空值防呆 (Crash Prevention)** (`Hazmat/index.html`)
    * **說明**：針對資料庫中部分 GHS 危害資料不齊全之化學品，加入 Optional Chaining 防呆 `(item.ghs?.[0] || '').split(',')`，避免前端 JavaScript 崩潰。
 3. **Jekyll 專案路徑跳轉修正** (`_config.yml`)
-   * **說明**：將 Jekyll 靜態建置設定中的 `baseurl` 修正為 `"/HCFD_ISO_PLATFORM"`，解決部署在 GitHub Pages 子路徑時導覽選單跳轉至根網域而發生 404 錯誤的問題。
+   * **說明**：將 Jekyll 靜態建置設定中的 `baseurl` 修正為 `"/HCFD_ISO_PLATFORM_DRILL"`，解決部署在 GitHub Pages 子路徑時導覽選單跳轉至根網域而發生 404 錯誤的問題。
 4. **HTML 未閉合標籤清理** (`環境氣候監控及NOAA/index.html`)
    * **說明**：補齊並閉合免責聲明區塊前未對稱的 `</div>` 標籤，防止不同解析度下排版跑版。
 
@@ -59,11 +59,11 @@
 
 本系統完全基於靜態網頁技術開發，支援跨平台即時開啟：
 
-1. **直接訪問線上 Demo**：開啟 [HCFD ISO Platform 部署網址](https://fc861117-sketch.github.io/HCFD_ISO_PLATFORM/)。
+1. **直接訪問線上 Demo**：開啟 [HCFD ISO Platform Drill 部署網址](https://fc861117-sketch.github.io/HCFD_ISO_PLATFORM_DRILL/)。
 2. **本地執行**：
    ```bash
    # Clone 本專案
-   git clone https://github.com/fc861117-sketch/HCFD_ISO_PLATFORM.git
+   git clone https://github.com/fc861117-sketch/HCFD_ISO_PLATFORM_DRILL.git
    ```
    * **本機靜態預覽**：可直接雙擊打開 `index.html`（部分定位功能可能會受到瀏覽器安全限制限制）。
    * **Jekyll 本地伺服器預覽**：
