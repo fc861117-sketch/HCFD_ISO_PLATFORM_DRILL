@@ -1,4 +1,6 @@
-# 🛡️ HCFD ISO Platform (事故安全官作業平台)
+# 🛡️ HCFD ISO Platform (事故安全官作業平台) - 演練專用版
+
+> ⚠️ **【重要聲明】本專案為「訓練演練專用版本 (Drill Version)」，所有資料與功能僅供教育訓練與內部模擬測試使用，並非正式上線版本，請勿直接應用於真實救災現場。**
 
 [![GitHub Pages](https://img.shields.io/badge/Deployed-GitHub%20Pages-success.svg)](https://fc861117-sketch.github.io/HCFD_ISO_PLATFORM_DRILL/)
 [![HTML5](https://img.shields.io/badge/Tech-HTML5-orange.svg)]()
