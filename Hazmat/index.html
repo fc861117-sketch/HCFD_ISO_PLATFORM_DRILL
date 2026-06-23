@@ -514,7 +514,7 @@ function handleSearch() {
                     const div = document.createElement('div');
                     
                     // 🌟 自動偵測是否為禁水性物質 (nfpa.s 包含 W)
-                    const isWaterReactive = (item.nfpa.s || '').toUpperCase().includes('W');
+                    const isWaterReactive = isWaterReactiveItem(item);
                     
                     // 🌟 自動偵測是否為 TIH (吸入性危害)
                     // 判斷邏輯：1. 類別是 2.3 (本身就是毒氣) 2. 戰術字眼包含 TIH 3. 您在資料庫手動加了 tih: true
@@ -568,6 +568,61 @@ function handleSearch() {
                 `;
             }
         }
+
+        function isWaterReactiveItem(item) {
+            const nfpaSpecial = String(item?.nfpa?.s || '').replace(/<[^>]*>/g, '').toUpperCase();
+            const tactics = String(item?.tactics || '');
+            const waterKeywords = ['遇水', '禁水', '水解', '水會', '水反應', '接觸水', '水分解', '水產生'];
+            return nfpaSpecial.includes('W') || String(item?.class) === '4.3' || waterKeywords.some(keyword => tactics.includes(keyword));
+        }
+
+        function getClassList(item) {
+            return String(item?.class || '').split(',').map(value => value.trim());
+        }
+
+        function hasWaterKeyword(item) {
+            const tactics = String(item?.tactics || '');
+            const nameTW = String(item?.nameTW || '');
+            const nameEN = String(item?.nameEN || '').toLowerCase();
+            const keywords = [
+                '\u9047\u6c34', '\u7981\u6c34', '\u6c34\u89e3', '\u6c34\u53cd\u61c9',
+                '\u63a5\u89f8\u6c34', '\u542b\u6c34', '\u6f6e\u6fd5', '\u6fd5\u6c23'
+            ];
+            return keywords.some(keyword => tactics.includes(keyword) || nameTW.includes(keyword)) || nameEN.includes('water-reactive');
+        }
+
+        function isWaterReactiveItem(item) {
+            const nfpaSpecial = String(item?.nfpa?.s || '').replace(/<[^>]*>/g, '').toUpperCase();
+            const rgs = Array.isArray(item?.rgs) ? item.rgs : [];
+            return nfpaSpecial.includes('W') || rgs.includes(12) || getClassList(item).includes('4.3') || hasWaterKeyword(item);
+        }
+
+        function getReactionFormula(item) {
+            if (item?.reaction) return item.reaction;
+            if (!isWaterReactiveItem(item)) return '';
+
+            const text = `${item?.nameTW || ''} ${item?.nameEN || ''} ${item?.tactics || ''}`.toLowerCase();
+            const prefix = '<span style="color:#ffeb3b;">\u901a\u5f0f\uff1a</span> ';
+
+            if (text.includes('phosphide') || text.includes('\u78f7\u5316\u6c2b') || text.includes('ph3')) {
+                return prefix + '$\\mathrm{MP_x} + \\mathrm{H_2O} \\rightarrow \\mathrm{M(OH)_x} + \\mathrm{PH_3} \\uparrow$';
+            }
+            if (text.includes('carbide') || text.includes('\u78b3\u5316')) {
+                return prefix + '$\\mathrm{MC_2} + 2\\mathrm{H_2O} \\rightarrow \\mathrm{M(OH)_2} + \\mathrm{C_2H_2} \\uparrow$';
+            }
+            if (text.includes('hydride') || text.includes('\u6c2b\u5316')) {
+                return prefix + '$\\mathrm{MH_x} + x\\mathrm{H_2O} \\rightarrow \\mathrm{M(OH)_x} + x\\mathrm{H_2} \\uparrow + \\mathrm{Heat}$';
+            }
+            if (text.includes('metal') || text.includes('\u91d1\u5c6c') || getClassList(item).includes('4.3')) {
+                return prefix + '$2\\mathrm{M} + 2\\mathrm{H_2O} \\rightarrow 2\\mathrm{MOH} + \\mathrm{H_2} \\uparrow + \\mathrm{Heat}$';
+            }
+            if (text.includes('\u9178') || text.includes('\u8150\u8755') || getClassList(item).includes('8')) {
+                return prefix + '$\\mathrm{Water\\ Reactive\\ Corrosive} + \\mathrm{H_2O} \\rightarrow \\mathrm{Acid/Corrosive\\ Gas} \\uparrow + \\mathrm{Heat}$';
+            }
+
+            return prefix + '$\\mathrm{Water\\ Reactive\\ Material} + \\mathrm{H_2O} \\rightarrow \\mathrm{H_2/toxic\\ gas} \\uparrow + \\mathrm{Heat}$';
+        }
+
 function showDetail(item) {
             // 切換畫面
             detailEl.style.display = 'block';
@@ -678,9 +733,10 @@ function showDetail(item) {
             // 🌟 新增：判斷並顯示化學反應式 (支援 LaTeX)
             const rowReaction = document.getElementById('row-reaction');
             const dReaction = document.getElementById('d-reaction');
-            if (item.reaction) {
+            const reactionFormula = getReactionFormula(item);
+            if (reactionFormula) {
                 rowReaction.style.display = 'block'; // 有資料就顯示
-                dReaction.innerHTML = item.reaction; // 寫入 LaTeX 原始碼
+                dReaction.innerHTML = reactionFormula; // 寫入 LaTeX 原始碼
                 
                 // 🌟 關鍵新增：呼叫 MathJax 重新渲染這個區塊
                 if (window.MathJax) {
@@ -688,7 +744,10 @@ function showDetail(item) {
                         console.error('MathJax 渲染失敗: ', err.message);
                     });
                 }
-} else {
+} else if (isWaterReactiveItem(item)) {
+            rowReaction.style.display = 'block';
+            dReaction.innerHTML = '<span style="color:#ffeb3b;">⚠️ 此物質會與水反應，資料庫需補化學反應式。</span>';
+        } else {
             rowReaction.style.display = 'none';  // 沒資料就隱藏
         }
             // 🌟 新增：判斷並顯示「化學署列管毒化物」按鈕
