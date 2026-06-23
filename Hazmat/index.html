@@ -1,5 +1,3 @@
----
----
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -456,7 +454,382 @@
     </style>
 </head>
 <body>
-    {% include nav.html %}
+<style>
+    /* 全域設定 */
+    :root {
+        --hcfd-yellow: #ffcc00;
+        --dark-bg: #121212;
+        --menu-bg: #1e1e1e;
+        --warning-orange: #ff9800;
+    }
+
+    /* 演練專用頂部橫幅 */
+    .drill-banner {
+        background-color: var(--warning-orange);
+        color: #000000;
+        text-align: center;
+        padding: 8px 10px;
+        font-weight: 900;
+        font-size: 0.95rem;
+        position: relative;
+        z-index: 1002;
+        letter-spacing: 1px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    }
+
+    /* 頂部導覽列容器 */
+    .iso-header {
+        background-color: var(--dark-bg);
+        border-bottom: 3px solid var(--hcfd-yellow);
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 20px;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    }
+
+    /* 網頁名稱連結 (點擊回首頁) */
+    .iso-title-link {
+        text-decoration: none;
+        color: #ffffff;
+        font-size: 1.2rem;
+        font-weight: bold;
+        letter-spacing: 1px;
+        transition: 0.2s;
+    }
+
+    .iso-title-link:hover {
+        color: var(--hcfd-yellow);
+    }
+
+    /* 漢堡選單按鈕 */
+    .menu-toggle {
+        background: none;
+        border: 2px solid var(--hcfd-yellow);
+        border-radius: 4px;
+        color: var(--hcfd-yellow);
+        cursor: pointer;
+        padding: 6px 12px;
+        font-size: 1.1rem;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    /* 側邊隱藏選單面板 */
+    .side-menu {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 280px;
+        height: 100%;
+        background-color: var(--menu-bg);
+        z-index: 1001;
+        transition: 0.4s ease-in-out;
+        box-shadow: -5px 0 15px rgba(0,0,0,0.7);
+        padding-top: 70px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .side-menu.active {
+        right: 0;
+    }
+
+    .side-menu a {
+        color: #ffffff;
+        text-decoration: none;
+        padding: 20px 25px;
+        font-size: 1.2rem;
+        font-weight: bold;
+        border-bottom: 1px solid #333;
+    }
+
+    .side-menu a:hover, .side-menu a:active {
+        background-color: var(--hcfd-yellow);
+        color: var(--dark-bg);
+    }
+
+    .close-btn {
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        color: var(--hcfd-yellow);
+        font-size: 1.8rem;
+        cursor: pointer;
+        background: none;
+        border: none;
+    }
+
+    .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.7);
+        display: none;
+        z-index: 1000;
+    }
+
+    .overlay.active {
+        display: block;
+    }
+
+    /* 系統設定視窗 (Settings Modal) */
+    .settings-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.85);
+        display: none;
+        z-index: 100001;
+        backdrop-filter: blur(5px);
+    }
+    .settings-overlay.active {
+        display: block;
+    }
+
+    .settings-modal {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0.9);
+        width: 90%;
+        max-width: 460px;
+        background-color: #1e1e1e;
+        border: 2px solid var(--hcfd-yellow);
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        z-index: 100002;
+        padding: 24px;
+        color: #ffffff;
+        display: none;
+        opacity: 0;
+        transition: 0.2s ease;
+        box-sizing: border-box;
+    }
+    .settings-modal.active {
+        display: block;
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+
+    .settings-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 2px solid #333;
+        padding-bottom: 12px;
+        margin-bottom: 18px;
+    }
+    .settings-header h3 {
+        margin: 0;
+        color: var(--hcfd-yellow);
+        font-size: 1.3rem;
+        font-weight: bold;
+    }
+    .settings-close {
+        color: #888;
+        font-size: 1.6rem;
+        cursor: pointer;
+        background: none;
+        border: none;
+    }
+    .settings-close:hover {
+        color: #fff;
+    }
+
+    .settings-field {
+        margin-bottom: 16px;
+        display: flex;
+        flex-direction: column;
+    }
+    .settings-field label {
+        font-size: 0.9rem;
+        color: #bbb;
+        margin-bottom: 6px;
+        font-weight: bold;
+    }
+    .settings-field select, .settings-field input {
+        padding: 10px 14px;
+        background-color: #2a2a2a;
+        border: 1px solid #444;
+        border-radius: 6px;
+        color: #ffffff;
+        font-size: 1rem;
+        box-sizing: border-box;
+    }
+    .settings-field select:focus, .settings-field input:focus {
+        border-color: var(--hcfd-yellow);
+        outline: none;
+    }
+    .settings-field input[type="password"] {
+        font-family: monospace;
+    }
+    
+    .settings-btn-save {
+        background-color: var(--hcfd-yellow);
+        color: #121212;
+        border: none;
+        border-radius: 6px;
+        padding: 12px;
+        font-weight: bold;
+        cursor: pointer;
+        width: 100%;
+        font-size: 1.1rem;
+        margin-top: 10px;
+        transition: 0.2s;
+    }
+    .settings-btn-save:hover {
+        background-color: #ffe066;
+    }
+</style>
+
+<div class="drill-banner">
+    ⚠️ 演練專用平台 - 本網站所有內容及資料均為消防模擬演練，請勿與真實災情混淆 ⚠️
+</div>
+
+<header class="iso-header">
+    <a href="../index.html" class="iso-title-link">竹縣消ISO【演練專用】</a>
+    
+    <button class="menu-toggle" onclick="toggleMenu()">
+        <span>選單</span> ☰
+    </button>
+</header>
+
+<div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+<nav class="side-menu" id="sideMenu">
+    <button class="close-btn" onclick="toggleMenu()">✕</button>
+    <a href="../index.html">ISO作業平台【演練專用】</a>
+    <a href="../ISO guide/index.html">事故安全官作業指南</a>
+    <a href="../風險決策模型/index.html">風險決策模型</a>
+    <a href="../環境氣候監控及NOAA/index.html">環境氣候監控及NOAA</a>
+    <a href="../Hazmat/index.html">化災圖資檢索 (HAZMAT)</a>
+    <a href="#" onclick="openSettingsModal(); return false;" style="color: var(--hcfd-yellow);">⚙️ 系統同步設定</a>
+</nav>
+
+<!-- 系統同步設定視窗 (Settings Modal) -->
+<div class="settings-overlay" id="settingsOverlay" onclick="closeSettingsModal()"></div>
+<div class="settings-modal" id="settingsModal">
+    <div class="settings-header">
+        <h3>⚙️ 系統同步設定</h3>
+        <button class="settings-close" onclick="closeSettingsModal()">✕</button>
+    </div>
+    
+    <div class="settings-field">
+        <label>儲存同步模式 (Sync Mode)</label>
+        <select id="settingSyncMode" onchange="toggleSettingFields()">
+            <option value="github">GitHub Repos Sync (無後端・推薦)</option>
+            <option value="gas">Google Apps Script (GAS)</option>
+        </select>
+    </div>
+    
+    <!-- GAS 設定 -->
+    <div id="settingGasArea" class="settings-field" style="display: none;">
+        <label>GAS Web App 網址</label>
+        <input type="text" id="settingGasUrl" placeholder="請貼上部署完成的 GAS 網址">
+        <span style="font-size: 0.8rem; color: #888; margin-top: 4px;">配合專案根目錄的 Code.gs 部署。</span>
+    </div>
+    
+    <!-- GitHub 同步設定 -->
+    <div id="settingGithubArea">
+        <div class="settings-field">
+            <label>GitHub 個人存取權杖 (PAT)</label>
+            <input type="password" id="settingGithubPat" placeholder="ghp_xxxxxxxxxxxxxx">
+            <span style="font-size: 0.8rem; color: #888; margin-top: 4px;">需要 repo 或 write 權限，僅保存在您的瀏覽器中。</span>
+        </div>
+        <div class="settings-field">
+            <label>GitHub 儲存庫路徑 (Owner/Repo)</label>
+            <input type="text" id="settingGithubRepo" placeholder="例如: fc861117-sketch/HCFD_ISO_PLATFORM_DRILL">
+        </div>
+        <div class="settings-field">
+            <label>分支名稱 (Branch)</label>
+            <input type="text" id="settingGithubBranch" placeholder="main" value="main">
+        </div>
+    </div>
+    <div style="margin-top: 18px; padding-top: 15px; border-top: 1px dashed #444; display: flex; flex-direction: column; gap: 8px;">
+        <span style="font-size: 0.85rem; color: #aaa; font-weight: bold;">🛠️ 開發與演練測試工具</span>
+        <button type="button" class="settings-btn-save" onclick="startUIAutomatedTest()" style="background-color: #e65100; color: white; margin-top: 0; padding: 10px; font-size: 0.95rem;">執行 UI 自動功能測試</button>
+    </div>
+    
+    <button class="settings-btn-save" onclick="saveSettings()" style="margin-top: 15px;">儲存並套用設定</button>
+</div>
+
+<script>
+    function toggleMenu() {
+        const menu = document.getElementById('sideMenu');
+        const overlay = document.getElementById('overlay');
+        menu.classList.toggle('active');
+        overlay.classList.toggle('active');
+    }
+
+    function openSettingsModal() {
+        // 關閉側邊欄
+        const menu = document.getElementById('sideMenu');
+        const overlay = document.getElementById('overlay');
+        if (menu.classList.contains('active')) {
+            menu.classList.remove('active');
+            overlay.classList.remove('active');
+        }
+        
+        // 載入當前設定
+        document.getElementById('settingSyncMode').value = localStorage.getItem('iso_sync_mode') || 'github';
+        document.getElementById('settingGasUrl').value = localStorage.getItem('iso_gas_url') || '';
+        document.getElementById('settingGithubPat').value = localStorage.getItem('iso_github_pat') || '';
+        document.getElementById('settingGithubRepo').value = localStorage.getItem('iso_github_repo') || 'fc861117-sketch/HCFD_ISO_PLATFORM_DRILL';
+        document.getElementById('settingGithubBranch').value = localStorage.getItem('iso_github_branch') || 'main';
+        
+        toggleSettingFields();
+        
+        document.getElementById('settingsOverlay').classList.add('active');
+        document.getElementById('settingsModal').classList.add('active');
+    }
+    
+    function closeSettingsModal() {
+        document.getElementById('settingsOverlay').classList.remove('active');
+        document.getElementById('settingsModal').classList.remove('active');
+    }
+    
+    function toggleSettingFields() {
+        const mode = document.getElementById('settingSyncMode').value;
+        if (mode === 'gas') {
+            document.getElementById('settingGasArea').style.display = 'flex';
+            document.getElementById('settingGithubArea').style.display = 'none';
+        } else {
+            document.getElementById('settingGasArea').style.display = 'none';
+            document.getElementById('settingGithubArea').style.display = 'block';
+        }
+    }
+    
+    function saveSettings() {
+        const mode = document.getElementById('settingSyncMode').value;
+        const gasUrl = document.getElementById('settingGasUrl').value.trim();
+        const pat = document.getElementById('settingGithubPat').value.trim();
+        const repo = document.getElementById('settingGithubRepo').value.trim();
+        const branch = document.getElementById('settingGithubBranch').value.trim() || 'main';
+        
+        localStorage.setItem('iso_sync_mode', mode);
+        localStorage.setItem('iso_gas_url', gasUrl);
+        localStorage.setItem('iso_github_pat', pat);
+        localStorage.setItem('iso_github_repo', repo);
+        localStorage.setItem('iso_github_branch', branch);
+        
+        closeSettingsModal();
+        alert('⚙️ 設定儲存成功！網頁將自動重新整理以套用新設定。');
+        window.location.reload();
+    }
+</script>
+
+<script src="../ui_tests.js"></script>
+
 
     <div class="page-watermark"></div>
     
