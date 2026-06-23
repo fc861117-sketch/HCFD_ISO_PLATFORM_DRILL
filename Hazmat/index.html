@@ -623,6 +623,21 @@ function handleSearch() {
             return prefix + '$\\mathrm{Water\\ Reactive\\ Material} + \\mathrm{H_2O} \\rightarrow \\mathrm{H_2/toxic\\ gas} \\uparrow + \\mathrm{Heat}$';
         }
 
+        function getWaterReactiveWarning(item) {
+            if (!isWaterReactiveItem(item)) return '';
+            const classes = getClassList(item);
+            if (classes.includes('4.3')) {
+                return '\n【禁水】遇水會釋放易燃或毒性氣體並放熱，嚴禁用水柱或泡沫接觸物質。優先使用 D 類乾粉、乾燥砂土覆蓋，並隔離防潮。';
+            }
+            return '\n【禁水注意】此物質與水或濕氣可能反應、放熱或產生腐蝕/毒性氣體；避免水進入容器或直接接觸洩漏物。';
+        }
+
+        function getDisplayTactics(item) {
+            const tactics = item?.tactics || '';
+            if (!isWaterReactiveItem(item) || /禁水|嚴禁用水|遇水|水反應/.test(tactics)) return tactics;
+            return tactics + getWaterReactiveWarning(item);
+        }
+
 function showDetail(item) {
             // 切換畫面
             detailEl.style.display = 'block';
@@ -662,9 +677,18 @@ function showDetail(item) {
 
             // 4. 真實 SVG 圖片資料庫讀取
             const cStr = String(item.class);
-            const imgSrc = `img/class_${cStr}.svg`; 
-            const fallbackSrc = `img/class_${cStr.charAt(0)}.svg`;
-            const imgHtml = `<img src="${imgSrc}" onerror="this.onerror=null; this.src='${fallbackSrc}';" style="width:70px; height:70px; background-color: #FFFFFF; clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); filter: drop-shadow(2px 2px 5px rgba(0,0,0,0.8));" alt="Class ${cStr}">`;
+            let imgHtml = '';
+            if (cStr === "N/A" || !item.class) {
+                imgHtml = `<div style="width:70px; height:70px; background-color: #FFFFFF; clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); filter: drop-shadow(2px 2px 5px rgba(0,0,0,0.8)); display:flex; align-items:center; justify-content:center; color:#333; font-size:1.6rem; font-weight:900; line-height:1; user-select:none;">N/A</div>`;
+            } else {
+                imgHtml = '<div style="display:flex; gap:12px; justify-content:center; align-items:center; flex-wrap:wrap;">';
+                getClassList(item).forEach(cls => {
+                    const imgSrc = `img/class_${cls}.svg`;
+                    const fallbackSrc = `img/class_${cls.charAt(0)}.svg`;
+                    imgHtml += `<img src="${imgSrc}" onerror="this.onerror=null; this.src='${fallbackSrc}';" style="width:70px; height:70px; background-color: #FFFFFF; clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); filter: drop-shadow(2px 2px 5px rgba(0,0,0,0.8));" alt="Class ${cls}">`;
+                });
+                imgHtml += '</div>';
+            }
 
             // 5. 建立左右並排的視覺儀表板
             const classSpan = document.getElementById('d-class');
@@ -721,6 +745,9 @@ function showDetail(item) {
                         ghsBox.innerHTML += `<span class="ghs-badge">${icon} ${text}</span>`;
                     }
                 });
+                if (isWaterReactiveItem(item)) {
+                    ghsBox.innerHTML += `<span class="ghs-badge" style="background:#f44336;color:white;">🈲 禁水 / 遇水反應</span>`;
+                }
             }
 
             // 7. 其他戰術資訊與 ERG 動態點擊
@@ -728,7 +755,7 @@ function showDetail(item) {
             if (dGuide) dGuide.innerHTML = `<span class="guide-link" onclick="showErgGuide('${item.erg}')">${item.erg} 👆</span>`;
             
             if(document.getElementById('d-iso')) document.getElementById('d-iso').innerText = item.isolation;
-            if(document.getElementById('d-tactics')) document.getElementById('d-tactics').innerText = item.tactics;
+            if(document.getElementById('d-tactics')) document.getElementById('d-tactics').innerText = getDisplayTactics(item);
             if(document.getElementById('d-ppe')) document.getElementById('d-ppe').innerText = item.ppe;
             // 🌟 新增：判斷並顯示化學反應式 (支援 LaTeX)
             const rowReaction = document.getElementById('row-reaction');
