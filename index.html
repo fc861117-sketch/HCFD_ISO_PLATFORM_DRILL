@@ -1221,7 +1221,7 @@ function renderLocalHomeFallback() {
                     <div style="display:flex; gap:8px; justify-content:flex-end; width:100%;">${syncBtn} ${delBtn} ${closeBtn}</div>
                 </div>
                 <div class="medic-body">
-                    <div><span class="medic-field-label">監測、偵察、回報事項 <span class="medic-field-code">(M)</span></span><input type="text" value="${item.m}" disabled style="background:#1a1a1a; color:#888;"></div>
+                    <div><span class="medic-field-label">監控環境與行動 <span class="medic-field-code">(M)</span></span><input type="text" value="${item.m}" disabled style="background:#1a1a1a; color:#888;"></div>
                     <div><span class="medic-field-label">評估危害與傷患狀況 <span class="medic-field-code">(E)</span></span><textarea id="med_e_${index}" ${disabledAttr} onchange="updateMedic(${index})">${item.e || ''}</textarea></div>
                     <div><span class="medic-field-label">決策與防護措施 <span class="medic-field-code">(D)</span></span><textarea id="med_d_${index}" ${disabledAttr} onchange="updateMedic(${index})">${item.d || ''}</textarea></div>
                     <div><span class="medic-field-label">介入處置 <span class="medic-field-code">(I)</span></span><textarea id="med_i_${index}" ${disabledAttr} onchange="updateMedic(${index})">${item.i || ''}</textarea></div>
