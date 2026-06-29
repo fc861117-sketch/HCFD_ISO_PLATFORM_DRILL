@@ -60,6 +60,8 @@
         
         .medic-entry { background: #252525; padding: 15px; border-radius: 6px; margin-top: 10px; border-left: 4px solid #4caf50; }
         .medic-body div { margin-bottom: 5px; font-size: 0.95rem; }
+        .medic-field-label { display:block; color:#ddd; font-weight:bold; margin: 8px 0 4px; }
+        .medic-field-code { color:#4caf50; font-weight:bold; }
 
         /* 即時視覺羅盤 CSS */
         .compass-container { position: relative; width: 140px; height: 140px; margin: 15px auto; border-radius: 50%; background: #1a1a1a; border: 4px solid #444; box-shadow: inset 0 0 15px rgba(0,0,0,0.8), 0 4px 15px rgba(0,0,0,0.5); }
@@ -1219,11 +1221,11 @@ function renderLocalHomeFallback() {
                     <div style="display:flex; gap:8px; justify-content:flex-end; width:100%;">${syncBtn} ${delBtn} ${closeBtn}</div>
                 </div>
                 <div class="medic-body">
-                    <div><span style="color:#aaa;">[M]</span> <input type="text" value="${item.m}" disabled style="background:#1a1a1a; color:#888;"></div>
-                    <div><span style="color:#aaa;">[E]</span> <textarea id="med_e_${index}" ${disabledAttr} onchange="updateMedic(${index})">${item.e || ''}</textarea></div>
-                    <div><span style="color:#aaa;">[D]</span> <textarea id="med_d_${index}" ${disabledAttr} onchange="updateMedic(${index})">${item.d || ''}</textarea></div>
-                    <div><span style="color:#aaa;">[I]</span> <textarea id="med_i_${index}" ${disabledAttr} onchange="updateMedic(${index})">${item.i || ''}</textarea></div>
-                    <div><span style="color:#aaa;">[C]</span> <textarea id="med_c_${index}" ${disabledAttr} onchange="updateMedic(${index})">${item.c || ''}</textarea></div>
+                    <div><span class="medic-field-label">監測、偵察、回報事項 <span class="medic-field-code">(M)</span></span><input type="text" value="${item.m}" disabled style="background:#1a1a1a; color:#888;"></div>
+                    <div><span class="medic-field-label">評估危害與傷患狀況 <span class="medic-field-code">(E)</span></span><textarea id="med_e_${index}" ${disabledAttr} onchange="updateMedic(${index})">${item.e || ''}</textarea></div>
+                    <div><span class="medic-field-label">決策與防護措施 <span class="medic-field-code">(D)</span></span><textarea id="med_d_${index}" ${disabledAttr} onchange="updateMedic(${index})">${item.d || ''}</textarea></div>
+                    <div><span class="medic-field-label">介入處置 <span class="medic-field-code">(I)</span></span><textarea id="med_i_${index}" ${disabledAttr} onchange="updateMedic(${index})">${item.i || ''}</textarea></div>
+                    <div><span class="medic-field-label">溝通、協調與交接 <span class="medic-field-code">(C)</span></span><textarea id="med_c_${index}" ${disabledAttr} onchange="updateMedic(${index})">${item.c || ''}</textarea></div>
                 </div>
             </div>`;
         });
