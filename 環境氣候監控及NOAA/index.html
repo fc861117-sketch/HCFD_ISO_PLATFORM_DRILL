@@ -223,11 +223,15 @@
 <!-- [AI FIX] 修正 disclaimer-box 未閉合的 </div> -->
 <div class="disclaimer-box">
     <strong>⚠️ 免責聲明與使用警語</strong>
-    本系統提供之氣象數據、熱危害指標與行動建議僅供輔助決策參考。<br><br>
+    本系統優先取用 NOAA/NCEP GFS 氣象模型資料；若 NOAA 資料暫時無法取得，將自動改用 Open-Meteo Best Match 可靠模型作為備援背景值。氣象數據、熱危害指標與行動建議僅供輔助決策參考。<br><br>
     災害現場存在局部微氣候（如火場熱輻射、建築屏蔽等），實際危害程度極可能與大氣背景值有顯著落差。使用者必須結合現場實體觀測（如手持式氣象儀）與自身專業進行最終判斷。<br>依賴本系統資訊所作之任何決策，其風險由使用者自行承擔，開發者恕不負任何法律責任。
 </div>
     <script>
         let ppeOffset = 0;
+        const WEATHER_SOURCES = [
+            { label: 'NOAA/NCEP GFS', model: 'gfs_seamless', fallback: false },
+            { label: 'Open-Meteo Best Match 備援資料', model: 'best_match', fallback: true }
+        ];
 
         // --- API 獲取邏輯 ---
         function fetchLocalWeather() {
@@ -244,17 +248,12 @@
             navigator.geolocation.getCurrentPosition(async (position) => {
                 const lat = position.coords.latitude;
                 const lon = position.coords.longitude;
-                statusEl.innerText = `定位成功，正在取得氣象資料...`;
+                statusEl.innerText = `定位成功，優先取得 NOAA/NCEP GFS 資料...`;
 
                 try {
-                    // 呼叫 Open-Meteo 免費氣象 API
-                    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m`;
-                    const response = await fetch(url);
-                    if (!response.ok) throw new Error("API 回應錯誤");
-                    
-                    const data = await response.json();
-                    const temp = data.current.temperature_2m;
-                    const humidity = data.current.relative_humidity_2m;
+                    const result = await fetchWeatherWithFallback(lat, lon, statusEl);
+                    const temp = result.data.current.temperature_2m;
+                    const humidity = result.data.current.relative_humidity_2m;
 
                     // 將獲取的數據填入滑桿
                     document.getElementById('temp-range').value = temp;
@@ -262,8 +261,13 @@
                     
                     calculateHeatIndex();
 
-                    statusEl.innerText = `✅ 成功獲取環境背景值！請依火場周邊「小氣候」微調滑桿。`;
-                    statusEl.style.color = "var(--safe)";
+                    if (result.source.fallback) {
+                        statusEl.innerText = `NOAA 資料暫不可用，已改用 ${result.source.label}。請依現場小氣候微調滑桿。`;
+                        statusEl.style.color = "#ffb74d";
+                    } else {
+                        statusEl.innerText = `資料來源：${result.source.label}。請依現場小氣候微調滑桿。`;
+                        statusEl.style.color = "var(--safe)";
+                    }
 
                 } catch (error) {
                     statusEl.innerText = "氣象資料獲取失敗，請手動調整滑桿。";
@@ -278,6 +282,42 @@
                 timeout: 10000,
                 maximumAge: 0
             });
+        }
+
+        async function fetchWeatherWithFallback(lat, lon, statusEl) {
+            let lastError = null;
+            for (const source of WEATHER_SOURCES) {
+                try {
+                    statusEl.innerText = source.fallback
+                        ? `NOAA 資料暫不可用，正在取得備援氣象資料...`
+                        : `正在取得 NOAA/NCEP GFS 氣象資料...`;
+                    const response = await fetch(buildWeatherUrl(lat, lon, source.model));
+                    if (!response.ok) throw new Error(`${source.label} API 回應錯誤`);
+
+                    const data = await response.json();
+                    const temp = data.current?.temperature_2m;
+                    const humidity = data.current?.relative_humidity_2m;
+                    if (!Number.isFinite(temp) || !Number.isFinite(humidity)) {
+                        throw new Error(`${source.label} 回傳資料缺漏`);
+                    }
+
+                    return { source, data };
+                } catch (error) {
+                    lastError = error;
+                }
+            }
+            throw lastError || new Error("氣象資料取得失敗");
+        }
+
+        function buildWeatherUrl(lat, lon, model) {
+            const params = new URLSearchParams({
+                latitude: lat,
+                longitude: lon,
+                current: 'temperature_2m,relative_humidity_2m',
+                models: model,
+                timezone: 'auto'
+            });
+            return `https://api.open-meteo.com/v1/forecast?${params.toString()}`;
         }
 
         // --- 核心邏輯 ---
