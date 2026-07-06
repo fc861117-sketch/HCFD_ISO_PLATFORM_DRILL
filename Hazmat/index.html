@@ -1232,6 +1232,8 @@
                 let score = 0;
                 const nameTW = (item.nameTW || '').toLowerCase();
                 const nameEN = (item.nameEN || '').toLowerCase();
+                const primaryTW = nameTW.replace(/\s*[（(].*$/, '').trim();
+                const primaryEN = nameEN.split(',')[0].trim();
                 const un = (item.un || '');
                 const cas = (item.cas || '').toLowerCase();
                 
@@ -1241,14 +1243,17 @@
                 else if (un.includes(query)) score += 6000;
                 
                 // 中文名稱匹配
-                if (nameTW === query) score += 5000;
+                if (primaryTW === query) score += 7000;
+                else if (primaryTW.startsWith(query)) score += 4500;
+                else if (nameTW === query) score += 5000;
                 else if (nameTW.startsWith(query)) score += 4000;
                 else if (nameTW.includes(query)) {
                     score += (2000 - nameTW.indexOf(query));
                 }
                 
                 // 英文名稱匹配
-                if (nameEN === query) score += 3000;
+                if (primaryEN === query) score += 3500;
+                else if (nameEN === query) score += 3000;
                 else if (nameEN.startsWith(query)) score += 2000;
                 else if (nameEN.includes(query)) {
                     score += (1000 - nameEN.indexOf(query));
@@ -1478,6 +1483,8 @@ function handleSearch() {
                 let score = 0;
                 const nameTW = (item.nameTW || '').toLowerCase();
                 const nameEN = (item.nameEN || '').toLowerCase();
+                const primaryTW = nameTW.replace(/\s*[（(].*$/, '').trim();
+                const primaryEN = nameEN.split(',')[0].trim();
                 const un = (item.un || '');
                 const cas = (item.cas || '').toLowerCase();
                 
@@ -1487,14 +1494,17 @@ function handleSearch() {
                 else if (un.includes(query)) score += 6000;
                 
                 // 中文名稱匹配
-                if (nameTW === query) score += 5000;
+                if (primaryTW === query) score += 7000;
+                else if (primaryTW.startsWith(query)) score += 4500;
+                else if (nameTW === query) score += 5000;
                 else if (nameTW.startsWith(query)) score += 4000;
                 else if (nameTW.includes(query)) {
                     score += (2000 - nameTW.indexOf(query));
                 }
                 
                 // 英文名稱匹配
-                if (nameEN === query) score += 3000;
+                if (primaryEN === query) score += 3500;
+                else if (nameEN === query) score += 3000;
                 else if (nameEN.startsWith(query)) score += 2000;
                 else if (nameEN.includes(query)) {
                     score += (1000 - nameEN.indexOf(query));
