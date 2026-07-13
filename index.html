@@ -198,6 +198,19 @@
         </div>
     </div>
 
+    <div class="card" id="briefingRoundArea" style="border-left-color:#9c27b0;">
+        <h2 style="color:#ce93d8;">圈次紀錄比較</h2>
+        <div class="row-full">
+            <label for="briefingRoundSelect">選擇要查看的圈次</label>
+            <select id="briefingRoundSelect" onchange="handleRoundSelection()">
+                <option value="current">目前輸入內容</option>
+            </select>
+        </div>
+        <div id="roundViewNotice" style="display:none; color:#ffb74d; font-weight:bold; text-align:center;">
+            🔒 圈次紀錄已封存，不可修改；可使用下方按鈕匯出圖片。
+        </div>
+    </div>
+
     <div class="card">
         <h2>與指揮官確認事項</h2>
         <div class="grid-2">
@@ -278,6 +291,7 @@
     </div>
 
     <button class="btn-main btn-sync-brief" onclick="syncBriefingToCloud()" style="background:#4caf50; margin-top:20px;">☁️ 儲存並同步【簡報表】至雲端</button>
+    <button id="btnSaveRound" class="btn-main btn-save-round" onclick="confirmAction(this, saveCurrentAsRound)" style="background:#9c27b0; margin-top:10px;">🔒 儲存為第1圈</button>
     <button id="btnExportImage" class="btn-main btn-export" onclick="exportToImage()" style="background:#2196F3; margin-top:10px;">📸 匯出最佳格式圖檔</button>
         <div id="finishCaseArea" style="margin-top: 40px; padding-top: 20px; border-top: 2px dashed #444; display: flex; flex-direction: column; align-items: center; width: 100%;">
     
@@ -532,6 +546,11 @@
     let currentProject = null; let currentModifier = ""; let db = JSON.parse(localStorage.getItem('isoDB')) || {};
     window.lastBHash = ""; window.lastMHash = ""; window.autoSyncInterval = null;
     let isSyncLocked = false; let isReadOnly = false;
+    let viewingRoundIndex = null; let roundDraft = null;
+
+    const briefingFieldIds = ['b_iso', 'b_ic', 'b_usage', 'b_usage_other', 'b_structure', 'b_structure_other', 'b_arriveTime', 'b_floorUp', 'b_floorDown', 'c_time', 'c_trappedState', 'c_deployCount', 'c_rescued', 'c_toRescue', 'c_trapLocation', 'c_notes', 's_time', 's_advice', 'e_weather', 'e_wind'];
+    const roundResetFieldIds = ['c_time', 'c_trappedState', 'c_deployCount', 'c_rescued', 'c_toRescue', 'c_trapLocation', 'c_notes', 's_time', 's_advice', 'e_weather', 'e_wind'];
+    const reconFieldNames = ['floor', 'teams', 'fire', 'smoke', 'door', 'window', 'risk', 'time', 'photo_url', 'photo_id', 'photo_formula'];
 
     // --- 視覺化電子羅盤專用變數 ---
     let liveOrientationHandler = null;
@@ -602,9 +621,9 @@ async function executeFinishCase() {
 
     function applyReadOnly(status) {
         isReadOnly = status;
-        document.querySelectorAll('input, select, textarea').forEach(el => { if (el.id !== 'modifierName') el.disabled = status; });
+        document.querySelectorAll('input, select, textarea').forEach(el => { if (el.id !== 'modifierName' && el.id !== 'briefingRoundSelect') el.disabled = status; });
         // 隱藏儲存與新增按鈕，保留匯出圖片
-        const hideSelectors = ['.btn-sync-brief', '.btn-sync-medic', 'button[onclick="confirmAction(this, addMedicEntry)"]', '#finishCaseArea', 'button[onclick="toggleLiveCompass()"]'];
+        const hideSelectors = ['.btn-sync-brief', '.btn-save-round', '.btn-sync-medic', 'button[onclick="confirmAction(this, addMedicEntry)"]', '#finishCaseArea', 'button[onclick="toggleLiveCompass()"]'];
         hideSelectors.forEach(sel => { const el = document.querySelector(sel); if(el) el.style.display = status ? 'none' : 'flex'; });
         
         document.getElementById('viewOnlyBadge').style.display = (status && !db[currentProject]?.briefing?.isLocked) ? 'block' : 'none';
@@ -852,6 +871,110 @@ async function executeFinishCase() {
         const centerBtn = document.querySelector('.wind-btn:nth-child(5)');
         if (centerBtn) centerBtn.classList.add('active'); 
         document.getElementById('e_wind').value = "無風";
+        viewingRoundIndex = null; roundDraft = null;
+        renderRoundOptions();
+    }
+
+    function collectBriefingData() {
+        const data = {};
+        briefingFieldIds.forEach(id => data[id] = document.getElementById(id).value);
+        data.b_area_input = document.getElementById('b_area_input').value;
+        data.b_area_unit = document.getElementById('b_area_unit').value;
+        data.b_area = document.getElementById('b_area').value;
+        data.b_usage_final = (!data.b_usage) ? '' : ((data.b_usage === '其他') ? data.b_usage_other : data.b_usage);
+        data.b_structure_final = (!data.b_structure) ? '' : ((data.b_structure === '其他') ? data.b_structure_other : data.b_structure);
+        for(let i=0; i<4; i++) reconFieldNames.forEach(f => data[`r_${i}_${f}`] = document.getElementById(`r_${i}_${f}`).value);
+        return data;
+    }
+
+    function applyBriefingData(data) {
+        briefingFieldIds.forEach(id => { const el = document.getElementById(id); if(el) el.value = data[id] || ''; });
+        ['b_area_input', 'b_area_unit', 'b_area'].forEach(id => {
+            const el = document.getElementById(id); if(el) el.value = data[id] || (id === 'b_area_unit' ? 'm2' : '');
+        });
+        toggleStructureOther(); toggleUsageOther();
+        for(let i=0; i<4; i++) {
+            reconFieldNames.forEach(f => { const el = document.getElementById(`r_${i}_${f}`); if(el) el.value = data[`r_${i}_${f}`] || ''; });
+            const photoUrl = data[`r_${i}_photo_url`];
+            document.getElementById(`r_${i}_photo_status`).innerHTML = photoUrl ? `<img src="${photoUrl}" style="max-width:100%; max-height:180px; border-radius:6px; margin-top:5px; border:1px solid #555; object-fit:cover;"><div style="margin-top:5px;"><a href="${photoUrl}" target="_blank" style="color:#4caf50; text-decoration:underline; font-weight:bold; font-size:13px;">🔗 開啟原始大圖</a></div>` : '';
+        }
+        const windVal = data.e_wind || '無風';
+        document.querySelectorAll('.wind-btn').forEach(b => b.classList.toggle('active', windVal === b.innerText || (windVal === '無風' && b.innerText === '無')));
+    }
+
+    function renderRoundOptions(selectedValue = 'current') {
+        const select = document.getElementById('briefingRoundSelect');
+        if(!select) return;
+        const rounds = db[currentProject]?.briefing?._rounds || [];
+        select.innerHTML = '<option value="current">目前輸入內容</option>' + rounds.map((round, index) => `<option value="${index}">第${round.number || index + 1}圈（${new Date(round.savedAt).toLocaleString()}）</option>`).join('');
+        select.value = selectedValue;
+        const btn = document.getElementById('btnSaveRound');
+        if(btn) btn.innerText = `🔒 儲存為第${rounds.length + 1}圈`;
+    }
+
+    function setRoundViewMode(status) {
+        document.querySelectorAll('#page-briefing input, #page-briefing select, #page-briefing textarea').forEach(el => {
+            if(el.id !== 'briefingRoundSelect') el.disabled = status || isReadOnly;
+        });
+        document.getElementById('briefingRoundSelect').disabled = false;
+        document.getElementById('roundViewNotice').style.display = status ? 'block' : 'none';
+        ['.btn-sync-brief', '.btn-save-round', '#finishCaseArea', 'button[onclick="toggleLiveCompass()"]'].forEach(sel => {
+            const el = document.querySelector(sel); if(el) el.style.display = (status || isReadOnly) ? 'none' : 'flex';
+        });
+    }
+
+    function handleRoundSelection() {
+        const select = document.getElementById('briefingRoundSelect');
+        if(select.value === 'current') {
+            viewingRoundIndex = null;
+            applyBriefingData(roundDraft || db[currentProject]?.briefing || {});
+            roundDraft = null;
+            setRoundViewMode(false);
+            return;
+        }
+        if(viewingRoundIndex === null) {
+            saveBriefingToLocal();
+            roundDraft = JSON.parse(JSON.stringify(db[currentProject].briefing));
+        }
+        const index = Number(select.value);
+        const round = db[currentProject]?.briefing?._rounds?.[index];
+        if(!round) return;
+        viewingRoundIndex = index;
+        applyBriefingData(round.data);
+        setRoundViewMode(true);
+        showToast(`📋 正在查看第${round.number || index + 1}圈；當前內容已自動暫存`, 'success');
+    }
+
+    function clearFieldsForNextRound() {
+        roundResetFieldIds.forEach(id => { const el = document.getElementById(id); if(el) { if(el.tagName === 'SELECT') el.selectedIndex = 0; else el.value = ''; } });
+        for(let i=0; i<4; i++) {
+            reconFieldNames.forEach(f => { const el = document.getElementById(`r_${i}_${f}`); if(el) { if(el.tagName === 'SELECT') el.selectedIndex = 0; else el.value = ''; } });
+            document.getElementById(`r_${i}_photo_status`).innerHTML = '';
+        }
+        document.querySelectorAll('.wind-btn').forEach(b => b.classList.remove('active'));
+        const centerBtn = document.querySelector('.wind-btn:nth-child(5)'); if(centerBtn) centerBtn.classList.add('active');
+        document.getElementById('e_wind').value = '無風';
+    }
+
+    async function saveCurrentAsRound() {
+        if(isReadOnly || viewingRoundIndex !== null || !currentProject) return;
+        saveBriefingToLocal();
+        const briefing = db[currentProject].briefing;
+        const rounds = Array.isArray(briefing._rounds) ? briefing._rounds : [];
+        rounds.push({ number: rounds.length + 1, savedAt: new Date().toISOString(), savedBy: currentModifier, data: collectBriefingData() });
+        briefing._rounds = rounds;
+        clearFieldsForNextRound();
+        saveBriefingToLocal();
+        renderRoundOptions('current');
+        try {
+            const payload = JSON.parse(JSON.stringify(db[currentProject].briefing));
+            const res = await apiCall({ action: 'saveBriefing', projectName: currentProject, creator: db[currentProject].creator, modifier: currentModifier + `(第${rounds.length}圈)`, briefing: payload, overwrite: false });
+            if(res.error) throw new Error(res.error);
+            window.lastBHash = JSON.stringify(db[currentProject].briefing);
+            showToast(`✅ 第${rounds.length}圈已封存；確認事項以下欄位已清空`, 'success');
+        } catch(e) {
+            showToast(`⚠️ 第${rounds.length}圈已存於本機，雲端同步失敗：${e.message}`, 'warning');
+        }
     }
 
     function saveDB() { localStorage.setItem('isoDB', JSON.stringify(db)); }
@@ -955,13 +1078,14 @@ async function executeFinishCase() {
             applyReadOnly(forceLock || mode === 'view');
 
             isSyncLocked = false; startAutoSync(); switchTab('page-briefing');
+            renderRoundOptions();
             if (btnElement && btnElement.tagName === 'BUTTON') {
                 btnElement.innerText = originalText;
                 if (btnElement.parentElement) {
                     btnElement.parentElement.querySelectorAll('button').forEach(b => b.disabled = false);
                 }
             }
-            isSyncLocked = true;
+            isSyncLocked = false;
             currentProject = name;
             localStorage.setItem('isoCurrentProject', name);
             document.getElementById('b_caseName').value = name;
@@ -1034,7 +1158,7 @@ async function executeFinishCase() {
     // ─── 匯出最佳格式圖檔 (高對比度, 無背景浮水印) ───
     function exportToImage() {
         if (!currentProject) return showToast("⚠️ 請先開啟專案！", "error"); 
-        saveBriefingToLocal(); 
+        if(viewingRoundIndex === null) saveBriefingToLocal();
         const btn = document.getElementById('btnExportImage'); btn.innerText = "⏳ 正在處理圖檔排版...";
 
         const v = (id) => document.getElementById(id).value || '未填寫';
@@ -1082,7 +1206,8 @@ async function executeFinishCase() {
         setTimeout(() => {
             const element = document.getElementById('exportTemplate');
             html2canvas(element, { scale: 2, backgroundColor: "#ffffff" }).then(canvas => {
-                const link = document.createElement('a'); link.download = `[ISO簡報表] ${currentProject}.png`; link.href = canvas.toDataURL("image/png"); link.click();
+                const roundLabel = viewingRoundIndex === null ? '' : ` 第${db[currentProject].briefing._rounds[viewingRoundIndex].number || viewingRoundIndex + 1}圈`;
+                const link = document.createElement('a'); link.download = `[ISO簡報表] ${currentProject}${roundLabel}.png`; link.href = canvas.toDataURL("image/png"); link.click();
                 btn.innerText = "📸 匯出最佳格式圖檔"; showToast("✅ 圖檔生成完畢，準備下載！", "success");
             }).catch(err => { showToast("❌ 圖檔產出失敗", "error"); btn.innerText = "📸 匯出最佳格式圖檔"; });
         }, 500); 
@@ -1180,12 +1305,11 @@ function renderLocalHomeFallback() {
     }
 
     function saveBriefingToLocal() {
-        const data = {};
-        const ids = ['b_iso', 'b_ic', 'b_usage', 'b_usage_other', 'b_structure', 'b_structure_other', 'b_arriveTime', 'b_floorUp', 'b_floorDown', 'c_time', 'c_trappedState', 'c_deployCount', 'c_rescued', 'c_toRescue', 'c_trapLocation', 'c_notes', 's_time', 's_advice', 'e_weather', 'e_wind'];
-        ids.forEach(id => data[id] = document.getElementById(id).value);
-        data['b_area_input'] = document.getElementById('b_area_input').value; data['b_area_unit'] = document.getElementById('b_area_unit').value; data['b_area'] = document.getElementById('b_area').value; 
-        data['b_usage_final'] = (!data['b_usage']) ? '' : ((data['b_usage'] === '其他') ? data['b_usage_other'] : data['b_usage']); data['b_structure_final'] = (!data['b_structure']) ? '' : ((data['b_structure'] === '其他') ? data['b_structure_other'] : data['b_structure']);
-        for(let i=0; i<4; i++) { ['floor', 'teams', 'fire', 'smoke', 'door', 'window', 'risk', 'time', 'photo_url', 'photo_id', 'photo_formula'].forEach(f => { data[`r_${i}_${f}`] = document.getElementById(`r_${i}_${f}`).value; }); }
+        if(viewingRoundIndex !== null) return;
+        const data = collectBriefingData();
+        const existing = db[currentProject]?.briefing || {};
+        if(Array.isArray(existing._rounds)) data._rounds = existing._rounds;
+        if(existing.isLocked === true) data.isLocked = true;
         if(!db[currentProject]) db[currentProject] = { briefing: {}, medic: [] }; db[currentProject].briefing = data; saveDB();
     }
 
