@@ -69,7 +69,8 @@
     "r_3_time": "16:02",
     "r_3_photo_url": "https://raw.githubusercontent.com/fc861117-sketch/HCFD_ISO_PLATFORM_DRILL/main/drills/photos/R_3_1783929696698.jpg",
     "r_3_photo_id": "6ea1c38ce29e635941bac319f0babea4c53cd4c7",
-    "r_3_photo_formula": "=IMAGE(\"https://raw.githubusercontent.com/fc861117-sketch/HCFD_ISO_PLATFORM_DRILL/main/drills/photos/R_3_1783929696698.jpg\")"
+    "r_3_photo_formula": "=IMAGE(\"https://raw.githubusercontent.com/fc861117-sketch/HCFD_ISO_PLATFORM_DRILL/main/drills/photos/R_3_1783929696698.jpg\")",
+    "isLocked": true
   },
   "medic": []
 }
