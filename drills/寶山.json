@@ -14,8 +14,8 @@
     "c_trappedState": "有",
     "c_deployCount": "0",
     "c_rescued": "0",
-    "c_toRescue": "2",
-    "c_trapLocation": "",
+    "c_toRescue": "1",
+    "c_trapLocation": "2樓",
     "c_notes": "",
     "s_time": "",
     "s_advice": "",
@@ -59,17 +59,40 @@
     "r_2_photo_url": "",
     "r_2_photo_id": "",
     "r_2_photo_formula": "",
-    "r_3_floor": "0",
+    "r_3_floor": "3",
     "r_3_teams": "0",
     "r_3_fire": "0無",
-    "r_3_smoke": "0無",
+    "r_3_smoke": "1小",
     "r_3_door": "無",
-    "r_3_window": "無",
-    "r_3_risk": "",
-    "r_3_time": "",
+    "r_3_window": "有",
+    "r_3_risk": "頂樓太陽能板",
+    "r_3_time": "15:36",
     "r_3_photo_url": "",
     "r_3_photo_id": "",
     "r_3_photo_formula": ""
   },
-  "medic": []
+  "medic": [
+    {
+      "id": 1783928122304,
+      "time": "15:34",
+      "m": "旁邊鐵皮",
+      "e": "多支鋼瓶",
+      "d": "移除或防護",
+      "i": "",
+      "c": "",
+      "completed": false,
+      "deleted": false
+    },
+    {
+      "id": 1783928247014,
+      "time": "15:35",
+      "m": "頂樓太陽能板",
+      "e": "觸電",
+      "d": "斷電",
+      "i": "請關係人切斷開關",
+      "c": "指揮官",
+      "completed": false,
+      "deleted": false
+    }
+  ]
 }
