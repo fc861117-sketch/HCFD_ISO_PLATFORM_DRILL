@@ -59,17 +59,17 @@
     "r_2_photo_url": "https://raw.githubusercontent.com/fc861117-sketch/HCFD_ISO_PLATFORM_DRILL/main/drills/photos/R_2_1783927914484.jpg",
     "r_2_photo_id": "4803424e46adc8ff7e8aceefc942ec25d164edca",
     "r_2_photo_formula": "=IMAGE(\"https://raw.githubusercontent.com/fc861117-sketch/HCFD_ISO_PLATFORM_DRILL/main/drills/photos/R_2_1783927914484.jpg\")",
-    "r_3_floor": "0",
+    "r_3_floor": "3",
     "r_3_teams": "0",
     "r_3_fire": "0無",
-    "r_3_smoke": "0無",
+    "r_3_smoke": "1小",
     "r_3_door": "無",
     "r_3_window": "無",
     "r_3_risk": "",
-    "r_3_time": "",
-    "r_3_photo_url": "",
-    "r_3_photo_id": "",
-    "r_3_photo_formula": ""
+    "r_3_time": "15:37",
+    "r_3_photo_url": "https://raw.githubusercontent.com/fc861117-sketch/HCFD_ISO_PLATFORM_DRILL/main/drills/photos/R_3_1783928255307.jpg",
+    "r_3_photo_id": "b24dbded6aefe29d1391cab4464484d5b97cd963",
+    "r_3_photo_formula": "=IMAGE(\"https://raw.githubusercontent.com/fc861117-sketch/HCFD_ISO_PLATFORM_DRILL/main/drills/photos/R_3_1783928255307.jpg\")"
   },
   "medic": []
 }
