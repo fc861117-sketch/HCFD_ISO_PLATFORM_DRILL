@@ -208,15 +208,15 @@
     </div>
 
     <div class="card" id="briefingRoundArea" style="border-left-color:#9c27b0;">
-        <h2 style="color:#ce93d8;">圈次紀錄比較</h2>
+        <h2 style="color:#ce93d8;">筆次紀錄比較</h2>
         <div class="row-full">
-            <label for="briefingRoundSelect">選擇要查看的圈次</label>
+            <label for="briefingRoundSelect">選擇要查看的筆次</label>
             <select id="briefingRoundSelect" onchange="handleRoundSelection()">
                 <option value="current">目前輸入內容</option>
             </select>
         </div>
         <div id="roundViewNotice" style="display:none; color:#ffb74d; font-weight:bold; text-align:center;">
-            🔒 圈次紀錄已封存，不可修改；可使用下方按鈕匯出圖片。
+            🔒 筆次紀錄已封存，不可修改；可使用下方按鈕匯出圖片。
         </div>
     </div>
 
@@ -300,7 +300,7 @@
     </div>
 
     <button class="btn-main btn-sync-brief" onclick="syncBriefingToCloud()" style="background:#4caf50; margin-top:20px;">☁️ 儲存並同步【簡報表】至雲端</button>
-    <button id="btnSaveRound" class="btn-main btn-save-round" onclick="confirmAction(this, saveCurrentAsRound)" style="background:#9c27b0; margin-top:10px;">🔒 儲存為第1圈</button>
+    <button id="btnSaveRound" class="btn-main btn-save-round" onclick="confirmAction(this, saveCurrentAsRound)" style="background:#9c27b0; margin-top:10px;">🔒 儲存為第1筆</button>
     <button id="btnExportImage" class="btn-main btn-export" onclick="exportToImage()" style="background:#2196F3; margin-top:10px;">📸 匯出最佳格式圖檔</button>
         <div id="finishCaseArea" style="margin-top: 40px; padding-top: 20px; border-top: 2px dashed #444; display: flex; flex-direction: column; align-items: center; width: 100%;">
     
@@ -930,10 +930,10 @@ async function executeFinishCase() {
         const select = document.getElementById('briefingRoundSelect');
         if(!select) return;
         const rounds = db[currentProject]?.briefing?._rounds || [];
-        select.innerHTML = '<option value="current">目前輸入內容</option>' + rounds.map((round, index) => `<option value="${index}">第${round.number || index + 1}圈（${new Date(round.savedAt).toLocaleString()}）</option>`).join('');
+        select.innerHTML = '<option value="current">目前輸入內容</option>' + rounds.map((round, index) => `<option value="${index}">第${round.number || index + 1}筆（${new Date(round.savedAt).toLocaleString()}）</option>`).join('');
         select.value = selectedValue;
         const btn = document.getElementById('btnSaveRound');
-        if(btn) btn.innerText = `🔒 儲存為第${rounds.length + 1}圈`;
+        if(btn) btn.innerText = `🔒 儲存為第${rounds.length + 1}筆`;
     }
 
     function setRoundViewMode(status) {
@@ -966,7 +966,7 @@ async function executeFinishCase() {
         viewingRoundIndex = index;
         applyBriefingData(round.data);
         setRoundViewMode(true);
-        showToast(`📋 正在查看第${round.number || index + 1}圈；當前內容已自動暫存`, 'success');
+        showToast(`📋 正在查看第${round.number || index + 1}筆；當前內容已自動暫存`, 'success');
     }
 
     function clearFieldsForNextRound() {
@@ -992,12 +992,12 @@ async function executeFinishCase() {
         renderRoundOptions('current');
         try {
             const payload = JSON.parse(JSON.stringify(db[currentProject].briefing));
-            const res = await apiCall({ action: 'saveBriefing', projectName: currentProject, creator: db[currentProject].creator, modifier: currentModifier + `(第${rounds.length}圈)`, briefing: payload, overwrite: false });
+            const res = await apiCall({ action: 'saveBriefing', projectName: currentProject, creator: db[currentProject].creator, modifier: currentModifier + `(第${rounds.length}筆)`, briefing: payload, overwrite: false });
             if(res.error) throw new Error(res.error);
             window.lastBHash = JSON.stringify(db[currentProject].briefing);
-            showToast(`✅ 第${rounds.length}圈已封存；確認事項以下欄位已清空`, 'success');
+            showToast(`✅ 第${rounds.length}筆已封存；確認事項以下欄位已清空`, 'success');
         } catch(e) {
-            showToast(`⚠️ 第${rounds.length}圈已存於本機，雲端同步失敗：${e.message}`, 'warning');
+            showToast(`⚠️ 第${rounds.length}筆已存於本機，雲端同步失敗：${e.message}`, 'warning');
         }
     }
 
@@ -1277,7 +1277,7 @@ async function executeFinishCase() {
         setTimeout(() => {
             const element = document.getElementById('exportTemplate');
             html2canvas(element, { scale: 2, backgroundColor: "#ffffff" }).then(canvas => {
-                const roundLabel = viewingRoundIndex === null ? '' : ` 第${db[currentProject].briefing._rounds[viewingRoundIndex].number || viewingRoundIndex + 1}圈`;
+                const roundLabel = viewingRoundIndex === null ? '' : ` 第${db[currentProject].briefing._rounds[viewingRoundIndex].number || viewingRoundIndex + 1}筆`;
                 const link = document.createElement('a'); link.download = `[ISO簡報表] ${currentProject}${roundLabel}.png`; link.href = canvas.toDataURL("image/png"); link.click();
                 btn.innerText = "📸 匯出最佳格式圖檔"; showToast("✅ 圖檔生成完畢，準備下載！", "success");
             }).catch(err => { showToast("❌ 圖檔產出失敗", "error"); btn.innerText = "📸 匯出最佳格式圖檔"; });
