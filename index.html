@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>【演練專用】新竹縣政府消防局ISO作業平台</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
         :root { --primary: #d32f2f; --bg: #121212; --card: #1e1e1e; --text: #e0e0e0; --accent: #ffb74d; --medic: #4caf50; }
         body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; padding-bottom: 100px; }
@@ -1199,6 +1200,7 @@ async function executeFinishCase() {
         const pageSize = 13;
         const pageCount = Math.ceil(visibleMedic.length / pageSize);
         try {
+            const generatedPages = [];
             for(let pageIndex=0; pageIndex<pageCount; pageIndex++) {
                 const pageItems = visibleMedic.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
                 const rows = [];
@@ -1211,11 +1213,25 @@ async function executeFinishCase() {
                 await new Promise(resolve => setTimeout(resolve, 100));
                 const canvas = await html2canvas(document.getElementById('medicExportTemplate'), { scale:2, backgroundColor:"#ffffff" });
                 const pageLabel = pageCount > 1 ? ` 第${pageIndex + 1}張` : '';
-                const link = document.createElement('a'); link.download = `[MEDIC紀錄表] ${currentProject}${pageLabel}.png`; link.href = canvas.toDataURL("image/png"); link.click();
-                if(pageCount > 1) await new Promise(resolve => setTimeout(resolve, 250));
+                const blob = await new Promise((resolve, reject) => canvas.toBlob(result => result ? resolve(result) : reject(new Error('PNG conversion failed')), "image/png"));
+                generatedPages.push({ name: `[MEDIC紀錄表] ${currentProject}${pageLabel}.png`, blob });
             }
+            const link = document.createElement('a');
+            if(pageCount === 1) {
+                link.download = generatedPages[0].name;
+                link.href = URL.createObjectURL(generatedPages[0].blob);
+            } else {
+                btn.innerText = "⏳ 正在打包全部圖片...";
+                const zip = new JSZip();
+                generatedPages.forEach(page => zip.file(page.name, page.blob));
+                const zipBlob = await zip.generateAsync({ type:"blob", compression:"DEFLATE" });
+                link.download = `[MEDIC紀錄表] ${currentProject} 共${pageCount}張.zip`;
+                link.href = URL.createObjectURL(zipBlob);
+            }
+            link.click();
+            setTimeout(() => URL.revokeObjectURL(link.href), 1000);
             btn.innerText = "📸 匯出 MEDIC 表圖片";
-            showToast(`✅ MEDIC 圖片已產生，共 ${pageCount} 張`, "success");
+            showToast(pageCount === 1 ? "✅ MEDIC 圖片已產生" : `✅ MEDIC 圖片已打包，共 ${pageCount} 張`, "success");
         } catch(e) {
             btn.innerText = "📸 匯出 MEDIC 表圖片";
             showToast("❌ MEDIC 圖片產出失敗", "error");
