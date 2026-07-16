@@ -93,6 +93,7 @@
         #exportTemplate, #medicExportTemplate { position: absolute; left: -9999px; top: -9999px; width: 1000px; background: #ffffff; color: #000000; padding: 40px; box-sizing: border-box; font-family: "微軟正黑體", sans-serif; overflow: hidden; }
         .export-content { position: relative; z-index: 1; }
         .export-header { text-align: center; font-size: 34px; font-weight: 900; margin-bottom: 25px; border-bottom: 5px solid #d32f2f; padding-bottom: 10px; color:#d32f2f;}
+        .export-record-number { display:none; width:max-content; margin:-10px auto 22px; padding:8px 24px; border:3px solid #7b1fa2; border-radius:24px; color:#6a1b9a; background:#f3e5f5; font-size:26px; font-weight:900; text-align:center; }
         .export-section { margin-bottom: 20px; border: 2px solid #000; border-radius: 10px; overflow: hidden; background: #fff; }
         .export-section-title { background: #111; color: #fff; padding: 10px 15px; font-size: 22px; font-weight: 900; }
         .export-grid { display: grid; grid-template-columns: 1fr 1fr; }
@@ -349,6 +350,7 @@
 <div id="exportTemplate">
     <div class="export-content">
         <div class="export-header">【演練專用】新竹縣政府消防局 ISO現場簡報表</div>
+        <div class="export-record-number" id="exp_recordNumber"></div>
         
         <div class="export-section">
             <div class="export-section-title">一、 基本資訊與指揮確認</div>
@@ -1233,6 +1235,15 @@ async function executeFinishCase() {
         const btn = document.getElementById('btnExportImage'); btn.innerText = "⏳ 正在處理圖檔排版...";
 
         const v = (id) => document.getElementById(id).value || '未填寫';
+        const recordNumber = document.getElementById('exp_recordNumber');
+        if(viewingRoundIndex === null) {
+            recordNumber.style.display = 'none';
+            recordNumber.innerText = '';
+        } else {
+            const round = db[currentProject].briefing._rounds[viewingRoundIndex];
+            recordNumber.innerText = `第 ${round.number || viewingRoundIndex + 1} 筆資料`;
+            recordNumber.style.display = 'block';
+        }
         
         document.getElementById('exp_caseName').innerText = v('b_caseName');
         document.getElementById('exp_arriveTime').innerText = v('b_arriveTime');
