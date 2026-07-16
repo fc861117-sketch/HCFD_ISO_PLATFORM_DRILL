@@ -1057,7 +1057,7 @@
         開發者不對因使用本系統資訊所衍生之任何意外、損害或誤判承擔法律責任。
     </div>
     <!-- 引用外部資料庫檔案 -->
-    <script src="database.js?v=14"></script>
+    <script src="database.js?v=15"></script>
 
     <script>
         let currentItem = null;
@@ -1233,6 +1233,10 @@
                 const nameTW = (item.nameTW || '').toLowerCase();
                 const nameEN = (item.nameEN || '').toLowerCase();
                 const primaryTW = nameTW.replace(/\s*[（(].*$/, '').trim();
+                const aliasTW = ((nameTW.match(/[（(](.*?)[）)]/) || [])[1] || '')
+                    .split(/[\/,，、]/)
+                    .map(alias => alias.trim())
+                    .filter(Boolean);
                 const primaryEN = nameEN.split(',')[0].trim();
                 const un = (item.un || '');
                 const cas = (item.cas || '').toLowerCase();
@@ -1244,7 +1248,8 @@
                 
                 // 中文名稱匹配
                 if (primaryTW === query) score += 7000;
-                else if (primaryTW.startsWith(query)) score += 4500;
+                else if (aliasTW.includes(query)) score += 6500;
+                else if (primaryTW.startsWith(query)) score += Math.max(3000, 4500 - primaryTW.length);
                 else if (nameTW === query) score += 5000;
                 else if (nameTW.startsWith(query)) score += 4000;
                 else if (nameTW.includes(query)) {
@@ -1434,6 +1439,10 @@
         const resultsEl = document.getElementById('search-results');
         const detailEl = document.getElementById('detail-view');
         const refSection = document.getElementById('reference-section');
+        const INITIAL_SEARCH_LIMIT = 15;
+        const SEARCH_LIMIT_STEP = 30;
+        let searchResultLimit = INITIAL_SEARCH_LIMIT;
+        let lastSearchQuery = '';
 
         function switchTab(tabId) {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -1445,6 +1454,10 @@
 function handleSearch() {
             const query = inputEl.value.trim().toLowerCase();
             resultsEl.innerHTML = '';
+            if (query !== lastSearchQuery) {
+                searchResultLimit = INITIAL_SEARCH_LIMIT;
+                lastSearchQuery = query;
+            }
             
             // 只要開始打字搜尋，就立刻隱藏下方的詳細資料卡片
             detailEl.style.display = 'none'; 
@@ -1484,6 +1497,10 @@ function handleSearch() {
                 const nameTW = (item.nameTW || '').toLowerCase();
                 const nameEN = (item.nameEN || '').toLowerCase();
                 const primaryTW = nameTW.replace(/\s*[（(].*$/, '').trim();
+                const aliasTW = ((nameTW.match(/[（(](.*?)[）)]/) || [])[1] || '')
+                    .split(/[\/,，、]/)
+                    .map(alias => alias.trim())
+                    .filter(Boolean);
                 const primaryEN = nameEN.split(',')[0].trim();
                 const un = (item.un || '');
                 const cas = (item.cas || '').toLowerCase();
@@ -1495,7 +1512,8 @@ function handleSearch() {
                 
                 // 中文名稱匹配
                 if (primaryTW === query) score += 7000;
-                else if (primaryTW.startsWith(query)) score += 4500;
+                else if (aliasTW.includes(query)) score += 6500;
+                else if (primaryTW.startsWith(query)) score += Math.max(3000, 4500 - primaryTW.length);
                 else if (nameTW === query) score += 5000;
                 else if (nameTW.startsWith(query)) score += 4000;
                 else if (nameTW.includes(query)) {
@@ -1520,7 +1538,8 @@ function handleSearch() {
             
             matches.sort((a, b) => getRelevance(b) - getRelevance(a));
             // 限制前15筆以保持流暢度
-            matches = matches.slice(0, 15);
+            const totalMatches = matches.length;
+            matches = matches.slice(0, searchResultLimit);
 
             // 4. 顯示結果
             if (matches.length > 0) {
@@ -1569,6 +1588,17 @@ function handleSearch() {
                     div.onclick = () => showDetail(item);
                     resultsEl.appendChild(div);
                 });
+                if (totalMatches > matches.length) {
+                    const moreBtn = document.createElement('button');
+                    moreBtn.type = 'button';
+                    moreBtn.textContent = `顯示更多（尚有 ${totalMatches - matches.length} 筆）`;
+                    moreBtn.style = 'width:100%; margin-top:10px; padding:12px; border:none; border-radius:6px; background:#444; color:white; font-weight:bold; cursor:pointer;';
+                    moreBtn.onclick = () => {
+                        searchResultLimit += SEARCH_LIMIT_STEP;
+                        handleSearch();
+                    };
+                    resultsEl.appendChild(moreBtn);
+                }
             } else {
                 resultsEl.style.display = 'block';
                 const safeQuery = encodeURIComponent(query);
