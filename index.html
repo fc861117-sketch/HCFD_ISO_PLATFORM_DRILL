@@ -951,6 +951,7 @@ async function executeFinishCase() {
     }
 
     function handleRoundSelection() {
+        clearBriefingDownloadLink();
         const select = document.getElementById('briefingRoundSelect');
         if(select.value === 'current') {
             viewingRoundIndex = null;
@@ -1235,6 +1236,19 @@ async function executeFinishCase() {
         return /Safari/i.test(ua) && !/(Chrome|CriOS|Chromium|Edg|OPR|FxiOS)/i.test(ua);
     }
 
+    function clearBriefingDownloadLink() {
+        const link = document.getElementById('briefingDownloadLink');
+        if(!link) return;
+        if(link.dataset.objectUrl) URL.revokeObjectURL(link.dataset.objectUrl);
+        link.style.display = 'none';
+        link.removeAttribute('href');
+        link.removeAttribute('download');
+        link.removeAttribute('target');
+        link.removeAttribute('rel');
+        delete link.dataset.objectUrl;
+        link.innerText = '⬇️ 若未自動下載，請點此下載圖片';
+    }
+
     function prepareBriefingImageDownload(canvas, filename) {
         return new Promise((resolve, reject) => {
             canvas.toBlob(blob => {
@@ -1267,7 +1281,7 @@ async function executeFinishCase() {
         if (!currentProject) return showToast("⚠️ 請先開啟專案！", "error"); 
         if(viewingRoundIndex === null) saveBriefingToLocal();
         const btn = document.getElementById('btnExportImage'); btn.innerText = "⏳ 正在處理圖檔排版...";
-        document.getElementById('briefingDownloadLink').style.display = 'none';
+        clearBriefingDownloadLink();
 
         const v = (id) => document.getElementById(id).value || '未填寫';
         const recordNumber = document.getElementById('exp_recordNumber');
