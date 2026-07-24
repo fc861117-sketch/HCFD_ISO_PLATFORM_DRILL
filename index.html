@@ -1230,6 +1230,11 @@ async function executeFinishCase() {
     }
 
     // ─── 匯出最佳格式圖檔 (高對比度, 無背景浮水印) ───
+    function isSafariBrowser() {
+        const ua = navigator.userAgent;
+        return /Safari/i.test(ua) && !/(Chrome|CriOS|Chromium|Edg|OPR|FxiOS)/i.test(ua);
+    }
+
     function prepareBriefingImageDownload(canvas, filename) {
         return new Promise((resolve, reject) => {
             canvas.toBlob(blob => {
@@ -1238,11 +1243,22 @@ async function executeFinishCase() {
                 if(link.dataset.objectUrl) URL.revokeObjectURL(link.dataset.objectUrl);
                 const objectUrl = URL.createObjectURL(blob);
                 link.href = objectUrl;
-                link.download = filename;
                 link.dataset.objectUrl = objectUrl;
                 link.style.display = 'block';
-                link.click();
-                resolve();
+                if(isSafariBrowser()) {
+                    link.removeAttribute('download');
+                    link.target = '_blank';
+                    link.rel = 'noopener';
+                    link.innerText = '🍎 Safari：點此開啟圖片，再長按或分享儲存';
+                    resolve(true);
+                } else {
+                    link.download = filename;
+                    link.removeAttribute('target');
+                    link.removeAttribute('rel');
+                    link.innerText = '⬇️ 若未自動下載，請點此下載圖片';
+                    link.click();
+                    resolve(false);
+                }
             }, 'image/png');
         });
     }
@@ -1308,8 +1324,9 @@ async function executeFinishCase() {
             const element = document.getElementById('exportTemplate');
             html2canvas(element, { scale: 2, backgroundColor: "#ffffff" }).then(async canvas => {
                 const roundLabel = viewingRoundIndex === null ? '' : ` 第${db[currentProject].briefing._rounds[viewingRoundIndex].number || viewingRoundIndex + 1}筆`;
-                await prepareBriefingImageDownload(canvas, `[ISO簡報表] ${currentProject}${roundLabel}.png`);
-                btn.innerText = "📸 匯出最佳格式圖檔"; showToast("✅ 圖片已產生；若未自動下載，請點橘色下載按鈕", "success");
+                const safariMode = await prepareBriefingImageDownload(canvas, `[ISO簡報表] ${currentProject}${roundLabel}.png`);
+                btn.innerText = "📸 匯出最佳格式圖檔";
+                showToast(safariMode ? "🍎 Safari 請點橘色按鈕，開啟圖片後長按或分享儲存" : "✅ 圖片已產生；若未自動下載，請點橘色下載按鈕", "success");
             }).catch(err => { showToast("❌ 圖檔產出失敗", "error"); btn.innerText = "📸 匯出最佳格式圖檔"; });
         }, 500); 
     }
