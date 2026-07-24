@@ -303,6 +303,7 @@
     <button class="btn-main btn-sync-brief" onclick="syncBriefingToCloud()" style="background:#4caf50; margin-top:20px;">☁️ 儲存並同步【簡報表】至雲端</button>
     <button id="btnSaveRound" class="btn-main btn-save-round" onclick="confirmAction(this, saveCurrentAsRound)" style="background:#9c27b0; margin-top:10px;">🔒 儲存為第1筆</button>
     <button id="btnExportImage" class="btn-main btn-export" onclick="exportToImage()" style="background:#2196F3; margin-top:10px;">📸 匯出最佳格式圖檔</button>
+    <a id="briefingDownloadLink" class="btn-main" style="display:none; background:#ef6c00; margin-top:10px; text-decoration:none; box-sizing:border-box;">⬇️ 若未自動下載，請點此下載圖片</a>
         <div id="finishCaseArea" style="margin-top: 40px; padding-top: 20px; border-top: 2px dashed #444; display: flex; flex-direction: column; align-items: center; width: 100%;">
     
     <button id="btnFinishCase" class="btn-main" style="background:#b71c1c; height:65px; min-height:65px; border:3px solid #ff5252; width: 100%;" onclick="finishCaseConfirm(this)">🔒 確定結案並鎖定專案 (禁止後續編輯)</button>
@@ -1229,10 +1230,28 @@ async function executeFinishCase() {
     }
 
     // ─── 匯出最佳格式圖檔 (高對比度, 無背景浮水印) ───
+    function prepareBriefingImageDownload(canvas, filename) {
+        return new Promise((resolve, reject) => {
+            canvas.toBlob(blob => {
+                if(!blob) return reject(new Error('圖片轉換失敗'));
+                const link = document.getElementById('briefingDownloadLink');
+                if(link.dataset.objectUrl) URL.revokeObjectURL(link.dataset.objectUrl);
+                const objectUrl = URL.createObjectURL(blob);
+                link.href = objectUrl;
+                link.download = filename;
+                link.dataset.objectUrl = objectUrl;
+                link.style.display = 'block';
+                link.click();
+                resolve();
+            }, 'image/png');
+        });
+    }
+
     function exportToImage() {
         if (!currentProject) return showToast("⚠️ 請先開啟專案！", "error"); 
         if(viewingRoundIndex === null) saveBriefingToLocal();
         const btn = document.getElementById('btnExportImage'); btn.innerText = "⏳ 正在處理圖檔排版...";
+        document.getElementById('briefingDownloadLink').style.display = 'none';
 
         const v = (id) => document.getElementById(id).value || '未填寫';
         const recordNumber = document.getElementById('exp_recordNumber');
@@ -1287,10 +1306,10 @@ async function executeFinishCase() {
 
         setTimeout(() => {
             const element = document.getElementById('exportTemplate');
-            html2canvas(element, { scale: 2, backgroundColor: "#ffffff" }).then(canvas => {
+            html2canvas(element, { scale: 2, backgroundColor: "#ffffff" }).then(async canvas => {
                 const roundLabel = viewingRoundIndex === null ? '' : ` 第${db[currentProject].briefing._rounds[viewingRoundIndex].number || viewingRoundIndex + 1}筆`;
-                const link = document.createElement('a'); link.download = `[ISO簡報表] ${currentProject}${roundLabel}.png`; link.href = canvas.toDataURL("image/png"); link.click();
-                btn.innerText = "📸 匯出最佳格式圖檔"; showToast("✅ 圖檔生成完畢，準備下載！", "success");
+                await prepareBriefingImageDownload(canvas, `[ISO簡報表] ${currentProject}${roundLabel}.png`);
+                btn.innerText = "📸 匯出最佳格式圖檔"; showToast("✅ 圖片已產生；若未自動下載，請點橘色下載按鈕", "success");
             }).catch(err => { showToast("❌ 圖檔產出失敗", "error"); btn.innerText = "📸 匯出最佳格式圖檔"; });
         }, 500); 
     }
