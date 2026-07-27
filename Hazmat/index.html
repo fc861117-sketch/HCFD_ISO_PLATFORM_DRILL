@@ -1057,7 +1057,7 @@
         開發者不對因使用本系統資訊所衍生之任何意外、損害或誤判承擔法律責任。
     </div>
     <!-- 引用外部資料庫檔案 -->
-    <script src="database.js?v=16"></script>
+    <script src="database.js?v=17"></script>
 
     <script>
         let currentItem = null;
@@ -1622,16 +1622,23 @@ function handleSearch() {
             const nameTW = String(item?.nameTW || '');
             const nameEN = String(item?.nameEN || '').toLowerCase();
             const keywords = [
-                '\u9047\u6c34', '\u7981\u6c34', '\u6c34\u89e3', '\u6c34\u53cd\u61c9',
-                '\u63a5\u89f8\u6c34', '\u542b\u6c34', '\u6f6e\u6fd5', '\u6fd5\u6c23'
+                '\u9047\u6c34', '\u6c34\u89e3', '\u6c34\u53cd\u61c9',
+                '\u63a5\u89f8\u6c34', '\u6fd5\u6c23'
             ];
-            return keywords.some(keyword => tactics.includes(keyword) || nameTW.includes(keyword)) || nameEN.includes('water-reactive');
+            return keywords.some(keyword => tactics.includes(keyword) || nameTW.includes(keyword)) ||
+                nameEN.includes('water-reactive') || nameEN.includes('reacts with water');
         }
 
         function isWaterReactiveItem(item) {
             const nfpaSpecial = String(item?.nfpa?.s || '').replace(/<[^>]*>/g, '').toUpperCase();
             const rgs = Array.isArray(item?.rgs) ? item.rgs : [];
-            return nfpaSpecial.includes('W') || rgs.includes(12) || getClassList(item).includes('4.3') || hasWaterKeyword(item);
+            return Boolean(item?.reaction) || nfpaSpecial.includes('W') || rgs.includes(12) || getClassList(item).includes('4.3') || hasWaterKeyword(item);
+        }
+
+        function isWaterProhibitedItem(item) {
+            const text = `${item?.nameTW || ''} ${item?.nameEN || ''} ${item?.tactics || ''}`;
+            const prohibitedPattern = /禁水|嚴禁用水|嚴禁直接用水|切勿用水|不得用水|避免水進入|避免水滴入|勿使水進入|no water|do not use water|water forbidden/i;
+            return getClassList(item).includes('4.3') || prohibitedPattern.test(text);
         }
 
         function getReactionFormula(item) {
@@ -1662,16 +1669,15 @@ function handleSearch() {
 
         function getWaterReactiveWarning(item) {
             if (!isWaterReactiveItem(item)) return '';
-            const classes = getClassList(item);
-            if (classes.includes('4.3')) {
+            if (isWaterProhibitedItem(item)) {
                 return '\n【禁水】遇水會釋放易燃或毒性氣體並放熱，嚴禁用水柱或泡沫接觸物質。優先使用 D 類乾粉、乾燥砂土覆蓋，並隔離防潮。';
             }
-            return '\n【禁水注意】此物質與水或濕氣可能反應、放熱或產生腐蝕/毒性氣體；避免水進入容器或直接接觸洩漏物。';
+            return '\n【遇水反應/放熱注意】此物質與水或濕氣可能反應、放熱或產生腐蝕/毒性氣體；依原 ERG 建議選用滅火方式，避免水直接進入容器或集中沖入洩漏物。';
         }
 
         function getDisplayTactics(item) {
             const tactics = item?.tactics || '';
-            if (!isWaterReactiveItem(item) || /禁水|嚴禁用水|遇水|水反應/.test(tactics)) return tactics;
+            if (!isWaterReactiveItem(item) || /禁水|嚴禁用水|遇水|水反應|放熱/.test(tactics)) return tactics;
             return tactics + getWaterReactiveWarning(item);
         }
 
@@ -1805,8 +1811,10 @@ function showDetail(item) {
                         ghsBox.innerHTML += `<span class="ghs-badge">${icon} ${text}</span>`;
                     }
                 });
-                if (isWaterReactiveItem(item)) {
-                    ghsBox.innerHTML += `<span class="ghs-badge" style="background:#f44336;color:white;">🈲 禁水 / 遇水反應</span>`;
+                if (isWaterProhibitedItem(item)) {
+                    ghsBox.innerHTML += `<span class="ghs-badge" style="background:#f44336;color:white;">🈲 禁水</span>`;
+                } else if (isWaterReactiveItem(item)) {
+                    ghsBox.innerHTML += `<span class="ghs-badge" style="background:#ff9800;color:#111;">💧 遇水反應 / 放熱</span>`;
                 }
             }
 
