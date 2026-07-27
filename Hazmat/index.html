@@ -1057,7 +1057,7 @@
         開發者不對因使用本系統資訊所衍生之任何意外、損害或誤判承擔法律責任。
     </div>
     <!-- 引用外部資料庫檔案 -->
-    <script src="database.js?v=17"></script>
+    <script src="database.js?v=18"></script>
 
     <script>
         let currentItem = null;
@@ -1547,8 +1547,9 @@ function handleSearch() {
                 matches.forEach(item => {
                     const div = document.createElement('div');
                     
-                    // 🌟 自動偵測是否為禁水性物質 (nfpa.s 包含 W)
+                    // 🌟 分開判斷「禁水」與「遇水反應/放熱」
                     const isWaterReactive = isWaterReactiveItem(item);
+                    const isWaterProhibited = isWaterProhibitedItem(item);
                     
                     // 🌟 自動偵測是否為 TIH (吸入性危害)
                     // 判斷邏輯：1. 類別是 2.3 (本身就是毒氣) 2. 戰術字眼包含 TIH 3. 您在資料庫手動加了 tih: true
@@ -1557,12 +1558,18 @@ function handleSearch() {
                     // 🌟 動態改變背景與邊框顏色 (加入雙重危害的漸層設計)
                     let rowStyle = "padding:12px; border-bottom:1px solid #444; cursor:pointer; font-size:1.1rem; display:flex; align-items:center;";
                     
-                    if (isWaterReactive && isTIH) {
-                        // 【雙重危害】：左紅右綠的漸層底色
+                    if (isWaterProhibited && isTIH) {
+                        // 【禁水 + TIH】：左紅右綠的漸層底色
                         rowStyle += " background: linear-gradient(90deg, rgba(244,67,54,0.15) 0%, rgba(76,175,80,0.15) 100%); border-left: 4px solid #f44336;";
-                    } else if (isWaterReactive) {
+                    } else if (isWaterReactive && isTIH) {
+                        // 【遇水反應/放熱 + TIH】：左橘右綠的漸層底色
+                        rowStyle += " background: linear-gradient(90deg, rgba(255,152,0,0.15) 0%, rgba(76,175,80,0.15) 100%); border-left: 4px solid #ff9800;";
+                    } else if (isWaterProhibited) {
                         // 【僅禁水】：暗紅色底 + 左側紅邊
-                        rowStyle += " background: rgba(244, 67, 54, 0.15); border-left: 4px solid #f44336;"; 
+                        rowStyle += " background: rgba(244, 67, 54, 0.15); border-left: 4px solid #f44336;";
+                    } else if (isWaterReactive) {
+                        // 【僅遇水反應/放熱】：暗橘色底 + 左側橘邊
+                        rowStyle += " background: rgba(255, 152, 0, 0.15); border-left: 4px solid #ff9800;"; 
                     } else if (isTIH) {
                         // 【僅 TIH】：暗綠色底 + 左側綠邊
                         rowStyle += " background: rgba(76, 175, 80, 0.15); border-left: 4px solid #4caf50;";
@@ -1575,9 +1582,11 @@ function handleSearch() {
                     // 🌟 動態組合標籤
                     let badgeHtml = `<span style="background:#ff9800;color:black;padding:2px 6px;border-radius:4px;font-weight:bold;margin-right:8px;white-space:nowrap;flex-shrink:0;">UN ${item.un}</span>`;
                     
-                    // 插入紅色禁水標籤
-                    if (isWaterReactive) {
+                    // 插入水反應標籤；只有真正禁水才用紅色
+                    if (isWaterProhibited) {
                         badgeHtml += `<span style="background:#f44336;color:white;padding:2px 6px;border-radius:4px;font-weight:bold;font-size:0.85rem;margin-right:6px;white-space:nowrap;flex-shrink:0;box-shadow:0 0 5px rgba(244,67,54,0.6);">🈲禁水</span>`;
+                    } else if (isWaterReactive) {
+                        badgeHtml += `<span style="background:#ff9800;color:#111;padding:2px 6px;border-radius:4px;font-weight:bold;font-size:0.85rem;margin-right:6px;white-space:nowrap;flex-shrink:0;box-shadow:0 0 5px rgba(255,152,0,0.45);">💧遇水反應</span>`;
                     }
                     // 插入綠色 TIH 標籤
                     if (isTIH) {
